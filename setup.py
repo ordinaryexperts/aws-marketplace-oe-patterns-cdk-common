@@ -19,7 +19,7 @@ setuptools.setup(
 
     install_requires = [
         f"aws-cdk.core=={CDK_VERSION}"
-    ]
+    ],
 
     classifiers=[
         "Programming Language :: Python :: 3",
