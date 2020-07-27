@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="oe-cdk-common",
+    name="oe-patterns-cdk-common",
     version="0.0.1",
     author="Aaron Richard Carlucci",
     author_email="aaron@ordinaryexperts.com",
