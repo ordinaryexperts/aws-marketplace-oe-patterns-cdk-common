@@ -85,7 +85,7 @@ class Vpc(core.Construct):
         )
         vpc_public_default_route.cfn_options.condition=vpc_not_given_condition
 
-	vpc_public_subnet1 = aws_ec2.CfnSubnet(
+        vpc_public_subnet1 = aws_ec2.CfnSubnet(
             self,
             "VpcPublicSubnet1",
             cidr_block="10.0.0.0/18",
@@ -154,7 +154,7 @@ class Vpc(core.Construct):
         )
         vpc_public_subnet2_nat_gateway.cfn_options.condition=vpc_not_given_condition
 
-	vpc_private_subnet1 = aws_ec2.CfnSubnet(
+        vpc_private_subnet1 = aws_ec2.CfnSubnet(
             self,
             "VpcPrivateSubnet1",
             cidr_block="10.0.128.0/18",
@@ -190,7 +190,7 @@ class Vpc(core.Construct):
         )
         vpc_private_subnet1_default_route.cfn_options.condition=vpc_not_given_condition
 
-	vpc_private_subnet2 = aws_ec2.CfnSubnet(
+        vpc_private_subnet2 = aws_ec2.CfnSubnet(
             self,
             "VpcPrivateSubnet2",
             cidr_block="10.0.192.0/18",
