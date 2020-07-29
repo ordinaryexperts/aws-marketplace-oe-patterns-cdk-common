@@ -17,7 +17,7 @@ setuptools.setup(
     url="https://github.com/ordinaryexperts/aws-marketplace-oe-patterns-cdk-common",
     packages=setuptools.find_packages(),
 
-    install_requires = [
+    install_requires=[
         f"aws-cdk.core=={CDK_VERSION}"
     ],
 
