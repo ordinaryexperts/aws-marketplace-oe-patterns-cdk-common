@@ -18,7 +18,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
 
     install_requires=[
-        f"aws-cdk.core=={CDK_VERSION}"
+        f"aws-cdk.core=={CDK_VERSION}",
+        f"aws-cdk.aws-ec2=={CDK_VERSION}",
     ],
 
     classifiers=[
