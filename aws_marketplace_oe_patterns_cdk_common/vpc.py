@@ -5,7 +5,7 @@ from aws_cdk import (
 
 class Vpc(core.Construct):
 
-    def __init__(self, scope: core.Construct, id: str, *, prefix=None):
+    def __init__(self, scope: core.Construct, id: str, *, {}):
         super().__init__(scope, id)
 
         self.vpc_id_param = core.CfnParameter(
