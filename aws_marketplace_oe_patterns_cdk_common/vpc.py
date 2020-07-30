@@ -83,7 +83,7 @@ class Vpc(core.Construct):
             internet_gateway_id=self.vpc_igw.ref
         )
         self.vpc_igw_attachment.cfn_options.condition=self.vpc_not_given_condition
-        self.vpc_igw_attachment.overide_logical_id("VpcIGWAttachment")
+        self.vpc_igw_attachment.override_logical_id("VpcIGWAttachment")
 
         self.vpc_public_route_table = aws_ec2.CfnRouteTable(
             self,
