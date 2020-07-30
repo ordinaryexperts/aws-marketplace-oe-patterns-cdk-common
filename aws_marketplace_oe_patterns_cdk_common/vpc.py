@@ -63,6 +63,7 @@ class Vpc(core.Construct):
             tags=[core.CfnTag(key="Name", value="{}/Vpc".format(core.Aws.STACK_NAME))]
         )
         self.vpc.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc.override_logical_id("Vpc")
 
         self.vpc_igw = aws_ec2.CfnInternetGateway(
             self,
