@@ -14,6 +14,7 @@ class Vpc(core.Construct):
             default="",
             description="Optional: Specify the VPC ID. If not specified, a VPC will be created."
         )
+        self.vpc_id_param.override_logical_id("VpcId")
         self.vpc_private_subnet_id1_param = core.CfnParameter(
             self,
             "VpcPrivateSubnetId1",
