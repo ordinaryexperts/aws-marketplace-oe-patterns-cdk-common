@@ -219,7 +219,7 @@ class Vpc(core.Construct):
             subnet_id=self.vpc_private_subnet1.ref
         )
         self.vpc_private_subnet1_route_table_association.cfn_options.condition=self.vpc_not_given_condition
-        self.vpc_private_subnet1_route_table_association.override_logical_id("VpcPublicSubnet1RouteTableAssociation")
+        self.vpc_private_subnet1_route_table_association.override_logical_id("VpcPrivateSubnet1RouteTableAssociation")
 
         self.vpc_private_subnet1_default_route = aws_ec2.CfnRoute(
             self,
