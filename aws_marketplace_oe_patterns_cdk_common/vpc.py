@@ -8,7 +8,7 @@ class Vpc(core.Construct):
     def __init__(self, scope: core.Construct, id: str, *, prefix=None):
         super().__init__(scope, id)
 
-        vpc_id_param = core.CfnParameter(
+        self.vpc_id_param = core.CfnParameter(
             self,
             "VpcId",
             default="",
@@ -43,12 +43,12 @@ class Vpc(core.Construct):
             "VpcGiven",
             expression=core.Fn.condition_not(core.Fn.condition_equals(vpc_id_param.value, ""))
         )
-        vpc_not_given_condition = core.CfnCondition(
+        self.vpc_not_given_condition = core.CfnCondition(
             self,
             "VpcNotGiven",
             expression=core.Fn.condition_equals(vpc_id_param.value, "")
         )
-        vpc = aws_ec2.CfnVPC(
+        self.vpc = aws_ec2.CfnVPC(
             self,
             "Vpc",
             cidr_block="10.0.0.0/16",
