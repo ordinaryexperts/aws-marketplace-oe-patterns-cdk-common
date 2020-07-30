@@ -43,6 +43,8 @@ class Vpc(core.Construct):
             description="Optional: Specify Subnet ID for second public subnet."
         )
         self.vpc_public_subnet_id2_param.override_logical_id("VpcPublicSubnetId2")
+
+        # conditions
         self.vpc_given_condition = core.CfnCondition(
             self,
             "VpcGiven",
@@ -53,6 +55,7 @@ class Vpc(core.Construct):
             "VpcNotGiven",
             expression=core.Fn.condition_equals(self.vpc_id_param.value, "")
         )
+
         self.vpc = aws_ec2.CfnVPC(
             self,
             "Vpc",
@@ -71,6 +74,8 @@ class Vpc(core.Construct):
             tags=[core.CfnTag(key="Name", value="{}/Vpc".format(core.Aws.STACK_NAME))]
         )
         self.vpc_igw.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_igw.override_logical_id("VpcInternetGateway")
+
         self.vpc_igw_attachment = aws_ec2.CfnVPCGatewayAttachment(
             self,
             "VpcIGWAttachment",
@@ -78,6 +83,8 @@ class Vpc(core.Construct):
             internet_gateway_id=self.vpc_igw.ref
         )
         self.vpc_igw_attachment.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_igw_attachment.overide_logical_id("VpcIGWAttachment")
+
         self.vpc_public_route_table = aws_ec2.CfnRouteTable(
             self,
             "VpcPublicRouteTable",
@@ -85,6 +92,8 @@ class Vpc(core.Construct):
             tags=[core.CfnTag(key="Name", value="{}/Vpc/PublicRouteTable".format(core.Aws.STACK_NAME))]
         )
         self.vpc_public_route_table.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_route_table.override_logical_id("VpcPublicRouteTable")
+
         self.vpc_public_default_route = aws_ec2.CfnRoute(
             self,
             "VpcPublicDefaultRoute",
@@ -93,6 +102,7 @@ class Vpc(core.Construct):
             gateway_id=self.vpc_igw.ref
         )
         self.vpc_public_default_route.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_default_route.override_logical_id("VpcPublicDefaultRoute")
 
         self.vpc_public_subnet1 = aws_ec2.CfnSubnet(
             self,
@@ -107,6 +117,8 @@ class Vpc(core.Construct):
             ]
         )
         self.vpc_public_subnet1.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_subnet1.override_logical_id("VpcPublicSubnet1")
+
         self.vpc_public_subnet1_route_table_association = aws_ec2.CfnSubnetRouteTableAssociation(
             self,
             "VpcPublicSubnet1RouteTableAssociation",
@@ -114,12 +126,16 @@ class Vpc(core.Construct):
             subnet_id=self.vpc_public_subnet1.ref
         )
         self.vpc_public_subnet1_route_table_association.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_subnet1_route_table_association.override_logical_id("VpcPublicSubnet1RouteTableAssociation")
+
         self.vpc_public_subnet1_eip = aws_ec2.CfnEIP(
             self,
             "VpcPublicSubnet1EIP",
             domain="vpc"
         )
         self.vpc_public_subnet1_eip.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_subnet1_eip.override_logical_id("VpcPublicSubnet1EIP")
+
         self.vpc_public_subnet1_nat_gateway = aws_ec2.CfnNatGateway(
             self,
             "VpcPublicSubnet1NATGateway",
@@ -128,6 +144,8 @@ class Vpc(core.Construct):
             tags=[core.CfnTag(key="Name", value="{}/Vpc/PublicSubnet1".format(core.Aws.STACK_NAME))]
         )
         self.vpc_public_subnet1_nat_gateway.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_subnet1_nat_gateway.override_logical_id("VpcPublicSubnet1NATGateway")
+
         self.vpc_public_subnet2 = aws_ec2.CfnSubnet(
             self,
             "VpcPublicSubnet2",
@@ -141,6 +159,8 @@ class Vpc(core.Construct):
             ]
         )
         self.vpc_public_subnet2.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_subnet2.override_logical_id("VpcPublicSubnet2")
+
         self.vpc_public_subnet2_route_table_association = aws_ec2.CfnSubnetRouteTableAssociation(
             self,
             "VpcPublicSubnet2RouteTableAssociation",
@@ -148,12 +168,16 @@ class Vpc(core.Construct):
             subnet_id=self.vpc_public_subnet2.ref
         )
         self.vpc_public_subnet2_route_table_association.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_subnet2_route_table_association.override_logical_id("VpcPublicSubnet2RouteTableAssociation")
+
         self.vpc_public_subnet2_eip = aws_ec2.CfnEIP(
             self,
             "VpcPublicSubnet2EIP",
             domain="vpc"
         )
         self.vpc_public_subnet2_eip.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_subnet2_eip.override_logical_id("VpcPublicSubnet2EIP")
+
         self.vpc_public_subnet2_nat_gateway = aws_ec2.CfnNatGateway(
             self,
             "VpcPublicSubnet2NATGateway",
@@ -162,6 +186,7 @@ class Vpc(core.Construct):
             tags=[core.CfnTag(key="Name", value="{}/Vpc/PublicSubnet2".format(core.Aws.STACK_NAME))]
         )
         self.vpc_public_subnet2_nat_gateway.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_public_subnet2_nat_gateway.override_logical_id("VpcPublicSubnet2NATGateway")
 
         self.vpc_private_subnet1 = aws_ec2.CfnSubnet(
             self,
@@ -176,6 +201,8 @@ class Vpc(core.Construct):
             ]
         )
         self.vpc_private_subnet1.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_private_subnet1.override_logical_id("VpcPrivateSubnet1")
+
         self.vpc_private_subnet1_route_table = aws_ec2.CfnRouteTable(
             self,
             "VpcPrivateSubnet1RouteTable",
@@ -183,6 +210,8 @@ class Vpc(core.Construct):
             tags=[core.CfnTag(key="Name", value="{}/Vpc/PrivateSubnet1".format(core.Aws.STACK_NAME))]
         )
         self.vpc_private_subnet1_route_table.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_private_subnet1_route_table.override_logical_id("VpcPrivateSubnet1RouteTable")
+
         self.vpc_private_subnet1_route_table_association = aws_ec2.CfnSubnetRouteTableAssociation(
             self,
             "VpcPrivateSubnet1RouteTableAssociation",
@@ -190,6 +219,8 @@ class Vpc(core.Construct):
             subnet_id=self.vpc_private_subnet1.ref
         )
         self.vpc_private_subnet1_route_table_association.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_private_subnet1_route_table_association.override_logical_id("VpcPublicSubnet1RouteTableAssociation")
+
         self.vpc_private_subnet1_default_route = aws_ec2.CfnRoute(
             self,
             "VpcPrivateSubnet1DefaultRoute",
@@ -198,6 +229,7 @@ class Vpc(core.Construct):
             nat_gateway_id=self.vpc_public_subnet1_nat_gateway.ref
         )
         self.vpc_private_subnet1_default_route.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_private_subnet1_default_route.override_logical_id("VpcPrivateSubnet1DefaultRoute")
 
         self.vpc_private_subnet2 = aws_ec2.CfnSubnet(
             self,
@@ -212,6 +244,8 @@ class Vpc(core.Construct):
             ]
         )
         self.vpc_private_subnet2.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_private_subnet2.override_logical_id("VpcPrivateSubnet2")
+
         self.vpc_private_subnet2_route_table = aws_ec2.CfnRouteTable(
             self,
             "VpcPrivateSubnet2RouteTable",
@@ -219,6 +253,8 @@ class Vpc(core.Construct):
             tags=[core.CfnTag(key="Name", value="{}/Vpc/PrivateSubnet2".format(core.Aws.STACK_NAME))]
         )
         self.vpc_private_subnet2_route_table.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_private_subnet2_route_table.override_logical_id("VpcPrivateSubnet2RouteTable")
+
         self.vpc_private_subnet2_route_table_association = aws_ec2.CfnSubnetRouteTableAssociation(
             self,
             "VpcPrivateSubnet2RouteTableAssociation",
@@ -226,6 +262,8 @@ class Vpc(core.Construct):
             subnet_id=self.vpc_private_subnet2.ref
         )
         self.vpc_private_subnet2_route_table_association.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_private_subnet2_route_table_association.override_logical_id("VpcPrivateSubnet2RouteTableAssociation")
+
         self.vpc_private_subnet2_default_route = aws_ec2.CfnRoute(
             self,
             "VpcPrivateSubnet2DefaultRoute",
@@ -234,3 +272,4 @@ class Vpc(core.Construct):
             nat_gateway_id=self.vpc_public_subnet2_nat_gateway.ref
         )
         self.vpc_private_subnet2_default_route.cfn_options.condition=self.vpc_not_given_condition
+        self.vpc_private_subnet2_default_route.override_logical_id("VpcPrivateSubnet2DefaultRoute")
