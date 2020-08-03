@@ -53,11 +53,13 @@ class Vpc(core.Construct):
             "VpcGiven",
             expression=core.Fn.condition_not(core.Fn.condition_equals(self.vpc_id_param.value, ""))
         )
+        self.override_logical_id(f"{id}Given")
         self.vpc_not_given_condition = core.CfnCondition(
             self,
             "VpcNotGiven",
             expression=core.Fn.condition_equals(self.vpc_id_param.value, "")
         )
+        self.override_logical_id(f"{id}NotGiven")
 
         # resources
 
