@@ -281,7 +281,7 @@ class Vpc(core.Construct):
 
         # helpers
 
-        def id(self):
+        def vpc_id(self):
             return core.Token.as_string(
                 core.Fn.condition_if(
 	            self.vpc_not_given_condition.logical_id,
