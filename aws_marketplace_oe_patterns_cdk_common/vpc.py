@@ -70,7 +70,7 @@ class Vpc(core.Construct):
             enable_dns_hostnames=True,
             enable_dns_support=True,
             instance_tenancy="default",
-            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}"]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}")]
         )
         self.vpc.cfn_options.condition=self.not_given_condition
         self.vpc.override_logical_id(f"{id}")
