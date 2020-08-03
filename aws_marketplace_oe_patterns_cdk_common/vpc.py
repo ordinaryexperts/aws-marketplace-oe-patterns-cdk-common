@@ -293,7 +293,7 @@ class Vpc(core.Construct):
         )
 
     def subnet_ids(self):
-        core.Token.as_list(
+        return core.Token.as_list(
             core.Fn.condition_if(
                 self.vpc_not_given_condition.logical_id,
                 [
