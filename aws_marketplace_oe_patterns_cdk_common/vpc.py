@@ -70,7 +70,7 @@ class Vpc(core.Construct):
             enable_dns_hostnames=True,
             enable_dns_support=True,
             instance_tenancy="default",
-            tags=[core.CfnTag(key="Name", value="{}/Vpc".format(core.Aws.STACK_NAME))]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}"]
         )
         self.vpc.cfn_options.condition=self.not_given_condition
         self.vpc.override_logical_id(f"{id}")
@@ -78,7 +78,7 @@ class Vpc(core.Construct):
         self.igw = aws_ec2.CfnInternetGateway(
             self,
             "InternetGateway",
-            tags=[core.CfnTag(key="Name", value="{}/Vpc".format(core.Aws.STACK_NAME))]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/Vpc"]
         )
         self.igw.cfn_options.condition=self.not_given_condition
         self.igw.override_logical_id(f"{id}InternetGateway")
@@ -96,7 +96,7 @@ class Vpc(core.Construct):
             self,
             "PublicRouteTable",
             vpc_id=self.vpc.ref,
-            tags=[core.CfnTag(key="Name", value="{}/Vpc/PublicRouteTable".format(core.Aws.STACK_NAME))]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicRouteTable"]
         )
         self.public_route_table.cfn_options.condition=self.not_given_condition
         self.public_route_table.override_logical_id(f"{id}PublicRouteTable")
@@ -120,7 +120,7 @@ class Vpc(core.Construct):
             availability_zone=core.Fn.select(0, core.Fn.get_azs()),
             map_public_ip_on_launch=True,
             tags=[
-                core.CfnTag(key="Name", value="{}/Vpc/PublicSubnet1".format(core.Aws.STACK_NAME))
+                core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicSubnet1")
             ]
         )
         self.public_subnet1.cfn_options.condition=self.not_given_condition
@@ -148,7 +148,7 @@ class Vpc(core.Construct):
             "PublicSubnet1NATGateway",
             allocation_id=self.public_subnet1_eip.attr_allocation_id,
             subnet_id=self.public_subnet1.ref,
-            tags=[core.CfnTag(key="Name", value="{}/Vpc/PublicSubnet1".format(core.Aws.STACK_NAME))]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicSubnet1")]
         )
         self.public_subnet1_nat_gateway.cfn_options.condition=self.not_given_condition
         self.public_subnet1_nat_gateway.override_logical_id(f"{id}PublicSubnet1NATGateway")
@@ -162,7 +162,7 @@ class Vpc(core.Construct):
             availability_zone=core.Fn.select(1, core.Fn.get_azs()),
             map_public_ip_on_launch=True,
             tags=[
-                core.CfnTag(key="Name", value="{}/Vpc/PublicSubnet2".format(core.Aws.STACK_NAME))
+                core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicSubnet2")
             ]
         )
         self.public_subnet2.cfn_options.condition=self.not_given_condition
@@ -190,7 +190,7 @@ class Vpc(core.Construct):
             "PublicSubnet2NATGateway",
             allocation_id=self.public_subnet2_eip.attr_allocation_id,
             subnet_id=self.public_subnet1.ref,
-            tags=[core.CfnTag(key="Name", value="{}/Vpc/PublicSubnet2".format(core.Aws.STACK_NAME))]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicSubnet2")]
         )
         self.public_subnet2_nat_gateway.cfn_options.condition=self.not_given_condition
         self.public_subnet2_nat_gateway.override_logical_id(f"{id}PublicSubnet2NATGateway")
@@ -204,7 +204,7 @@ class Vpc(core.Construct):
             availability_zone=core.Fn.select(0, core.Fn.get_azs()),
             map_public_ip_on_launch=False,
             tags=[
-                core.CfnTag(key="Name", value="{}/Vpc/PrivateSubnet1".format(core.Aws.STACK_NAME))
+                core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PrivateSubnet1")
             ]
         )
         self.private_subnet1.cfn_options.condition=self.not_given_condition
@@ -214,7 +214,7 @@ class Vpc(core.Construct):
             self,
             "PrivateSubnet1RouteTable",
             vpc_id=self.vpc.ref,
-            tags=[core.CfnTag(key="Name", value="{}/Vpc/PrivateSubnet1".format(core.Aws.STACK_NAME))]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PrivateSubnet1")]
         )
         self.private_subnet1_route_table.cfn_options.condition=self.not_given_condition
         self.private_subnet1_route_table.override_logical_id(f"{id}PrivateSubnet1RouteTable")
@@ -247,7 +247,7 @@ class Vpc(core.Construct):
             availability_zone=core.Fn.select(1, core.Fn.get_azs()),
             map_public_ip_on_launch=False,
             tags=[
-                core.CfnTag(key="Name", value="{}/Vpc/PrivateSubnet2".format(core.Aws.STACK_NAME))
+                core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PrivateSubnet2")
             ]
         )
         self.private_subnet2.cfn_options.condition=self.not_given_condition
@@ -257,7 +257,7 @@ class Vpc(core.Construct):
             self,
             "PrivateSubnet2RouteTable",
             vpc_id=self.vpc.ref,
-            tags=[core.CfnTag(key="Name", value="{}/Vpc/PrivateSubnet2".format(core.Aws.STACK_NAME))]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PrivateSubnet2")]
         )
         self.private_subnet2_route_table.cfn_options.condition=self.not_given_condition
         self.private_subnet2_route_table.override_logical_id(f"{id}PrivateSubnet2RouteTable")
