@@ -279,13 +279,13 @@ class Vpc(core.Construct):
         self.vpc_private_subnet2_default_route.cfn_options.condition=self.vpc_not_given_condition
         self.vpc_private_subnet2_default_route.override_logical_id("VpcPrivateSubnet2DefaultRoute")
 
-        # helpers
+    # helpers
 
-        def vpc_id(self):
-            return core.Token.as_string(
-                core.Fn.condition_if(
-	            self.vpc_not_given_condition.logical_id,
-                    self.vpc.ref,
-                    self.vpc_id_param.value_as_string
-                )
+    def id(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+	        self.vpc_not_given_condition.logical_id,
+                self.vpc.ref,
+                self.vpc_id_param.value_as_string
             )
+        )
