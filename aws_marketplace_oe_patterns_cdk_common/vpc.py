@@ -292,6 +292,39 @@ class Vpc(core.Construct):
             )
         )
 
+    def metadata_parameter_group(self, label="VPC"):
+        return {
+            "Label": {
+                "default": label
+            },
+            "Parameters": [
+                self.vpc_id_param.logical_id,
+                self.vpc_private_subnet_id1_param.logical_id,
+                self.vpc_private_subnet_id2_param.logical_id,
+                self.vpc_public_subnet_id1_param.logical_id,
+                self.vpc_public_subnet_id2_param.logical_id
+            ]
+        }
+
+    def metadata_parameter_labels(self):
+        return {
+            self.vpc_id_param.logical_id: {
+		"default": "VPC ID"
+            },
+            self.vpc_private_subnet_id1_param.logical_id: {
+		"default": "Private Subnet ID 1"
+            },
+            self.vpc_private_subnet_id2_param.logical_id: {
+                "default": "Private Subnet ID 2"
+            },
+            self.vpc_public_subnet_id1_param.logical_id: {
+                "default": "Public Subnet ID 1"
+            },
+            self.vpc_public_subnet_id2_param.logical_id: {
+                "default": "Public Subnet ID 2"
+            }
+        }
+
     def private_subnet1_id(self):
         return core.Token.as_string(
             core.Fn.condition_if(
