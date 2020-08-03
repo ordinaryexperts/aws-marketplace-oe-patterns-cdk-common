@@ -310,7 +310,7 @@ class Vpc(core.Construct):
             )
         )
 
-    def subnet_ids(self):
+    def private_subnet_ids(self):
         return core.Token.as_list(
             core.Fn.condition_if(
                 self.vpc_not_given_condition.logical_id,
