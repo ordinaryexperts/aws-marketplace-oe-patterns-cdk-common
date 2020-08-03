@@ -78,7 +78,7 @@ class Vpc(core.Construct):
         self.igw = aws_ec2.CfnInternetGateway(
             self,
             "InternetGateway",
-            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/Vpc"]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}")]
         )
         self.igw.cfn_options.condition=self.not_given_condition
         self.igw.override_logical_id(f"{id}InternetGateway")
