@@ -96,7 +96,7 @@ class Vpc(core.Construct):
             self,
             "PublicRouteTable",
             vpc_id=self.vpc.ref,
-            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicRouteTable"]
+            tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicRouteTable")]
         )
         self.public_route_table.cfn_options.condition=self.not_given_condition
         self.public_route_table.override_logical_id(f"{id}PublicRouteTable")
