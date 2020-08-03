@@ -259,7 +259,7 @@ class Vpc(core.Construct):
             vpc_id=self.vpc.ref,
             tags=[core.CfnTag(key="Name", value="{}/Vpc/PrivateSubnet2".format(core.Aws.STACK_NAME))]
         )
-        self.private_subnet2_route_table.cfn_options.condition=self.vpc_not_given_condition
+        self.private_subnet2_route_table.cfn_options.condition=self.not_given_condition
         self.private_subnet2_route_table.override_logical_id(f"{id}PrivateSubnet2RouteTable")
 
         self.private_subnet2_route_table_association = aws_ec2.CfnSubnetRouteTableAssociation(
