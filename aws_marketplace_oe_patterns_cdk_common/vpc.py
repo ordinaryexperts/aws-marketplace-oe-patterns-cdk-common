@@ -285,7 +285,7 @@ class Vpc(core.Construct):
             return core.Token.as_string(
                 core.Fn.condition_if(
 	            self.vpc_not_given_condition.logical_id,
-                    self..vpc.ref,
+                    self.vpc.ref,
                     self.vpc_id_param.value_as_string
                 )
             )
