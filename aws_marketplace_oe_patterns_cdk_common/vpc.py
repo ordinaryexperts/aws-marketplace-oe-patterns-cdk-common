@@ -291,3 +291,18 @@ class Vpc(core.Construct):
                 self.vpc_id_param.value_as_string
             )
         )
+
+    def subnet_ids(self):
+        core.Token.as_list(
+            core.Fn.condition_if(
+                vpc.vpc_not_given_condition.logical_id,
+                [
+                    vpc.vpc_private_subnet1.ref,
+                    vpc.vpc_private_subnet2.ref
+                ],
+                [
+                    vpc.vpc_private_subnet_id1_param.value_as_string,
+		    vpc.vpc_private_subnet_id2_param.value_as_string
+                ]
+            )
+        )
