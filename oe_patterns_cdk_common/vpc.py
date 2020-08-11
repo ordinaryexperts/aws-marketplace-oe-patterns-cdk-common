@@ -8,7 +8,9 @@ class Vpc(core.Construct):
     def __init__(self, scope: core.Construct, id: str, **props):
         super().__init__(scope, id)
 
-        # parameters
+        #
+        # PARAMETERS
+        #
 
         self.id_param = core.CfnParameter(
             self,
@@ -46,7 +48,9 @@ class Vpc(core.Construct):
         )
         self.public_subnet_id2_param.override_logical_id(f"{id}PublicSubnetId2")
 
-        # conditions
+        #
+        # CONDITIONS
+        #
 
         self.given_condition = core.CfnCondition(
             self,
@@ -61,7 +65,9 @@ class Vpc(core.Construct):
         )
         self.not_given_condition.override_logical_id(f"{id}/NotGivenCondition")
 
-        # resources
+        #
+        # RESOURCES
+        #
 
         self.vpc = aws_ec2.CfnVPC(
             self,
@@ -281,7 +287,9 @@ class Vpc(core.Construct):
         self.private_subnet2_default_route.cfn_options.condition=self.not_given_condition
         self.private_subnet2_default_route.override_logical_id(f"{id}/PrivateSubnet2DefaultRoute")
 
-    # helpers
+    #
+    # HELPERS
+    #
 
     def id(self):
         return core.Token.as_string(
