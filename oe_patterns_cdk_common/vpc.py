@@ -22,7 +22,7 @@ class Vpc(core.Construct):
         self.cidr_block_param = core.CfnParameter(
             self,
             "CidrBlock",
-            allowed_pattern='^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+            allowed_pattern='^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$',
             default="10.0.0.0/16",
             description="Optional: Specify the VPC CIDR block."
         )
