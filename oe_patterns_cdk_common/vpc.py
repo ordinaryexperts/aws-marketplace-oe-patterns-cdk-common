@@ -19,6 +19,13 @@ class Vpc(core.Construct):
             description="Optional: Specify the VPC ID. If not specified, a VPC will be created."
         )
         self.id_param.override_logical_id(f"{id}Id")
+        self.cidr_block_param = core.CfnParameter(
+            self,
+            "CidrBlock",
+            default="10.0.0.0/16",
+            description="Optional: Specify the VPC CIDR block."
+        )
+        self.cidr_block_param.override_logical_id(f"{id}CidrBlock")
         self.private_subnet_id1_param = core.CfnParameter(
             self,
             "PrivateSubnetId1",
@@ -300,6 +307,15 @@ class Vpc(core.Construct):
             )
         )
 
+    def cidr_ip(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+                self.given_condition.logical_id,
+                self.cidr_block_param.value_as_string,
+                self.vpc.attr_cidr_block
+            )
+        )
+
     def metadata_parameter_group(self, label="VPC"):
         return {
             "Label": {
@@ -307,6 +323,7 @@ class Vpc(core.Construct):
             },
             "Parameters": [
                 self.id_param.logical_id,
+                self.cidr_block_param.logical_id,
                 self.private_subnet_id1_param.logical_id,
                 self.private_subnet_id2_param.logical_id,
                 self.public_subnet_id1_param.logical_id,
@@ -319,6 +336,9 @@ class Vpc(core.Construct):
             self.id_param.logical_id: {
 		"default": "VPC ID"
             },
+            self.cidr_block_param.logical_id: {
+                "default": "VPC CIDR IP"
+            }
             self.private_subnet_id1_param.logical_id: {
 		"default": "Private Subnet ID 1"
             },
