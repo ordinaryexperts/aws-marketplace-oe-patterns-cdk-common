@@ -338,7 +338,7 @@ class Vpc(core.Construct):
             },
             self.cidr_block_param.logical_id: {
                 "default": "VPC CIDR IP"
-            }
+            },
             self.private_subnet_id1_param.logical_id: {
 		"default": "Private Subnet ID 1"
             },
