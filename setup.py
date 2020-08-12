@@ -3,12 +3,11 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-# TODO: match version from calling code?
-CDK_VERSION="1.42.1"
+CDK_VERSION="1.57.0"
 
 setuptools.setup(
     name="oe-patterns-cdk-common",
-    version="0.0.1",
+    version="1.1.0",
     author="Ordinary Experts",
     author_email="aaron@ordinaryexperts.com",
     description="Common CDK code for re-use in other AWS Marketplace patterns.",
