@@ -295,7 +295,7 @@ class Vpc(core.Construct):
             self,
             "IdOutput",
             description="The ID of the VPC.",
-            value=self.vpc.ref
+            value=self.id()
         )
         self.private_subnet_id1_output = core.CfnOutput(
             self,
@@ -397,6 +397,39 @@ class Vpc(core.Construct):
                 [
                     self.private_subnet_id1_param.value_as_string,
 		    self.private_subnet_id2_param.value_as_string
+                ]
+            )
+        )
+
+    def public_subnet1_id(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                self.public_subnet1.ref,
+                self.public_subnet_id1_param.value_as_string
+            )
+        )
+
+    def public_subnet2_id(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                self.public_subnet2.ref,
+                self.public_subnet_id2_param.value_as_string
+            )
+        )
+
+    def public_subnet_ids(self):
+        return core.Token.as_list(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                [
+                    self.public_subnet1.ref,
+                    self.public_subnet2.ref
+                ],
+                [
+                    self.public_subnet_id1_param.value_as_string,
+		    self.public_subnet_id2_param.value_as_string
                 ]
             )
         )
