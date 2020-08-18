@@ -287,6 +287,41 @@ class Vpc(core.Construct):
         self.private_subnet2_default_route.cfn_options.condition=self.not_given_condition
         self.private_subnet2_default_route.override_logical_id(f"{id}PrivateSubnet2DefaultRoute")
 
+        #
+        # OUTPUTS
+        #
+
+        self.id_output = core.CfnOutput(
+            self,
+            "IdOutput",
+            description="The ID of the VPC.",
+            value=self.vpc.ref
+        )
+        self.private_subnet_id1_output = core.CfnOuput(
+            self,
+            "PrivateSubnetId1Output",
+            description="The ID of the first private VPC subnet.",
+            value=private_subnet1.ref
+        )
+        self.private_subnet_id2_output = core.CfnOutput(
+            self,
+            "PrivateSubnetId2Output",
+            description="The ID of the second private VPC subnet.",
+            value=private_subnet2.ref
+        )
+        self.public_subnet_id1_output = core.CfnOuput(
+            self,
+            "PublicSubnetId1Output",
+            description="The ID of the first public VPC subnet.",
+            value=public_subnet1.ref
+        )
+        self.public_subnet_id2_output = core.CfnOutput(
+            self,
+            "PublicSubnetId2Output",
+            description="The ID of the second public VPC subnet.",
+            value=public_subnet2.ref
+        )
+
     #
     # HELPERS
     #
