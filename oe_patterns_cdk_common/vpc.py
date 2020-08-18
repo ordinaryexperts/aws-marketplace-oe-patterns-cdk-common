@@ -301,25 +301,25 @@ class Vpc(core.Construct):
             self,
             "PrivateSubnetId1Output",
             description="The ID of the first private VPC subnet.",
-            value=private_subnet1.ref
+            value=private_subnet1_id()
         )
         self.private_subnet_id2_output = core.CfnOutput(
             self,
             "PrivateSubnetId2Output",
             description="The ID of the second private VPC subnet.",
-            value=private_subnet2.ref
+            value=private_subnet2_id()
         )
         self.public_subnet_id1_output = core.CfnOutput(
             self,
             "PublicSubnetId1Output",
             description="The ID of the first public VPC subnet.",
-            value=public_subnet1.ref
+            value=public_subnet1_id()
         )
         self.public_subnet_id2_output = core.CfnOutput(
             self,
             "PublicSubnetId2Output",
             description="The ID of the second public VPC subnet.",
-            value=public_subnet2.ref
+            value=public_subnet2_id()
         )
 
     #
