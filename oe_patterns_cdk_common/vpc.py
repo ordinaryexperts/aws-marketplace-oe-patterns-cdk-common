@@ -287,6 +287,41 @@ class Vpc(core.Construct):
         self.private_subnet2_default_route.cfn_options.condition=self.not_given_condition
         self.private_subnet2_default_route.override_logical_id(f"{id}PrivateSubnet2DefaultRoute")
 
+        #
+        # OUTPUTS
+        #
+
+        self.id_output = core.CfnOutput(
+            self,
+            "IdOutput",
+            description="The ID of the VPC.",
+            value=self.id()
+        )
+        self.private_subnet_id1_output = core.CfnOutput(
+            self,
+            "PrivateSubnetId1Output",
+            description="The ID of the first private VPC subnet.",
+            value=self.private_subnet1_id()
+        )
+        self.private_subnet_id2_output = core.CfnOutput(
+            self,
+            "PrivateSubnetId2Output",
+            description="The ID of the second private VPC subnet.",
+            value=self.private_subnet2_id()
+        )
+        self.public_subnet_id1_output = core.CfnOutput(
+            self,
+            "PublicSubnetId1Output",
+            description="The ID of the first public VPC subnet.",
+            value=self.public_subnet1_id()
+        )
+        self.public_subnet_id2_output = core.CfnOutput(
+            self,
+            "PublicSubnetId2Output",
+            description="The ID of the second public VPC subnet.",
+            value=self.public_subnet2_id()
+        )
+
     #
     # HELPERS
     #
@@ -362,6 +397,39 @@ class Vpc(core.Construct):
                 [
                     self.private_subnet_id1_param.value_as_string,
 		    self.private_subnet_id2_param.value_as_string
+                ]
+            )
+        )
+
+    def public_subnet1_id(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                self.public_subnet1.ref,
+                self.public_subnet_id1_param.value_as_string
+            )
+        )
+
+    def public_subnet2_id(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                self.public_subnet2.ref,
+                self.public_subnet_id2_param.value_as_string
+            )
+        )
+
+    def public_subnet_ids(self):
+        return core.Token.as_list(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                [
+                    self.public_subnet1.ref,
+                    self.public_subnet2.ref
+                ],
+                [
+                    self.public_subnet_id1_param.value_as_string,
+		    self.public_subnet_id2_param.value_as_string
                 ]
             )
         )
