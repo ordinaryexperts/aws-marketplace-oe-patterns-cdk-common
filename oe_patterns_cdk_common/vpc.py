@@ -19,6 +19,14 @@ class Vpc(core.Construct):
             description="Optional: Specify the VPC ID. If not specified, a VPC will be created."
         )
         self.id_param.override_logical_id(f"{id}Id")
+        self.cidr_block_param = core.CfnParameter(
+            self,
+            "CidrBlock",
+            allowed_pattern='^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$',
+            default="10.0.0.0/16",
+            description="Optional: Specify the VPC CIDR block."
+        )
+        self.cidr_block_param.override_logical_id(f"{id}CidrBlock")
         self.private_subnet_id1_param = core.CfnParameter(
             self,
             "PrivateSubnetId1",
@@ -287,6 +295,41 @@ class Vpc(core.Construct):
         self.private_subnet2_default_route.cfn_options.condition=self.not_given_condition
         self.private_subnet2_default_route.override_logical_id(f"{id}PrivateSubnet2DefaultRoute")
 
+        #
+        # OUTPUTS
+        #
+
+        self.id_output = core.CfnOutput(
+            self,
+            "IdOutput",
+            description="The ID of the VPC.",
+            value=self.id()
+        )
+        self.private_subnet_id1_output = core.CfnOutput(
+            self,
+            "PrivateSubnetId1Output",
+            description="The ID of the first private VPC subnet.",
+            value=self.private_subnet1_id()
+        )
+        self.private_subnet_id2_output = core.CfnOutput(
+            self,
+            "PrivateSubnetId2Output",
+            description="The ID of the second private VPC subnet.",
+            value=self.private_subnet2_id()
+        )
+        self.public_subnet_id1_output = core.CfnOutput(
+            self,
+            "PublicSubnetId1Output",
+            description="The ID of the first public VPC subnet.",
+            value=self.public_subnet1_id()
+        )
+        self.public_subnet_id2_output = core.CfnOutput(
+            self,
+            "PublicSubnetId2Output",
+            description="The ID of the second public VPC subnet.",
+            value=self.public_subnet2_id()
+        )
+
     #
     # HELPERS
     #
@@ -300,6 +343,15 @@ class Vpc(core.Construct):
             )
         )
 
+    def cidr_ip(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+                self.given_condition.logical_id,
+                self.cidr_block_param.value_as_string,
+                self.vpc.attr_cidr_block
+            )
+        )
+
     def metadata_parameter_group(self, label="VPC"):
         return {
             "Label": {
@@ -307,6 +359,7 @@ class Vpc(core.Construct):
             },
             "Parameters": [
                 self.id_param.logical_id,
+                self.cidr_block_param.logical_id,
                 self.private_subnet_id1_param.logical_id,
                 self.private_subnet_id2_param.logical_id,
                 self.public_subnet_id1_param.logical_id,
@@ -318,6 +371,9 @@ class Vpc(core.Construct):
         return {
             self.id_param.logical_id: {
 		"default": "VPC ID"
+            },
+            self.cidr_block_param.logical_id: {
+                "default": "VPC CIDR IP"
             },
             self.private_subnet_id1_param.logical_id: {
 		"default": "Private Subnet ID 1"
@@ -362,6 +418,39 @@ class Vpc(core.Construct):
                 [
                     self.private_subnet_id1_param.value_as_string,
 		    self.private_subnet_id2_param.value_as_string
+                ]
+            )
+        )
+
+    def public_subnet1_id(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                self.public_subnet1.ref,
+                self.public_subnet_id1_param.value_as_string
+            )
+        )
+
+    def public_subnet2_id(self):
+        return core.Token.as_string(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                self.public_subnet2.ref,
+                self.public_subnet_id2_param.value_as_string
+            )
+        )
+
+    def public_subnet_ids(self):
+        return core.Token.as_list(
+            core.Fn.condition_if(
+                self.not_given_condition.logical_id,
+                [
+                    self.public_subnet1.ref,
+                    self.public_subnet2.ref
+                ],
+                [
+                    self.public_subnet_id1_param.value_as_string,
+                    self.public_subnet_id2_param.value_as_string
                 ]
             )
         )
