@@ -1,5 +1,7 @@
 # Unreleased
 
+# 1.2.0
+
 * Adding VPC outputs
 * Adding public_subnet_ids helper
 * Adding CIDR Block param and cidr_ip helper
