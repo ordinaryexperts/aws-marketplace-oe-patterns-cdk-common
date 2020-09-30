@@ -1,5 +1,9 @@
 # Unreleased
 
+# 1.3.0
+
+* Removing unused conditions and parameters
+
 # 1.2.0
 
 * Adding VPC outputs
