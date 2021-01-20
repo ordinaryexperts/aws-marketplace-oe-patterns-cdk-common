@@ -1,6 +1,7 @@
 # Unreleased
 
 * Adding VPC outputs
+* Adding Util class
 
 # 1.1.0
 
