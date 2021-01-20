@@ -1,5 +1,9 @@
 # Unreleased
 
+# 1.4.0
+
+* Adding Util class
+
 # 1.3.0
 
 * Removing unused conditions and parameters
