@@ -21,22 +21,41 @@ $ ave oe-patterns-prod make TEMPLATE_VERSION=1.0.0 ami-ec2-build
 3. Update CDK with AMI ID, synth, and test:
 
 ```
-$ vim cdk/wordpress/wordpress_stack.py # update the AMI info as directed by the output of ami-ec2-build
+$ vim cdk/wordpress/wordpress_stack.py # update as directed by the output of ami-ec2-build
 $ make synth-to-file
-(now take file in dist/template.yaml and test it manually in console of the OE Patterns Prod account)
+$ avl oe-patterns-prod-dylan
+(take dist/template.yaml and test it manually in console of OE Patterns Prod account)
 ```
 
 4. Scan AMI in AWS Marketplace Portal
 
 ```
-$ avl oe-patterns-prod-dylan
 $ xdg-open https://aws.amazon.com/marketplace/management/manage-products/#/manage-amis.unshared
 (go to Assets -> Amazon Machine Image, then select the latest AMI and click 'Share')
 (monitor the result of the scan and make fixes, repeat as necessary)
 ```
 
-5. Submit Product Load Form to AWS Marketplace
+5. Generate Product Load Form for AWS Marketplace
 
 ```
 $ wget https://s3.amazonaws.com/awsmp-loadforms/ProductDataLoad-Current.xlsx
+(open in Excel, copy header line, paste into scripts/gen-plf-column-headers.txt)
+$ ave oe-patterns-prod-dylan make TEMPLATE_VERSION=1.0.0 AMI_ID=ami-0e845d4ea57267858 gen-plf
+(this may take more than an hour to complete due to the AWS pricing calculations...)
+(sometimes you have to run it more than once...)
+(it also helps to quit anything else running on your laptop while it is running...)
+```
+
+The above will generate a `plf.csv`. Open the default Product Load Form downloaded above, remove the default content, and paste in the row from `plf.csv`.
+
+6. Publish template to s3
+
+```
+$ ave oe-patterns-dev make TEMPLATE_VERSION=1.0.0 publish
+```
+
+7. Upload Excel file to AWS Management Portal
+
+```
+$ wget https://aws.amazon.com/marketplace/management/product-load
 ```
