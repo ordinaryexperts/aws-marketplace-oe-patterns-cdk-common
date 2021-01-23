@@ -57,7 +57,7 @@ $ ave oe-patterns-dev make TEMPLATE_VERSION=1.0.0 publish
 7. Upload Excel file to AWS Management Portal
 
 ```
-$ wget https://aws.amazon.com/marketplace/management/product-load
+$ xdg-open https://aws.amazon.com/marketplace/management/product-load
 ```
 
 
