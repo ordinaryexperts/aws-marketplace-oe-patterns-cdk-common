@@ -40,7 +40,7 @@ $ xdg-open https://aws.amazon.com/marketplace/management/manage-products/#/manag
 ```
 $ wget https://s3.amazonaws.com/awsmp-loadforms/ProductDataLoad-Current.xlsx
 (open in Excel, copy header line, paste into scripts/gen-plf-column-headers.txt)
-$ ave oe-patterns-prod-dylan make TEMPLATE_VERSION=1.0.0 AMI_ID=ami-0e845d4ea57267858 gen-plf
+$ ave oe-patterns-prod-dylan make TEMPLATE_VERSION=1.0.0 AMI_ID=ami-xxxxxxxxxxxxxxxxx gen-plf
 (this may take more than an hour to complete due to the AWS pricing calculations...)
 (sometimes you have to run it more than once...)
 (it also helps to quit anything else running on your laptop while it is running...)
@@ -48,7 +48,7 @@ $ ave oe-patterns-prod-dylan make TEMPLATE_VERSION=1.0.0 AMI_ID=ami-0e845d4ea572
 
 The above will generate a `plf.csv`. Open the default Product Load Form downloaded above, remove the default content, and paste in the row from `plf.csv`.
 
-6. Publish template to s3
+6. Publish template to s3 bucket (in OE Patterns dev account)
 
 ```
 $ ave oe-patterns-dev make TEMPLATE_VERSION=1.0.0 publish
@@ -58,4 +58,25 @@ $ ave oe-patterns-dev make TEMPLATE_VERSION=1.0.0 publish
 
 ```
 $ wget https://aws.amazon.com/marketplace/management/product-load
+```
+
+
+8. Finish release branch
+
+```
+$ git flow release finish 1.0.0
+$ git checkout main
+$ git push
+$ git push --tags
+$ git checkout develop
+```
+
+9. Generate and copy dev AMI for taskcat tests
+
+```
+$ ave oe-patterns-dev make ami-ec2-build
+$ ave oe-patterns-dev make AMI_ID=ami-xxxxxxxxxxxxxxxxx ami-ec2-copy
+$ git add .
+$ git commit -m "Updated AMI for taskcat testing post 1.0.0 release"
+$ git push
 ```
