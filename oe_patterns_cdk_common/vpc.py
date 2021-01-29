@@ -291,30 +291,35 @@ class Vpc(core.Construct):
             description="The ID of the VPC.",
             value=self.id()
         )
+        self.id_output.override_logical_id(f"{id}IdOutput")
         self.private_subnet_id1_output = core.CfnOutput(
             self,
             "PrivateSubnetId1Output",
             description="The ID of the first private VPC subnet.",
             value=self.private_subnet1_id()
         )
+        self.private_subnet_id1_output.override_logical_id(f"{id}PrivateSubnetId1Output")
         self.private_subnet_id2_output = core.CfnOutput(
             self,
             "PrivateSubnetId2Output",
             description="The ID of the second private VPC subnet.",
             value=self.private_subnet2_id()
         )
+        self.private_subnet_id2_output.override_logical_id(f"{id}PrivateSubnetId2Output")
         self.public_subnet_id1_output = core.CfnOutput(
             self,
             "PublicSubnetId1Output",
             description="The ID of the first public VPC subnet.",
             value=self.public_subnet1_id()
         )
+        self.public_subnet_id1_output.override_logical_id(f"{id}PublicSubnetId1Output")
         self.public_subnet_id2_output = core.CfnOutput(
             self,
             "PublicSubnetId2Output",
             description="The ID of the second public VPC subnet.",
             value=self.public_subnet2_id()
         )
+        self.public_subnet_id2_output.override_logical_id(f"{id}PublicSubnetId2Output")
 
     #
     # HELPERS

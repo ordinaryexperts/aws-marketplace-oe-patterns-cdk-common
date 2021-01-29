@@ -1,5 +1,7 @@
 # Unreleased
 
+* Cleanup of output logical ids
+
 # 1.4.0
 
 * Adding Util class
