@@ -2,6 +2,7 @@
 
 * Cleanup of output logical ids
 * Add parameters for VPC CIDRs
+* Upgrade CDK to 1.87.1
 
 # 1.4.0
 
