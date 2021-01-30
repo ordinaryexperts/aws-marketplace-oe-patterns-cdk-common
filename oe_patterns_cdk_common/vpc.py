@@ -28,6 +28,15 @@ class Vpc(core.Construct):
         )
         self.cidr_param.override_logical_id(f"{id}Cidr")
 
+        self.nat_gateway_per_subnet_param = core.CfnParameter(
+            self,
+            "NatGatewayPerSubnet",
+            allowed_values=[ "true", "false" ],
+            default="false",
+            description="Optional: Set to 'true' to provision a NAT Gateway in each public subnet for AZ HA."
+        )
+        self.nat_gateway_per_subnet_param.override_logical_id(f"{id}NatGatewayPerSubnet")
+
         self.private_subnet1_id_param = core.CfnParameter(
             self,
             "PrivateSubnet1Id",
@@ -101,6 +110,16 @@ class Vpc(core.Construct):
             expression=core.Fn.condition_equals(self.id_param.value, "")
         )
         self.not_given_condition.override_logical_id(f"{id}NotGiven")
+
+        self.not_given_and_nat_gateway_per_subnet_condition = core.CfnCondition(
+            self,
+            "NotGivenAndNatGatewayPerSubnetCondition",
+            expression=core.Fn.condition_and(
+                core.Fn.condition_equals(self.id_param.value, ""),
+                core.Fn.condition_equals(self.nat_gateway_per_subnet_param.value, "true")
+            )
+        )
+        self.not_given_and_nat_gateway_per_subnet_condition.override_logical_id(f"{id}NotGivenAndNatGatewayPerSubnet")
 
         #
         # RESOURCES
@@ -225,7 +244,7 @@ class Vpc(core.Construct):
             "PublicSubnet2EIP",
             domain="vpc"
         )
-        self.public_subnet2_eip.cfn_options.condition=self.not_given_condition
+        self.public_subnet2_eip.cfn_options.condition=self.not_given_and_nat_gateway_per_subnet_condition
         self.public_subnet2_eip.override_logical_id(f"{id}PublicSubnet2EIP")
 
         self.public_subnet2_nat_gateway = aws_ec2.CfnNatGateway(
@@ -235,7 +254,7 @@ class Vpc(core.Construct):
             subnet_id=self.public_subnet1.ref,
             tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicSubnet2")]
         )
-        self.public_subnet2_nat_gateway.cfn_options.condition=self.not_given_condition
+        self.public_subnet2_nat_gateway.cfn_options.condition=self.not_given_and_nat_gateway_per_subnet_condition
         self.public_subnet2_nat_gateway.override_logical_id(f"{id}PublicSubnet2NATGateway")
 
         self.private_subnet1 = aws_ec2.CfnSubnet(
@@ -319,7 +338,13 @@ class Vpc(core.Construct):
             "PrivateSubnet2DefaultRoute",
             route_table_id=self.private_subnet2_route_table.ref,
             destination_cidr_block="0.0.0.0/0",
-            nat_gateway_id=self.public_subnet2_nat_gateway.ref
+            nat_gateway_id=core.Token.as_string(
+                core.Fn.condition_if(
+                    self.not_given_and_nat_gateway_per_subnet_condition.logical_id,
+                    self.public_subnet2_nat_gateway.ref,
+                    self.public_subnet1_nat_gateway.ref
+                )
+            )
         )
         self.private_subnet2_default_route.cfn_options.condition=self.not_given_condition
         self.private_subnet2_default_route.override_logical_id(f"{id}PrivateSubnet2DefaultRoute")
@@ -371,7 +396,7 @@ class Vpc(core.Construct):
     def id(self):
         return core.Token.as_string(
             core.Fn.condition_if(
-            self.not_given_condition.logical_id,
+                self.not_given_condition.logical_id,
                 self.vpc.ref,
                 self.id_param.value_as_string
             )
@@ -397,6 +422,7 @@ class Vpc(core.Construct):
                 },
                 "Parameters": [
                     self.cidr_param.logical_id,
+                    self.nat_gateway_per_subnet_param.logical_id,
                     self.private_subnet1_cidr_param.logical_id,
                     self.private_subnet2_cidr_param.logical_id,
                     self.public_subnet1_cidr_param.logical_id,
@@ -407,11 +433,23 @@ class Vpc(core.Construct):
 
     def metadata_parameter_labels(self):
         return {
+            self.cidr_param.logical_id: {
+                "default": "VPC IPv4 CIDR"
+            },
             self.id_param.logical_id: {
                 "default": "VPC ID"
             },
+            self.nat_gateway_per_subnet_param.logical_id: {
+                "default": "Provision NAT Gateways Per Public Subnet (for HA but with higher cost)"
+            },
+            self.private_subnet1_cidr_param.logical_id: {
+                "default": "Private Subnet 1 IPv4 CIDR"
+            },
             self.private_subnet1_id_param.logical_id: {
                 "default": "Private Subnet 1 ID"
+            },
+            self.private_subnet2_cidr_param.logical_id: {
+                "default": "Private Subnet 2 IPv4 CIDR"
             },
             self.private_subnet2_id_param.logical_id: {
                 "default": "Private Subnet 2 ID"
@@ -419,20 +457,11 @@ class Vpc(core.Construct):
             self.public_subnet1_id_param.logical_id: {
                 "default": "Public Subnet 1 ID"
             },
-            self.public_subnet2_id_param.logical_id: {
-                "default": "Public Subnet 2 ID"
-            },
-            self.cidr_param.logical_id: {
-                "default": "VPC IPv4 CIDR"
-            },
-            self.private_subnet1_cidr_param.logical_id: {
-                "default": "Private Subnet 1 IPv4 CIDR"
-            },
-            self.private_subnet2_cidr_param.logical_id: {
-                "default": "Private Subnet 2 IPv4 CIDR"
-            },
             self.public_subnet1_cidr_param.logical_id: {
                 "default": "Public Subnet 1 IPv4 CIDR"
+            },
+            self.public_subnet2_id_param.logical_id: {
+                "default": "Public Subnet 2 ID"
             },
             self.public_subnet2_cidr_param.logical_id: {
                 "default": "Public Subnet 2 IPv4 CIDR"
