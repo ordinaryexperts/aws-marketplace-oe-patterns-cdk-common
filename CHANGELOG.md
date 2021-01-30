@@ -1,6 +1,7 @@
 # Unreleased
 
 * Cleanup of output logical ids
+* Add parameters for VPC CIDRs
 
 # 1.4.0
 
