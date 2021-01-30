@@ -3,7 +3,7 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-CDK_VERSION="1.57.0"
+CDK_VERSION="1.87.1"
 
 setuptools.setup(
     name="oe-patterns-cdk-common",
