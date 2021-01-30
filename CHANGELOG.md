@@ -1,5 +1,9 @@
 # Unreleased
 
+# 2.0.1
+
+* Fix consistency of labels
+
 # 2.0.0
 
 * Cleanup of output logical ids
