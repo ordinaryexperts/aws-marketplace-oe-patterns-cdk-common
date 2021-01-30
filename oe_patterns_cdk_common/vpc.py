@@ -73,7 +73,7 @@ class Vpc(core.Construct):
             self,
             "PublicSubnetId1",
             default="",
-            description="Optional: Specify Subnet ID for first public subnet."
+            description="Optional: Specify Subnet ID for public subnet 1."
         )
         self.public_subnet1_id_param.override_logical_id(f"{id}PublicSubnet1Id")
         self.public_subnet1_cidr_param = core.CfnParameter(
@@ -89,7 +89,7 @@ class Vpc(core.Construct):
             self,
             "PublicSubnet2Id",
             default="",
-            description="Optional: Specify Subnet ID for second public subnet."
+            description="Optional: Specify Subnet ID for public subnet 2."
         )
         self.public_subnet2_id_param.override_logical_id(f"{id}PublicSubnet2Id")
         self.public_subnet2_cidr_param = core.CfnParameter(
