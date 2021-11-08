@@ -21,10 +21,11 @@ $ ave oe-patterns-prod make TEMPLATE_VERSION=1.0.0 ami-ec2-build
 3. Update CDK with AMI ID, synth, and test:
 
 ```
-$ vim cdk/wordpress/wordpress_stack.py # update as directed by the output of ami-ec2-build
+$ vim cdk/[app]/[app]_stack.py # update as directed by the output of ami-ec2-build
 $ make synth-to-file
 $ avl oe-patterns-prod-dylan
 (take dist/template.yaml and test it manually in console of OE Patterns Prod account)
+$ git add cdk
 ```
 
 4. Scan AMI in AWS Marketplace Portal
@@ -32,13 +33,23 @@ $ avl oe-patterns-prod-dylan
 ```
 $ xdg-open https://aws.amazon.com/marketplace/management/manage-products/#/manage-amis.unshared
 (go to Assets -> Amazon Machine Image, then select the latest AMI and click 'Share')
+Role: arn:aws:iam::879777583535:role/AWSMarketplaceAMIScanning
 (monitor the result of the scan and make fixes, repeat as necessary)
 ```
 
 5. Generate Product Load Form for AWS Marketplace
 
+If this is the first version to be submitted:
+
 ```
 $ wget https://s3.amazonaws.com/awsmp-loadforms/ProductDataLoad-Current.xlsx
+```
+
+If the product is already published, go to 'Products -> Server', then select the product, and click the `Download product load form` button.
+
+Then:
+
+```
 (open in Excel, copy header line, paste into scripts/gen-plf-column-headers.txt)
 $ ave oe-patterns-prod-dylan make TEMPLATE_VERSION=1.0.0 AMI_ID=ami-xxxxxxxxxxxxxxxxx gen-plf
 (this may take more than an hour to complete due to the AWS pricing calculations...)
@@ -64,6 +75,7 @@ $ xdg-open https://aws.amazon.com/marketplace/management/product-load
 8. Finish release branch
 
 ```
+$ git ci -m "1.0.0 updates"
 $ git flow release finish 1.0.0
 $ git checkout main
 $ git push
