@@ -33,6 +33,7 @@ $ git add cdk
 ```
 $ xdg-open https://aws.amazon.com/marketplace/management/manage-products/#/manage-amis.unshared
 (go to Assets -> Amazon Machine Image, then select the latest AMI and click 'Share')
+Role: arn:aws:iam::879777583535:role/AWSMarketplaceAMIScanning
 (monitor the result of the scan and make fixes, repeat as necessary)
 ```
 
