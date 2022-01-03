@@ -1,5 +1,9 @@
 # Unreleased
 
+# 2.0.2
+
+* Allow newer versions of CDK
+
 # 2.0.1
 
 * Fix consistency of labels
