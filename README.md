@@ -33,7 +33,7 @@ $ git add cdk
 4. Scan AMI in AWS Marketplace Portal
 
 ```
-$ xdg-open https://aws.amazon.com/marketplace/management/manage-products/#/manage-amis.unshared
+$ xdg-open https://aws.amazon.com/marketplace/management/manage-products/#/share
 (go to Assets -> Amazon Machine Image, then select the latest AMI and click 'Share')
 Role: arn:aws:iam::879777583535:role/AWSMarketplaceAMIScanning
 (monitor the result of the scan and make fixes, repeat as necessary)
