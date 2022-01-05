@@ -71,7 +71,9 @@ $ xdg-open https://aws.amazon.com/marketplace/management/product-load
 ```
 
 
-8. Finish release branch
+8. Wait for AWS to update product / make requested changes on release branch
+
+9. Finish release branch
 
 ```
 $ git ci -m "$TEMPLATE_VERSION updates"
@@ -82,7 +84,7 @@ $ git push --tags
 $ git checkout develop
 ```
 
-9. Generate and copy dev AMI for taskcat tests
+10. Generate and copy dev AMI for taskcat tests
 
 ```
 $ ave oe-patterns-dev make ami-ec2-build
