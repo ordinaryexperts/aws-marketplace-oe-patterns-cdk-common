@@ -93,3 +93,25 @@ $ git add .
 $ git commit -m "Updated AMI for taskcat testing post $TEMPLATE_VERSION release"
 $ git push
 ```
+
+*Create new product*
+
+1. Create github repo
+
+2. Clone locally
+
+3. Create CDK project, and rename base folder to `cdk` for consistency among patterns.
+
+```
+$ mkdir [projectname]
+$ cd [projectname]
+$ cdk init app --language python
+$ cd ..
+$ mv [projectname] cdk
+```
+
+
+## Areas we can reuse
+
+* packer/setup.sh - the beginning and end of that script should be the some for all patterns using the same OS
+* scripts/* - all these scripts could be shared
