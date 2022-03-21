@@ -1,5 +1,7 @@
 # Unreleased
 
+* MySQL RDS Construct
+
 # 2.0.2
 
 * Allow newer versions of CDK
