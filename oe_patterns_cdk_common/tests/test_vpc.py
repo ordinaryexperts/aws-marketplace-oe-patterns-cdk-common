@@ -3,7 +3,7 @@ from aws_cdk import (
         assertions
     )
 
-from oe_patterns_cdk_common import Vpc
+from oe_patterns_cdk_common.vpc import Vpc
 
 def test_vpc():
   stack = core.Stack()
