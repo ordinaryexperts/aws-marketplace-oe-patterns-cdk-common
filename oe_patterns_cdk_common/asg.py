@@ -18,6 +18,7 @@ class Asg(core.Construct):
             default="m5.xlarge",
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
+        instance_type_param.override_logical_id(f"{id}InstanceType")
 
         # iam
         iam_instance_role = aws_iam.CfnRole(
