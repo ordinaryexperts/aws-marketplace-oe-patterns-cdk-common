@@ -1,5 +1,6 @@
 # Unreleased
 
+* EFS construct
 * WIP MySQL Aurora RDS Construct
 * WIP ASG Construct
 
