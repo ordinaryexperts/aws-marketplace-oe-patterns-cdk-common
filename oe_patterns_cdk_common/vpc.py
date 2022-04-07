@@ -251,7 +251,7 @@ class Vpc(core.Construct):
             self,
             "PublicSubnet2NATGateway",
             allocation_id=self.public_subnet2_eip.attr_allocation_id,
-            subnet_id=self.public_subnet1.ref,
+            subnet_id=self.public_subnet2.ref,
             tags=[core.CfnTag(key="Name", value=f"{core.Aws.STACK_NAME}/{id}/PublicSubnet2")]
         )
         self.public_subnet2_nat_gateway.cfn_options.condition=self.not_given_and_nat_gateway_per_subnet_condition
