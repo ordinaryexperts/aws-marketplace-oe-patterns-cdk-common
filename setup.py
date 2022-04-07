@@ -3,7 +3,7 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-CDK_VERSION="1.87.1"
+CDK_VERSION="1.148.0"
 
 setuptools.setup(
     name="oe-patterns-cdk-common",
@@ -17,8 +17,11 @@ setuptools.setup(
     packages=setuptools.find_packages(),
 
     install_requires=[
+        f"aws-cdk.assertions>={CDK_VERSION}"
         f"aws-cdk.core>={CDK_VERSION}",
+        f"aws-cdk.aws-autoscaling>={CDK_VERSION}",
         f"aws-cdk.aws-ec2>={CDK_VERSION}",
+        f"aws-cdk.aws-iam>={CDK_VERSION}"
     ],
 
     classifiers=[

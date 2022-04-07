@@ -1,5 +1,8 @@
 # Unreleased
 
+* WIP MySQL Aurora RDS Construct
+* WIP ASG Construct
+
 # 2.0.2
 
 * Allow newer versions of CDK
