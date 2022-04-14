@@ -11,4 +11,4 @@ python: build
 	docker-compose run -w /code --rm devenv python3
 
 test: build
-	docker-compose run -w /code --rm devenv pytest
+	docker-compose run -w /code --rm devenv pytest -s

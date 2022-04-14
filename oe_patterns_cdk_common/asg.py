@@ -9,7 +9,7 @@ from oe_patterns_cdk_common.vpc import Vpc
 
 class Asg(core.Construct):
 
-    def __init__(self, scope: core.Construct, id: str, vpc: Vpc, user_data_file_path: str = None, user_data_variables: dict = None, **props):
+    def __init__(self, scope: core.Construct, id: str, vpc: Vpc, user_data_contents: str = None, user_data_variables: dict = None, **props):
         super().__init__(scope, id, **props)
 
         self.instance_type_param = core.CfnParameter(
@@ -117,18 +117,13 @@ class Asg(core.Construct):
         )
         self.ec2_instance_profile.override_logical_id(f"{id}InstanceProfile")
 
-        launch_config_user_data = None
         user_data = None
-        if user_data_file_path is not None:
-            with open(user_data_file_path) as f:
-                launch_config_user_data = f.read()
-            if user_data_variables is None:
-                user_data_variables = {}
+        if user_data_contents is not None:
             user_data = (
                 core.Fn.base64(
                     core.Fn.sub(
-                        launch_config_user_data,
-                        **user_data_variables
+                        user_data_contents,
+                        user_data_variables
                     )
                 )
             )
