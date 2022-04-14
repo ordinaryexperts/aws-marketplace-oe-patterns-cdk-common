@@ -1,6 +1,3 @@
-import os
-import yaml
-
 from aws_cdk import (
     aws_autoscaling,
     aws_ec2,
@@ -25,14 +22,6 @@ class Asg(core.Construct):
             user_data_variables: dict = None,
             **props):
         super().__init__(scope, id, **props)
-
-
-
-        current_directory = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        allowed_values = yaml.load(
-            open(os.path.join(current_directory, "allowed_values.yaml")),
-            Loader=yaml.SafeLoader
-        )
 
         default_allowed_instance_types = [
             "c5.large",
