@@ -169,3 +169,22 @@ class Asg(core.Construct):
             )
         )
         core.Tags.of(self.asg).add("Name", "{}/Asg".format(core.Aws.STACK_NAME))
+
+    def metadata_parameter_group(self):
+        return [
+            {
+                "Label": {
+                    "default": "ASG Configuration"
+                },
+                "Parameters": [
+                    self.instance_type_param.logical_id
+                ]
+            }
+        ]
+
+    def metadata_parameter_labels(self):
+        return {
+            self.instance_type_param.logical_id: {
+                "default": "EC2 instance type"
+            }
+        }
