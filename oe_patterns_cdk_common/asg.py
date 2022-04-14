@@ -17,7 +17,8 @@ class Asg(core.Construct):
             scope: core.Construct,
             id: str,
             vpc: Vpc,
-            allowed_values: dict = None,
+            allowed_instance_types: 'list[string]' = [],
+            default_instance_type: str = 'm5.xlarge',
             allow_associate_address: bool = False,
             log_group_arns: 'list[string]' = [],
             user_data_contents: str = None,
@@ -25,17 +26,81 @@ class Asg(core.Construct):
             **props):
         super().__init__(scope, id, **props)
 
+
+
         current_directory = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
         allowed_values = yaml.load(
             open(os.path.join(current_directory, "allowed_values.yaml")),
             Loader=yaml.SafeLoader
         )
 
+        default_allowed_instance_types = [
+            "c5.large",
+            "c5.xlarge",
+            "c5.2xlarge",
+            "c5.4xlarge",
+            "c5.9xlarge",
+            "c5.12xlarge",
+            "c5.18xlarge",
+            "c5.24xlarge",
+            "c5.metal",
+            "c5d.12xlarge",
+            "c5d.18xlarge",
+            "c5d.2xlarge",
+            "c5d.4xlarge",
+            "c5d.9xlarge",
+            "c5d.large",
+            "c5d.xlarge",
+            "m5.large",
+            "m5.xlarge",
+            "m5.2xlarge",
+            "m5.4xlarge",
+            "m5.8xlarge",
+            "m5.12xlarge",
+            "m5.16xlarge",
+            "m5.24xlarge",
+            "m5.metal",
+            "m5d.large",
+            "m5d.xlarge",
+            "m5d.2xlarge",
+            "m5d.4xlarge",
+            "m5d.8xlarge",
+            "m5d.12xlarge",
+            "m5d.16xlarge",
+            "m5d.24xlarge",
+            "m5d.metal",
+            "r5.large",
+            "r5.xlarge",
+            "r5.2xlarge",
+            "r5.4xlarge",
+            "r5.8xlarge",
+            "r5.12xlarge",
+            "r5.16xlarge",
+            "r5.24xlarge",
+            "r5.metal",
+            "r5d.large",
+            "r5d.xlarge",
+            "r5d.2xlarge",
+            "r5d.4xlarge",
+            "r5d.8xlarge",
+            "r5d.12xlarge",
+            "r5d.16xlarge",
+            "r5d.24xlarge",
+            "r5d.metal",
+            "t3.nano",
+            "t3.micro",
+            "t3.small",
+            "t3.medium",
+            "t3.large",
+            "t3.xlarge",
+            "t3.2xlarge"
+        ]
+
         self.instance_type_param = core.CfnParameter(
             self,
             "AsgInstanceType",
-            allowed_values=allowed_values["allowed_instance_types"],
-            default="m5.xlarge",
+            allowed_values=allowed_instance_types if allowed_instance_types else default_allowed_instance_types,
+            default=default_instance_type,
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
