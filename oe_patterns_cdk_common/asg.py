@@ -9,7 +9,16 @@ from oe_patterns_cdk_common.vpc import Vpc
 
 class Asg(core.Construct):
 
-    def __init__(self, scope: core.Construct, id: str, vpc: Vpc, user_data_contents: str = None, user_data_variables: dict = None, **props):
+    def __init__(
+            self,
+            scope: core.Construct,
+            id: str,
+            vpc: Vpc,
+            allow_associate_address: bool = False,
+            log_group_arns: 'list[string]' = [],
+            user_data_contents: str = None,
+            user_data_variables: dict = None,
+            **props):
         super().__init__(scope, id, **props)
 
         self.instance_type_param = core.CfnParameter(
@@ -21,19 +30,40 @@ class Asg(core.Construct):
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
 
         # iam
-        self.iam_instance_role = aws_iam.CfnRole(
-            self,
-            "AsgInstanceRole",
-            assume_role_policy_document=aws_iam.PolicyDocument(
-                statements=[
-                    aws_iam.PolicyStatement(
-                        effect=aws_iam.Effect.ALLOW,
-                        actions=[ "sts:AssumeRole" ],
-                        principals=[ aws_iam.ServicePrincipal("ec2.amazonaws.com") ]
-                    )
-                ]
+        policies = [
+            aws_iam.CfnRole.PolicyProperty(
+                policy_document=aws_iam.PolicyDocument(
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[
+                                "ec2:DescribeVolumes",
+                                "ec2:DescribeTags",
+                                "cloudwatch:GetMetricStatistics",
+                                "cloudwatch:ListMetrics",
+                                "cloudwatch:PutMetricData"
+                            ],
+                            resources=[ "*" ]
+                        )
+                    ]
+                ),
+                policy_name="AllowStreamMetricsToCloudWatch"
             ),
-            policies=[
+            aws_iam.CfnRole.PolicyProperty(
+                policy_document=aws_iam.PolicyDocument(
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[ "autoscaling:Describe*" ],
+                            resources=[ "*" ]
+                        )
+                    ]
+                ),
+                policy_name="AllowDescribeAutoScaling"
+            )
+        ]
+        if log_group_arns:
+            policies.append(
                 aws_iam.CfnRole.PolicyProperty(
                     policy_document=aws_iam.PolicyDocument(
                         statements=[
@@ -44,30 +74,15 @@ class Asg(core.Construct):
                                     "logs:DescribeLogStreams",
                                     "logs:PutLogEvents"
                                 ],
-                                resources=["*"]
+                                resources=log_group_arns
                             )
                         ]
                     ),
                     policy_name="AllowStreamLogsToCloudWatch"
-                ),
-                aws_iam.CfnRole.PolicyProperty(
-                    policy_document=aws_iam.PolicyDocument(
-                        statements=[
-                            aws_iam.PolicyStatement(
-                                effect=aws_iam.Effect.ALLOW,
-                                actions=[
-                                    "ec2:DescribeVolumes",
-                                    "ec2:DescribeTags",
-                                    "cloudwatch:GetMetricStatistics",
-                                    "cloudwatch:ListMetrics",
-                                    "cloudwatch:PutMetricData"
-                                ],
-                                resources=[ "*" ]
-                            )
-                        ]
-                    ),
-                    policy_name="AllowStreamMetricsToCloudWatch"
-                ),
+                )
+            )
+        if allow_associate_address:
+            policies.append(
                 aws_iam.CfnRole.PolicyProperty(
                     policy_document=aws_iam.PolicyDocument(
                         statements=[
@@ -81,20 +96,22 @@ class Asg(core.Construct):
                         ]
                     ),
                     policy_name="AllowAssociateAddress"
-                ),
-                aws_iam.CfnRole.PolicyProperty(
-                    policy_document=aws_iam.PolicyDocument(
-                        statements=[
-                            aws_iam.PolicyStatement(
-                                effect=aws_iam.Effect.ALLOW,
-                                actions=[ "autoscaling:Describe*" ],
-                                resources=[ "*" ]
-                            )
-                        ]
-                    ),
-                    policy_name="AllowDescribeAutoScaling"
-                ),
-            ],
+                )
+            )
+
+        self.iam_instance_role = aws_iam.CfnRole(
+            self,
+            "AsgInstanceRole",
+            assume_role_policy_document=aws_iam.PolicyDocument(
+                statements=[
+                    aws_iam.PolicyStatement(
+                        effect=aws_iam.Effect.ALLOW,
+                        actions=[ "sts:AssumeRole" ],
+                        principals=[ aws_iam.ServicePrincipal("ec2.amazonaws.com") ]
+                    )
+                ]
+            ),
+            policies=policies,
             managed_policy_arns=[
                 "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
             ]
