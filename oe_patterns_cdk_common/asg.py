@@ -1,3 +1,6 @@
+import os
+import yaml
+
 from aws_cdk import (
     aws_autoscaling,
     aws_ec2,
@@ -14,6 +17,7 @@ class Asg(core.Construct):
             scope: core.Construct,
             id: str,
             vpc: Vpc,
+            allowed_values: dict = None,
             allow_associate_address: bool = False,
             log_group_arns: 'list[string]' = [],
             user_data_contents: str = None,
@@ -21,9 +25,16 @@ class Asg(core.Construct):
             **props):
         super().__init__(scope, id, **props)
 
+        current_directory = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        allowed_values = yaml.load(
+            open(os.path.join(current_directory, "allowed_values.yaml")),
+            Loader=yaml.SafeLoader
+        )
+
         self.instance_type_param = core.CfnParameter(
             self,
             "AsgInstanceType",
+            allowed_values=allowed_values["allowed_instance_types"],
             default="m5.xlarge",
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
