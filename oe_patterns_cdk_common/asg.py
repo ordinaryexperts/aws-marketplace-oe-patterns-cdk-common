@@ -230,7 +230,7 @@ class Asg(core.Construct):
             min_size="1",
             vpc_zone_identifier=vpc.public_subnet_ids()
         )
-        self.asg.override_logical_id(id)
+        self.asg.override_logical_id(f"{id}Asg")
         self.asg.cfn_options.creation_policy=core.CfnCreationPolicy(
             resource_signal=core.CfnResourceSignal(
                 count=1,
