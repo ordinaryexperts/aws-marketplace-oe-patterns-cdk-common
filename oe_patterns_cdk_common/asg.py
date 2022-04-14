@@ -73,6 +73,20 @@ class Asg(core.Construct):
                         statements=[
                             aws_iam.PolicyStatement(
                                 effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "ec2:AssociateAddress",
+                                ],
+                                resources=[ "*" ]
+                            )
+                        ]
+                    ),
+                    policy_name="AllowAssociateAddress"
+                ),
+                aws_iam.CfnRole.PolicyProperty(
+                    policy_document=aws_iam.PolicyDocument(
+                        statements=[
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
                                 actions=[ "autoscaling:Describe*" ],
                                 resources=[ "*" ]
                             )
@@ -101,7 +115,7 @@ class Asg(core.Construct):
 	    "AsgInstanceProfile",
             roles=[ self.iam_instance_role.ref ]
         )
-        self.sg.override_logical_id(f"{id}InstanceProfile")
+        self.ec2_instance_profile.override_logical_id(f"{id}InstanceProfile")
 
         launch_config_user_data = None
         user_data = None
@@ -127,7 +141,7 @@ class Asg(core.Construct):
             security_groups=[ self.sg.ref ],
             user_data=user_data
         )
-        self.sg.override_logical_id(f"{id}LaunchConfig")
+        self.ec2_launch_config.override_logical_id(f"{id}LaunchConfig")
 
         # autoscaling
         self.asg = aws_autoscaling.CfnAutoScalingGroup(
