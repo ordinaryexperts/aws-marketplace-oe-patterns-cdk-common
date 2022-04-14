@@ -12,18 +12,18 @@ class Asg(core.Construct):
     def __init__(self, scope: core.Construct, id: str, vpc: Vpc, user_data_file_path: str = None, user_data_variables: dict = None, **props):
         super().__init__(scope, id, **props)
 
-        instance_type_param = core.CfnParameter(
+        self.instance_type_param = core.CfnParameter(
             self,
             "AsgInstanceType",
             default="m5.xlarge",
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
-        instance_type_param.override_logical_id(f"{id}InstanceType")
+        self.instance_type_param.override_logical_id(f"{id}InstanceType")
 
         # iam
-        iam_instance_role = aws_iam.CfnRole(
+        self.iam_instance_role = aws_iam.CfnRole(
             self,
-            f"{id}InstanceRole",
+            "AsgInstanceRole",
             assume_role_policy_document=aws_iam.PolicyDocument(
                 statements=[
                     aws_iam.PolicyStatement(
@@ -85,20 +85,24 @@ class Asg(core.Construct):
                 "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
             ]
         )
+        self.iam_instance_role.override_logical_id(f"{id}InstanceRole")
 
         # ec2
-        sg = aws_ec2.CfnSecurityGroup(
+        self.sg = aws_ec2.CfnSecurityGroup(
             self,
-            f"{id}Sg",
+            "AsgSg",
             group_description=f"{id} security group",
             vpc_id=vpc.id()
         )
+        self.sg.override_logical_id(f"{id}Sg")
 
-        ec2_instance_profile = aws_iam.CfnInstanceProfile(
+        self.ec2_instance_profile = aws_iam.CfnInstanceProfile(
 	    self,
-	    f"{id}InstanceProfile",
-            roles=[ iam_instance_role.ref ]
+	    "AsgInstanceProfile",
+            roles=[ self.iam_instance_role.ref ]
         )
+        self.sg.override_logical_id(f"{id}InstanceProfile")
+
         launch_config_user_data = None
         user_data = None
         if user_data_file_path is not None:
@@ -114,33 +118,35 @@ class Asg(core.Construct):
                     )
                 )
             )
-        ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
+        self.ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
             self,
             f"{id}LaunchConfig",
             image_id=core.Fn.find_in_map("AWSAMIRegionMap", core.Aws.REGION, "AMI"),
-            instance_type=instance_type_param.value_as_string,
-            iam_instance_profile=ec2_instance_profile.ref,
-            security_groups=[ sg.ref ],
+            instance_type=self.instance_type_param.value_as_string,
+            iam_instance_profile=self.ec2_instance_profile.ref,
+            security_groups=[ self.sg.ref ],
             user_data=user_data
         )
+        self.sg.override_logical_id(f"{id}LaunchConfig")
 
         # autoscaling
-        asg = aws_autoscaling.CfnAutoScalingGroup(
+        self.asg = aws_autoscaling.CfnAutoScalingGroup(
             self,
-            f"{id}Asg",
-            launch_configuration_name=ec2_launch_config.ref,
+            "Asg",
+            launch_configuration_name=self.ec2_launch_config.ref,
             desired_capacity="1",
             max_size="1",
             min_size="1",
             vpc_zone_identifier=vpc.public_subnet_ids()
         )
-        asg.cfn_options.creation_policy=core.CfnCreationPolicy(
+        self.asg.override_logical_id(id)
+        self.asg.cfn_options.creation_policy=core.CfnCreationPolicy(
             resource_signal=core.CfnResourceSignal(
                 count=1,
                 timeout="PT15M"
             )
         )
-        asg.cfn_options.update_policy=core.CfnUpdatePolicy(
+        self.asg.cfn_options.update_policy=core.CfnUpdatePolicy(
             auto_scaling_rolling_update=core.CfnAutoScalingRollingUpdate(
                 max_batch_size=1,
                 min_instances_in_service=0,
@@ -148,4 +154,4 @@ class Asg(core.Construct):
                 wait_on_resource_signals=True
             )
         )
-        core.Tags.of(asg).add("Name", "{}/Asg".format(core.Aws.STACK_NAME))
+        core.Tags.of(self.asg).add("Name", "{}/Asg".format(core.Aws.STACK_NAME))
