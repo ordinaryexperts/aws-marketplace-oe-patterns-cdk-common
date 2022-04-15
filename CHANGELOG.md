@@ -2,7 +2,7 @@
 
 * [PublicSubnet2NATGateway should be on subnet2](https://github.com/ordinaryexperts/aws-marketplace-oe-patterns-cdk-common/pull/4)
 * WIP MySQL Aurora RDS Construct
-* WIP ASG Construct
+* ASG Construct
 
 # 2.0.2
 
