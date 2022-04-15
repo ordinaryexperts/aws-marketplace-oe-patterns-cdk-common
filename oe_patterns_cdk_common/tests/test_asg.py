@@ -1,3 +1,4 @@
+import json
 from aws_cdk import (
         core,
         assertions
@@ -5,6 +6,12 @@ from aws_cdk import (
 
 from oe_patterns_cdk_common.vpc import Vpc
 from oe_patterns_cdk_common.asg import Asg
+
+def print_resource(template, type):
+  resource = template.find_resources(type)
+  print('******')
+  print(json.dumps(resource, indent=4, sort_keys=True))
+  print('******')
 
 def test_asg():
   stack = core.Stack()
@@ -17,11 +24,5 @@ def test_asg():
     vpc=vpc
   )
   template = assertions.Template.from_stack(stack)
-  # import json
-  # launch_config = template.find_resources('AWS::AutoScaling::LaunchConfiguration')
-  # parsed = json.loads(str(launch_config).replace("\'", "\""))
-  # print('******')
-  # print(json.dumps(parsed, indent=4, sort_keys=True))
-  # print('******')
-
+  # print_resource(template, 'AWS::AutoScaling::AutoScalingGroup')
   template.resource_count_is("AWS::AutoScaling::AutoScalingGroup", 1)

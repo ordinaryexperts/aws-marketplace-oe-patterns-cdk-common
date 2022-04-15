@@ -14,10 +14,11 @@ class Asg(core.Construct):
             scope: core.Construct,
             id: str,
             vpc: Vpc,
+            allow_associate_address: bool = False,
             allowed_instance_types: 'list[string]' = [],
             default_instance_type: str = 'm5.xlarge',
-            allow_associate_address: bool = False,
             log_group_arns: 'list[string]' = [],
+            singleton: bool = False,
             user_data_contents: str = None,
             user_data_variables: dict = None,
             **props):
@@ -93,6 +94,34 @@ class Asg(core.Construct):
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
+        if not singleton:
+            self.desired_capacity_param = core.CfnParameter(
+                self,
+                "AsgDesiredCapacity",
+                default=1,
+                description="Required: The desired capacity of the Auto Scaling Group.",
+                min_value=0,
+                type="Number"
+            )
+            self.desired_capacity_param.override_logical_id(f"{id}DesiredCapacity")
+            self.max_size_param = core.CfnParameter(
+                self,
+                "AsgMaxSize",
+                default=2,
+                description="Required: The maximum size of the Auto Scaling Group.",
+                min_value=0,
+                type="Number"
+            )
+            self.max_size_param.override_logical_id(f"{id}MaxSize")
+            self.min_size_param = core.CfnParameter(
+                self,
+                "AsgMinSize",
+                default=1,
+                description="Required: The minimum size of the Auto Scaling Group.",
+                min_value=0,
+                type="Number"
+            )
+            self.min_size_param.override_logical_id(f"{id}MinSize")
 
         # iam
         policies = [
@@ -225,9 +254,9 @@ class Asg(core.Construct):
             self,
             "Asg",
             launch_configuration_name=self.ec2_launch_config.ref,
-            desired_capacity="1",
-            max_size="1",
-            min_size="1",
+            desired_capacity="1" if singleton else core.Token.as_string(self.desired_capacity_param.value),
+            max_size="1" if singleton else core.Token.as_string(self.max_size_param.value),
+            min_size="1" if singleton else core.Token.as_string(self.min_size_param.value),
             vpc_zone_identifier=vpc.public_subnet_ids()
         )
         self.asg.override_logical_id(f"{id}Asg")
@@ -237,14 +266,21 @@ class Asg(core.Construct):
                 timeout="PT15M"
             )
         )
-        self.asg.cfn_options.update_policy=core.CfnUpdatePolicy(
-            auto_scaling_rolling_update=core.CfnAutoScalingRollingUpdate(
-                max_batch_size=1,
-                min_instances_in_service=0,
-                pause_time="PT15M",
-                wait_on_resource_signals=True
+        if singleton:
+            self.asg.cfn_options.update_policy=core.CfnUpdatePolicy(
+                auto_scaling_rolling_update=core.CfnAutoScalingRollingUpdate(
+                    max_batch_size=1,
+                    min_instances_in_service=0,
+                    pause_time="PT15M",
+                    wait_on_resource_signals=True
+                )
             )
-        )
+        else:
+            self.asg.cfn_options.update_policy=core.CfnUpdatePolicy(
+                auto_scaling_replacing_update=core.CfnAutoScalingReplacingUpdate(
+                    will_replace=True
+                )
+            )
         core.Tags.of(self.asg).add("Name", "{}/Asg".format(core.Aws.STACK_NAME))
 
     def metadata_parameter_group(self):
@@ -254,7 +290,10 @@ class Asg(core.Construct):
                     "default": "ASG Configuration"
                 },
                 "Parameters": [
-                    self.instance_type_param.logical_id
+                    self.instance_type_param.logical_id,
+                    self.desired_capacity_param.logical_id,
+                    self.max_size_param.logical_id,
+                    self.min_size_param.logical_id
                 ]
             }
         ]
@@ -263,5 +302,14 @@ class Asg(core.Construct):
         return {
             self.instance_type_param.logical_id: {
                 "default": "EC2 instance type"
+            },
+            self.desired_capacity_param.logical_id: {
+                "default": "Auto Scaling Group Desired Capacity"
+            },
+            self.max_size_param.logical_id: {
+                "default": "Auto Scaling Group Maximum Size"
+            },
+            self.min_size_param.logical_id: {
+                "default": "Auto Scaling Group Minimum Size"
             }
         }
