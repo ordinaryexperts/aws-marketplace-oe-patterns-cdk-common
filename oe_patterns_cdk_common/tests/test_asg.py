@@ -15,14 +15,33 @@ def print_resource(template, type):
 
 def test_asg():
   stack = core.Stack()
-  vpc = Vpc(stack, "TestVpc")
+  vpc = Vpc(stack, 'TestVpc')
   asg = Asg(
     stack,
-    "TestAsg",
-    user_data_contents="#!/bin/bash\necho ${MYVAR}\n",
+    'TestAsg',
+    user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
     user_data_variables={ 'MYVAR': 'Ref: MyParam' },
     vpc=vpc
   )
   template = assertions.Template.from_stack(stack)
   # print_resource(template, 'AWS::AutoScaling::AutoScalingGroup')
-  template.resource_count_is("AWS::AutoScaling::AutoScalingGroup", 1)
+  template.has_resource('AWS::AutoScaling::AutoScalingGroup', {
+    'UpdatePolicy': {'AutoScalingReplacingUpdate': assertions.Match.any_value()}
+  })
+
+def test_singleton_asg():
+  stack = core.Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  asg = Asg(
+    stack,
+    'TestAsg',
+    singleton=True,
+    user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
+    user_data_variables={ 'MYVAR': 'Ref: MyParam' },
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print_resource(template, 'AWS::AutoScaling::AutoScalingGroup')
+  template.has_resource('AWS::AutoScaling::AutoScalingGroup', {
+    'UpdatePolicy': {'AutoScalingRollingUpdate': assertions.Match.any_value()}
+  })
