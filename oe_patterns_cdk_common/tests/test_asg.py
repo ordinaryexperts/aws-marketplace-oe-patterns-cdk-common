@@ -1,8 +1,8 @@
 import json
 from aws_cdk import (
-        core,
-        assertions
-    )
+  assertions,
+  Stack
+)
 
 from oe_patterns_cdk_common.vpc import Vpc
 from oe_patterns_cdk_common.asg import Asg
@@ -14,7 +14,7 @@ def print_resource(template, type):
   print('******')
 
 def test_asg():
-  stack = core.Stack()
+  stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
   asg = Asg(
     stack,
@@ -30,7 +30,7 @@ def test_asg():
   })
 
 def test_singleton_asg():
-  stack = core.Stack()
+  stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
   asg = Asg(
     stack,

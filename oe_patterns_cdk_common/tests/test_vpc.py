@@ -1,12 +1,12 @@
 from aws_cdk import (
-        core,
-        assertions
-    )
+  assertions,
+  Stack
+)
 
 from oe_patterns_cdk_common.vpc import Vpc
 
 def test_vpc():
-  stack = core.Stack()
+  stack = Stack()
   vpc = Vpc(stack, "test")
   template = assertions.Template.from_stack(stack)
 

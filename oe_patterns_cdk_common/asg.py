@@ -1,17 +1,27 @@
 from aws_cdk import (
+    Aws,
     aws_autoscaling,
     aws_ec2,
     aws_iam,
-    core
+    CfnAutoScalingReplacingUpdate,
+    CfnAutoScalingRollingUpdate,
+    CfnCreationPolicy,
+    CfnParameter,
+    CfnResourceSignal,
+    CfnUpdatePolicy,
+    Fn,
+    Tags,
+    Token
 )
 
+from constructs import Construct
 from oe_patterns_cdk_common.vpc import Vpc
 
-class Asg(core.Construct):
+class Asg(Construct):
 
     def __init__(
             self,
-            scope: core.Construct,
+            scope: Construct,
             id: str,
             vpc: Vpc,
             allow_associate_address: bool = False,
@@ -86,7 +96,7 @@ class Asg(core.Construct):
             "t3.2xlarge"
         ]
 
-        self.instance_type_param = core.CfnParameter(
+        self.instance_type_param = CfnParameter(
             self,
             "AsgInstanceType",
             allowed_values=allowed_instance_types if allowed_instance_types else default_allowed_instance_types,
@@ -95,7 +105,7 @@ class Asg(core.Construct):
         )
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
         if not singleton:
-            self.desired_capacity_param = core.CfnParameter(
+            self.desired_capacity_param = CfnParameter(
                 self,
                 "AsgDesiredCapacity",
                 default=1,
@@ -104,7 +114,7 @@ class Asg(core.Construct):
                 type="Number"
             )
             self.desired_capacity_param.override_logical_id(f"{id}DesiredCapacity")
-            self.max_size_param = core.CfnParameter(
+            self.max_size_param = CfnParameter(
                 self,
                 "AsgMaxSize",
                 default=2,
@@ -113,7 +123,7 @@ class Asg(core.Construct):
                 type="Number"
             )
             self.max_size_param.override_logical_id(f"{id}MaxSize")
-            self.min_size_param = core.CfnParameter(
+            self.min_size_param = CfnParameter(
                 self,
                 "AsgMinSize",
                 default=1,
@@ -231,8 +241,8 @@ class Asg(core.Construct):
         user_data = None
         if user_data_contents is not None:
             user_data = (
-                core.Fn.base64(
-                    core.Fn.sub(
+                Fn.base64(
+                    Fn.sub(
                         user_data_contents,
                         user_data_variables
                     )
@@ -241,7 +251,7 @@ class Asg(core.Construct):
         self.ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
             self,
             f"{id}LaunchConfig",
-            image_id=core.Fn.find_in_map("AWSAMIRegionMap", core.Aws.REGION, "AMI"),
+            image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
             instance_type=self.instance_type_param.value_as_string,
             iam_instance_profile=self.ec2_instance_profile.ref,
             security_groups=[ self.sg.ref ],
@@ -254,21 +264,21 @@ class Asg(core.Construct):
             self,
             "Asg",
             launch_configuration_name=self.ec2_launch_config.ref,
-            desired_capacity="1" if singleton else core.Token.as_string(self.desired_capacity_param.value),
-            max_size="1" if singleton else core.Token.as_string(self.max_size_param.value),
-            min_size="1" if singleton else core.Token.as_string(self.min_size_param.value),
+            desired_capacity="1" if singleton else Token.as_string(self.desired_capacity_param.value),
+            max_size="1" if singleton else Token.as_string(self.max_size_param.value),
+            min_size="1" if singleton else Token.as_string(self.min_size_param.value),
             vpc_zone_identifier=vpc.public_subnet_ids()
         )
         self.asg.override_logical_id(f"{id}Asg")
-        self.asg.cfn_options.creation_policy=core.CfnCreationPolicy(
-            resource_signal=core.CfnResourceSignal(
+        self.asg.cfn_options.creation_policy=CfnCreationPolicy(
+            resource_signal=CfnResourceSignal(
                 count=1,
                 timeout="PT15M"
             )
         )
         if singleton:
-            self.asg.cfn_options.update_policy=core.CfnUpdatePolicy(
-                auto_scaling_rolling_update=core.CfnAutoScalingRollingUpdate(
+            self.asg.cfn_options.update_policy=CfnUpdatePolicy(
+                auto_scaling_rolling_update=CfnAutoScalingRollingUpdate(
                     max_batch_size=1,
                     min_instances_in_service=0,
                     pause_time="PT15M",
@@ -276,12 +286,12 @@ class Asg(core.Construct):
                 )
             )
         else:
-            self.asg.cfn_options.update_policy=core.CfnUpdatePolicy(
-                auto_scaling_replacing_update=core.CfnAutoScalingReplacingUpdate(
+            self.asg.cfn_options.update_policy=CfnUpdatePolicy(
+                auto_scaling_replacing_update=CfnAutoScalingReplacingUpdate(
                     will_replace=True
                 )
             )
-        core.Tags.of(self.asg).add("Name", "{}/Asg".format(core.Aws.STACK_NAME))
+        Tags.of(self.asg).add("Name", "{}/Asg".format(Aws.STACK_NAME))
 
     def metadata_parameter_group(self):
         return [
