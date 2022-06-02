@@ -1,14 +1,14 @@
 from aws_cdk import (
+  assertions,
   aws_ec2,
-  core,
-  assertions
+  Stack
 )
 
 from oe_patterns_cdk_common.vpc import Vpc
 from oe_patterns_cdk_common.efs import Efs
 
 def test_efs():
-  stack = core.Stack()
+  stack = Stack()
   vpc = Vpc(stack, "TestVpc")
   app_sg = aws_ec2.CfnSecurityGroup(
     stack,
