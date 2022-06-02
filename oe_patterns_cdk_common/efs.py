@@ -61,24 +61,24 @@ class Efs(Construct):
         )
         self.efs_transition_to_primary_storage_class_enabled_condition.override_logical_id(f"{id}TransitionToPrimaryStorageClassEnabledCondition")
         # efs
-        self.efs_sg = aws_ec2.CfnSecurityGroup(
+        self.sg = aws_ec2.CfnSecurityGroup(
             self,
             "EfsSg",
             group_description="{}/Efs".format(Aws.STACK_NAME),
             vpc_id=vpc.id()
         )
-        self.efs_sg.override_logical_id(f"{id}Sg")
-        self.efs_sg_ingress = aws_ec2.CfnSecurityGroupIngress(
+        self.sg.override_logical_id(f"{id}Sg")
+        self.sg_ingress = aws_ec2.CfnSecurityGroupIngress(
             self,
             "EfsSgIngress",
             description="Allow EFS traffic from AppSg to EfsSg",
             from_port=2049,
-            group_id=self.efs_sg.ref,
+            group_id=self.sg.ref,
             ip_protocol="tcp",
             source_security_group_id=app_sg.ref,
             to_port=2049
         )
-        self.efs_sg.override_logical_id(f"{id}SgIngress")
+        self.sg.override_logical_id(f"{id}SgIngress")
         self.efs = aws_efs.CfnFileSystem(
             self,
             "AppEfs",
@@ -117,7 +117,7 @@ class Efs(Construct):
             self,
             "AppEfsMountTarget1",
             file_system_id=self.efs.ref,
-            security_groups=[ self.efs_sg.ref ],
+            security_groups=[ self.sg.ref ],
             subnet_id=vpc.private_subnet1_id()
         )
         self.efs_mount_target1.override_logical_id(f"App{id}MountTarget1")
@@ -125,21 +125,10 @@ class Efs(Construct):
             self,
             "AppEfsMountTarget2",
             file_system_id=self.efs.ref,
-            security_groups=[ self.efs_sg.ref ],
+            security_groups=[ self.sg.ref ],
             subnet_id=vpc.private_subnet2_id()
         )
         self.efs_mount_target2.override_logical_id(f"App{id}MountTarget2")
-                    # {
-                    #     "Label": {
-                    #         "default": "EFS Configuration"
-                    #     },
-                    #     "Parameters": [
-                    #         self.efs_automatic_backups_enabled_param.logical_id,
-                    #         efs_transition_to_ia_param.logical_id,
-                    #         efs_transition_to_primary_storage_class_param.logical_id
-                    #     ]
-                    # },
-
 
     def metadata_parameter_group(self):
         return [
@@ -167,4 +156,3 @@ class Efs(Construct):
                 "default": "EFS Transition to Primary Storage Class"
             }
         }
-
