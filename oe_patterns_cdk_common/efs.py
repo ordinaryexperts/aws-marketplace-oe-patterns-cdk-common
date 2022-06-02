@@ -78,7 +78,7 @@ class Efs(Construct):
             source_security_group_id=app_sg.ref,
             to_port=2049
         )
-        self.sg.override_logical_id(f"{id}SgIngress")
+        self.sg_ingress.override_logical_id(f"{id}SgIngress")
         self.efs = aws_efs.CfnFileSystem(
             self,
             "AppEfs",
