@@ -1,6 +1,7 @@
 # Unreleased
 
 * Upgrading to CDK 2.20.0
+* EFS construct
 
 # 2.1.0
 
