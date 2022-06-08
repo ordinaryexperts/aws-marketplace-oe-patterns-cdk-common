@@ -37,14 +37,14 @@ class Alb(Construct):
             description="Optional: Specify the ARN of a ACM Certificate to configure HTTPS."
         )
         self.certificate_arn_param.override_logical_id(f"{id}CertificateArn")
-        self.alb_ingress_cidr_param = CfnParameter(
+        self.ingress_cidr_param = CfnParameter(
             self,
             "AlbIngressCidr",
             allowed_pattern=r"^((\d{1,3})\.){3}\d{1,3}/\d{1,2}$",
             default="0.0.0.0/0",
             description="Optional: VPC IPv4 CIDR block to restrict public access to ALB (default is 0.0.0.0/0 which is open to internet)."
         )
-        self.alb_ingress_cidr_param.override_logical_id(f"{id}IngressCidr")
+        self.ingress_cidr_param.override_logical_id(f"{id}IngressCidr")
 
         self.sg = aws_ec2.CfnSecurityGroup(
             self,
@@ -54,26 +54,28 @@ class Alb(Construct):
         )
         self.sg.override_logical_id(f"{id}Sg")
         Tags.of(self.sg).add("Name", "{}/AlbSg".format(Aws.STACK_NAME))
-        self.alb_http_ingress = aws_ec2.CfnSecurityGroupIngress(
+        self.http_ingress = aws_ec2.CfnSecurityGroupIngress(
             self,
             "AlbSgHttpIngress",
-            cidr_ip=self.alb_ingress_cidr_param.value_as_string,
+            cidr_ip=self.ingress_cidr_param.value_as_string,
             description="Allow HTTP traffic to ALB from anyone",
             from_port=80,
             group_id=self.sg.ref,
             ip_protocol="tcp",
             to_port=80
         )
-        self.alb_https_ingress = aws_ec2.CfnSecurityGroupIngress(
+        self.http_ingress.override_logical_id(f"{id}SgHttpIngress")
+        self.https_ingress = aws_ec2.CfnSecurityGroupIngress(
             self,
             "AlbSgHttpsIngress",
-            cidr_ip=self.alb_ingress_cidr_param.value_as_string,
+            cidr_ip=self.ingress_cidr_param.value_as_string,
             description="Allow HTTPS traffic to ALB from anyone",
             from_port=443,
             group_id=self.sg.ref,
             ip_protocol="tcp",
             to_port=443
         )
+        self.https_ingress.override_logical_id(f"{id}SgHttpsIngress")
         self.sg_https_ingress = aws_ec2.CfnSecurityGroupIngress(
             self,
             "AppSgHttpsIngress",
@@ -84,6 +86,7 @@ class Alb(Construct):
             source_security_group_id=self.sg.ref,
             to_port=443
         )
+        self.sg_https_ingress.override_logical_id(f"{id}SgAlbIngress")
 
         self.alb = aws_elasticloadbalancingv2.CfnLoadBalancer(
             self,
@@ -93,6 +96,7 @@ class Alb(Construct):
             subnets=vpc.public_subnet_ids(),
             type="application"
         )
+        self.alb.override_logical_id(id)
         self.http_listener = aws_elasticloadbalancingv2.CfnListener(
             self,
             "HttpListener",
@@ -114,6 +118,7 @@ class Alb(Construct):
             port=80,
             protocol="HTTP"
         )
+        self.http_listener.override_logical_id(f"{id}HttpListener")
         # CDK generates ActionProperty with lowercase properties - need to override due to following error:
         # Stack operations on resource HttpListener would fail starting from 03/01/2021 as the template has invalid properties.
         # Please refer to the resource documentation to fix the template.
@@ -154,6 +159,7 @@ class Alb(Construct):
             target_type="instance",
             vpc_id=vpc.id()
         )
+        self.https_target_group.override_logical_id(f"{id}HttpsTargetGroup")
         # TODO moved to calling stack?
         # self.asg.asg.target_group_arns = [ self.https_target_group.ref ]
         self.https_listener = aws_elasticloadbalancingv2.CfnListener(
@@ -174,6 +180,7 @@ class Alb(Construct):
             port=443,
             protocol="HTTPS"
         )
+        self.https_listener.override_logical_id(f"{id}HttpsListener")
 
     def metadata_parameter_group(self):
         return [
@@ -183,7 +190,7 @@ class Alb(Construct):
                 },
                 "Parameters": [
                     self.certificate_arn_param.logical_id,
-                    self.alb_ingress_cidr_param.logical_id
+                    self.ingress_cidr_param.logical_id
                 ],
             }
         ]
@@ -193,7 +200,7 @@ class Alb(Construct):
             self.certificate_arn_param.logical_id: {
                 "default": "ALB ACM Certificate ARN"
             },
-            self.alb_ingress_cidr_param.logical_id: {
+            self.ingress_cidr_param.logical_id: {
                 "default": "ALB Ingress CIDR"
             }
         }
