@@ -269,7 +269,7 @@ class Asg(Construct):
             min_size="1" if singleton else Token.as_string(self.min_size_param.value),
             vpc_zone_identifier=vpc.public_subnet_ids()
         )
-        self.asg.override_logical_id(f"{id}Asg")
+        self.asg.override_logical_id(id)
         self.asg.cfn_options.creation_policy=CfnCreationPolicy(
             resource_signal=CfnResourceSignal(
                 count=1,
