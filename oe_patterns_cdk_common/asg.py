@@ -29,6 +29,7 @@ class Asg(Construct):
             default_instance_type: str = 'm5.xlarge',
             log_group_arns: 'list[string]' = [],
             singleton: bool = False,
+            use_public_subnets: bool = False,
             user_data_contents: str = None,
             user_data_variables: dict = None,
             **props):
@@ -267,7 +268,7 @@ class Asg(Construct):
             desired_capacity="1" if singleton else Token.as_string(self.desired_capacity_param.value),
             max_size="1" if singleton else Token.as_string(self.max_size_param.value),
             min_size="1" if singleton else Token.as_string(self.min_size_param.value),
-            vpc_zone_identifier=vpc.public_subnet_ids()
+            vpc_zone_identifier=vpc.public_subnet_ids() if use_public_subnets else vpc.private_subnet_ids()
         )
         self.asg.override_logical_id(id)
         self.asg.cfn_options.creation_policy=CfnCreationPolicy(
