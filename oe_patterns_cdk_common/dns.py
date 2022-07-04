@@ -31,6 +31,7 @@ class Dns(Construct):
             default="",
             description="Optional: Route 53 Hosted Zone name in which a DNS record will be created by this template. Must already exist and be the domain part of the Hostname parameter, without trailing dot. E.G. 'internal.mycompany.com'"
         )
+        self.route_53_hosted_zone_name_param.override_logical_id(f"{id}Route53HostedZoneName")
         self.hostname_param = CfnParameter(
             self,
             "Hostname",
@@ -39,6 +40,7 @@ class Dns(Construct):
             default="",
             description="Optional: The hostname to access the service. E.G. 'app.internal.mycompany.com'"
         )
+        self.hostname_param.override_logical_id(f"{id}Hostname")
         self.route_53_hosted_zone_name_exists_condition = CfnCondition(
             self,
             "Route53HostedZoneNameExists",
@@ -49,6 +51,7 @@ class Dns(Construct):
             "HostnameExists",
             expression=Fn.condition_not(Fn.condition_equals(self.hostname_param.value, ""))
         )
+        self.hostname_exists_condition.override_logical_id(f"{id}HostnameExists")
         # route 53
         self.record_set = aws_route53.CfnRecordSet(
             self,
@@ -58,6 +61,7 @@ class Dns(Construct):
             resource_records=[ alb.alb.attr_dns_name ],
             type="CNAME"
         )
+        self.record_set.override_logical_id(f"{id}RecordSet")
         # https://github.com/aws/aws-cdk/issues/8431
         self.record_set.add_property_override("TTL", 60)
         self.record_set.cfn_options.condition = self.route_53_hosted_zone_name_exists_condition
@@ -72,6 +76,7 @@ class Dns(Construct):
                 "https://{}".format(alb.alb.attr_dns_name)
             ))
         )
+        self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
 
     def metadata_parameter_group(self):
         return [
