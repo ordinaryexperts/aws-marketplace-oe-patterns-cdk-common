@@ -3,9 +3,11 @@ from aws_cdk import (
     aws_autoscaling,
     aws_ec2,
     aws_iam,
+    aws_logs,
     CfnAutoScalingReplacingUpdate,
     CfnAutoScalingRollingUpdate,
     CfnCreationPolicy,
+    CfnDeletionPolicy,
     CfnParameter,
     CfnResourceSignal,
     CfnUpdatePolicy,
@@ -19,6 +21,8 @@ from oe_patterns_cdk_common.vpc import Vpc
 
 class Asg(Construct):
 
+    TWO_YEARS_IN_DAYS=731
+
     def __init__(
             self,
             scope: Construct,
@@ -27,7 +31,6 @@ class Asg(Construct):
             allow_associate_address: bool = False,
             allowed_instance_types: 'list[string]' = [],
             default_instance_type: str = 'm5.xlarge',
-            log_group_arns: 'list[string]' = [],
             singleton: bool = False,
             use_public_subnets: bool = False,
             user_data_contents: str = None,
@@ -134,6 +137,24 @@ class Asg(Construct):
             )
             self.min_size_param.override_logical_id(f"{id}MinSize")
 
+        # cloudwatch
+        self.app_log_group = aws_logs.CfnLogGroup(
+            self,
+            "AppLogGroup",
+            retention_in_days=Asg.TWO_YEARS_IN_DAYS
+        )
+        self.app_log_group.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
+        self.app_log_group.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
+        self.app_log_group.override_logical_id(f"{id}AppLogGroup")
+        self.system_log_group = aws_logs.CfnLogGroup(
+            self,
+            "SystemLogGroup",
+            retention_in_days=Asg.TWO_YEARS_IN_DAYS
+        )
+        self.system_log_group.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
+        self.system_log_group.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
+        self.system_log_group.override_logical_id(f"{id}SystemLogGroup")
+
         # iam
         policies = [
             aws_iam.CfnRole.PolicyProperty(
@@ -167,25 +188,27 @@ class Asg(Construct):
                 policy_name="AllowDescribeAutoScaling"
             )
         ]
-        if log_group_arns:
-            policies.append(
-                aws_iam.CfnRole.PolicyProperty(
-                    policy_document=aws_iam.PolicyDocument(
-                        statements=[
-                            aws_iam.PolicyStatement(
-                                effect=aws_iam.Effect.ALLOW,
-                                actions=[
-                                    "logs:CreateLogStream",
-                                    "logs:DescribeLogStreams",
-                                    "logs:PutLogEvents"
-                                ],
-                                resources=log_group_arns
-                            )
-                        ]
-                    ),
-                    policy_name="AllowStreamLogsToCloudWatch"
-                )
+        policies.append(
+            aws_iam.CfnRole.PolicyProperty(
+                policy_document=aws_iam.PolicyDocument(
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[
+                                "logs:CreateLogStream",
+                                "logs:DescribeLogStreams",
+                                "logs:PutLogEvents"
+                            ],
+                            resources=[
+                                self.system_log_group.attr_arn,
+                                self.app_log_group.attr_arn
+                            ]
+                        )
+                    ]
+                ),
+                policy_name="AllowStreamLogsToCloudWatch"
             )
+        )
         if allow_associate_address:
             policies.append(
                 aws_iam.CfnRole.PolicyProperty(
