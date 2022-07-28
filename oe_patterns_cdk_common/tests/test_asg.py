@@ -45,3 +45,18 @@ def test_singleton_asg():
   template.has_resource('AWS::AutoScaling::AutoScalingGroup', {
     'UpdatePolicy': {'AutoScalingRollingUpdate': assertions.Match.any_value()}
   })
+
+def test_data_asg():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  asg = Asg(
+    stack,
+    'TestAsg',
+    data_volume_size=10,
+    user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
+    user_data_variables={ 'MYVAR': 'Ref: MyParam' },
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  template.resource_count_is("AWS::EC2::Volume", 1)
