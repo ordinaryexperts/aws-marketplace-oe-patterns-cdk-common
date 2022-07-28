@@ -306,10 +306,12 @@ class Asg(Construct):
                 self,
                 "AsgDataVolume",
                 availability_zone=Fn.select(0, Fn.get_azs()),
-                snapshot_id=Fn.condition_if(
-                    self.data_volume_snapshot_condition.logical_id,
-                    self.data_volume_snapshot_param.value_as_string,
-                    Aws.NO_VALUE
+                snapshot_id=Token.as_string(
+                    Fn.condition_if(
+                        self.data_volume_snapshot_condition.logical_id,
+                        self.data_volume_snapshot_param.value_as_string,
+                        Aws.NO_VALUE
+                    )
                 ),
                 encrypted=True,
                 size=data_volume_size
