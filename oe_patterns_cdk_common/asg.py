@@ -298,7 +298,7 @@ class Asg(Construct):
             self.data_volume_snapshot_condition = CfnCondition(
                 self,
                 "AsgDataVolumeSnapshotCondition",
-                expression=Fn.condition_not(Fn.condition_equals(self.efs_transition_to_ia_param.value, ""))
+                expression=Fn.condition_not(Fn.condition_equals(self.data_volume_snapshot_param.value, ""))
             )
             self.data_volume_snapshot_condition.override_logical_id(f"{id}DataVolumeSnapshotCondition")
 
