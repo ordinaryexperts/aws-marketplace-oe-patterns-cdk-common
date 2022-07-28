@@ -289,7 +289,7 @@ class Asg(Construct):
             self.data_volume = aws_ec2.CfnVolume(
                 self,
                 "AsgDataVolume",
-                availability_zone=vpc.public_subnet1.attr_availability_zone if use_public_subnets else vpc.private_subnet1.attr_availability_zone,
+                availability_zone=Fn.select(0, Fn.get_azs())
                 encrypted=True,
                 size=data_volume_size
             )
