@@ -30,6 +30,7 @@ class Asg(Construct):
             vpc: Vpc,
             allow_associate_address: bool = False,
             allowed_instance_types: 'list[string]' = [],
+            data_volume_size: int = 0,
             default_instance_type: str = 'm5.xlarge',
             singleton: bool = False,
             use_public_subnets: bool = False,
@@ -282,6 +283,17 @@ class Asg(Construct):
             user_data=user_data
         )
         self.ec2_launch_config.override_logical_id(f"{id}LaunchConfig")
+
+        # data volume
+        if data_volume_size > 0:
+            self.data_volume = aws_ec2.CfnVolume(
+                self,
+                "AsgDataVolume",
+                availability_zone=Fn.select(0, Fn.get_azs()),
+                encrypted=True,
+                size=data_volume_size
+            )
+            self.data_volume.override_logical_id(f"{id}DataVolume")
 
         # autoscaling
         self.asg = aws_autoscaling.CfnAutoScalingGroup(
