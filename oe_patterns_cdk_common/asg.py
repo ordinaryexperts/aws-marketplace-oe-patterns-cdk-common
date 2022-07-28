@@ -6,6 +6,7 @@ from aws_cdk import (
     aws_logs,
     CfnAutoScalingReplacingUpdate,
     CfnAutoScalingRollingUpdate,
+    CfnCondition,
     CfnCreationPolicy,
     CfnDeletionPolicy,
     CfnParameter,
@@ -286,10 +287,30 @@ class Asg(Construct):
 
         # data volume
         if data_volume_size > 0:
+            self.data_volume_snapshot_param = CfnParameter(
+                self,
+                "AsgDataVolumeSnapshot",
+                default="",
+                description="Optional: An EBS snapshot to restore as a starting point for the data volume.",
+            )
+            self.data_volume_snapshot_param.override_logical_id(f"{id}DataVolumeSnapshot")
+
+            self.data_volume_snapshot_condition = CfnCondition(
+                self,
+                "AsgDataVolumeSnapshotCondition",
+                expression=Fn.condition_not(Fn.condition_equals(self.efs_transition_to_ia_param.value, ""))
+            )
+            self.data_volume_snapshot_condition.override_logical_id(f"{id}DataVolumeSnapshotCondition")
+
             self.data_volume = aws_ec2.CfnVolume(
                 self,
                 "AsgDataVolume",
                 availability_zone=Fn.select(0, Fn.get_azs()),
+                snapshot_id=Fn.condition_if(
+                    self.data_volume_snapshot_condition.logical_id,
+                    self.data_volume_snapshot_param.value_as_string,
+                    Aws.NO_VALUE
+                ),
                 encrypted=True,
                 size=data_volume_size
             )

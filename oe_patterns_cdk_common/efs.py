@@ -1,8 +1,6 @@
 from aws_cdk import (
-    aws_autoscaling,
     aws_ec2,
     aws_efs,
-    aws_iam,
     Aws,
     CfnCondition,
     CfnParameter,

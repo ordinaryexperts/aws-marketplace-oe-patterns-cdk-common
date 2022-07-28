@@ -4,7 +4,6 @@ from aws_cdk import (
     CfnOutput,
     CfnParameter,
     Fn,
-    Tags,
     Token
 )
 
