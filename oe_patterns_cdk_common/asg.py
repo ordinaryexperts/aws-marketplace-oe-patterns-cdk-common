@@ -289,11 +289,16 @@ class Asg(Construct):
             self.data_volume = aws_ec2.CfnVolume(
                 self,
                 "AsgDataVolume",
-                availability_zone=Fn.select(0, Fn.get_azs()),
+                availability_zone=vpc.public_subnet1.attr_availability_zone if use_public_subnets else vpc.private_subnet1.attr_availability_zone,
                 encrypted=True,
                 size=data_volume_size
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
+
+        if singleton:
+            subnets = [vpc.public_subnet1_id()] if use_public_subnets else [vpc.private_subnet1_id()]
+        else:
+            subnets = vpc.public_subnet_ids() if use_public_subnets else vpc.private_subnet_ids()
 
         # autoscaling
         self.asg = aws_autoscaling.CfnAutoScalingGroup(
@@ -303,7 +308,7 @@ class Asg(Construct):
             desired_capacity="1" if singleton else Token.as_string(self.desired_capacity_param.value),
             max_size="1" if singleton else Token.as_string(self.max_size_param.value),
             min_size="1" if singleton else Token.as_string(self.min_size_param.value),
-            vpc_zone_identifier=vpc.public_subnet_ids() if use_public_subnets else vpc.private_subnet_ids()
+            vpc_zone_identifier=subnets
         )
         self.asg.override_logical_id(id)
         self.asg.cfn_options.creation_policy=CfnCreationPolicy(
