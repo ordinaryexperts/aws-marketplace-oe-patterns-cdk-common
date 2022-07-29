@@ -1,8 +1,11 @@
+import os
+
 from aws_cdk import (
     Aws,
     aws_autoscaling,
     aws_ec2,
     aws_iam,
+    aws_lambda,
     aws_logs,
     CfnAutoScalingReplacingUpdate,
     CfnAutoScalingRollingUpdate,
@@ -287,6 +290,24 @@ class Asg(Construct):
 
         # data volume
         if data_volume_size > 0:
+            # lambda to find az from subnet
+            lambda_code_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "lambdas",
+                "subnet_to_az.py"
+            )
+            with open(lambda_code_path) as f:
+                lambda_code = f.read()
+            self.subnet_to_az_lambda = aws_lambda.Function(
+                self,
+                "AsgSubnetToAzLambda",
+                runtime=aws_lambda.Runtime.PYTHON_3_8,
+                handler="index.handler",
+                code=aws_lambda.Code.from_inline(lambda_code)
+            )
+            self.subnet_to_az_lambda.node.default_child.override_logical_id(f"{id}SubnetToAzLambda")
+            self.subnet_to_az_lambda.role.node.default_child.override_logical_id(f"{id}SubnetToAzLambdaRole")
+
             self.data_volume_snapshot_param = CfnParameter(
                 self,
                 "AsgDataVolumeSnapshot",
