@@ -4,5 +4,5 @@ import cfnresponse
 def handler(event, context):
     print(event)
     responseData = {}
-    responseData['az'] = 'us-east-1a'
+    responseData['az'] = 'us-east-1b'
     cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
