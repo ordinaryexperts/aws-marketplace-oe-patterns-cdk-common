@@ -332,7 +332,7 @@ class Asg(Construct):
             self.data_volume = aws_ec2.CfnVolume(
                 self,
                 "AsgDataVolume",
-                availability_zone=Fn.select(0, Fn.get_azs()),
+                availability_zone=Token.as_string(self.subnet_to_az_custom_resource.get_att('az')),
                 snapshot_id=Token.as_string(
                     Fn.condition_if(
                         self.data_volume_snapshot_condition.logical_id,
