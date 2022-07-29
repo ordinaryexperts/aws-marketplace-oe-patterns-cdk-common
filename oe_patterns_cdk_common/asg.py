@@ -3,6 +3,7 @@ import os
 from aws_cdk import (
     Aws,
     aws_autoscaling,
+    aws_cloudformation,
     aws_ec2,
     aws_iam,
     aws_lambda,
@@ -306,6 +307,11 @@ class Asg(Construct):
             )
             self.subnet_to_az_lambda.node.default_child.override_logical_id(f"{id}SubnetToAzLambda")
             self.subnet_to_az_lambda.role.node.default_child.override_logical_id(f"{id}SubnetToAzLambdaRole")
+            self.subnet_to_az_custom_resource = aws_cloudformation.CfnCustomResource(
+                self,
+                "SubnetToAzCustomResource",
+                service_token=self.subnet_to_az_lambda.function_arn
+            )
 
             self.data_volume_snapshot_param = CfnParameter(
                 self,
