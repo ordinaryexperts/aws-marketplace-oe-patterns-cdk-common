@@ -16,6 +16,7 @@ from aws_cdk import (
     CfnParameter,
     CfnResourceSignal,
     CfnUpdatePolicy,
+    CustomResource,
     Fn,
     Tags,
     Token
@@ -307,12 +308,16 @@ class Asg(Construct):
             )
             self.subnet_to_az_lambda.node.default_child.override_logical_id(f"{id}SubnetToAzLambda")
             self.subnet_to_az_lambda.role.node.default_child.override_logical_id(f"{id}SubnetToAzLambdaRole")
-            self.subnet_to_az_custom_resource = aws_cloudformation.CfnCustomResource(
+            self.subnet_to_az_custom_resource = CustomResource(
                 self,
                 "AsgSubnetToAzCustomResource",
-                service_token=self.subnet_to_az_lambda.function_arn
+                service_token=self.subnet_to_az_lambda.function_arn,
+                properties={
+                    "aws_region": Aws.REGION,
+                    "subnet_id": vpc.public_subnet1_id() if use_public_subnets else vpc.private_subnet1_id()
+                }
             )
-            self.subnet_to_az_custom_resource.override_logical_id(f"{id}SubnetToAzCustomResource")
+            self.subnet_to_az_custom_resource.node.default_child.override_logical_id(f"{id}SubnetToAzCustomResource")
 
             self.data_volume_snapshot_param = CfnParameter(
                 self,
