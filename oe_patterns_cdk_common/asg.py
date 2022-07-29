@@ -293,8 +293,7 @@ class Asg(Construct):
             # lambda to find az from subnet
             lambda_code_path = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
-                "lambdas",
-                "subnet_to_az.py"
+                "lambda_subnet_to_az.py"
             )
             with open(lambda_code_path) as f:
                 lambda_code = f.read()
