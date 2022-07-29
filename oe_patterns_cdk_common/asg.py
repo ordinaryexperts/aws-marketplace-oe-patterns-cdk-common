@@ -308,6 +308,18 @@ class Asg(Construct):
             )
             self.subnet_to_az_lambda.node.default_child.override_logical_id(f"{id}SubnetToAzLambda")
             self.subnet_to_az_lambda.role.node.default_child.override_logical_id(f"{id}SubnetToAzLambdaRole")
+            self.subnet_to_az_lambda.role.attach_inline_policy(
+                aws_iam.Policy(
+                    self,
+                    "describe-subnets-policy",
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            actions=["ec2:DescribeSubnets"],
+                            resources=["*"]
+                        )
+                    ]
+                )
+            )
             self.subnet_to_az_custom_resource = CustomResource(
                 self,
                 "AsgSubnetToAzCustomResource",
