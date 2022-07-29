@@ -10,5 +10,6 @@ def handler(event, context):
         responseData = {'az': response['Subnets'][0]['AvailabilityZone']}
         print(responseData)
         cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
-    except Exception:
+    except Exception as e:
         cfnresponse.send(event, context, cfnresponse.FAILED)
+        raise e
