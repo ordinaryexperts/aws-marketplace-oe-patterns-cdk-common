@@ -362,6 +362,23 @@ class Asg(Construct):
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
 
+            policies.append(
+                aws_iam.CfnRole.PolicyProperty(
+                    policy_document=aws_iam.PolicyDocument(
+                        statements=[
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "ec2:AttachVolume"
+                                ],
+                                resources=["*"]
+                            )
+                        ]
+                    ),
+                    policy_name="AllowAttachVolume"
+                )
+            )
+
         if singleton:
             subnets = [vpc.public_subnet1_id()] if use_public_subnets else [vpc.private_subnet1_id()]
         else:
