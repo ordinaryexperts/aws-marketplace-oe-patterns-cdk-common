@@ -233,6 +233,23 @@ class Asg(Construct):
                     policy_name="AllowAssociateAddress"
                 )
             )
+        if data_volume_size > 0:
+            policies.append(
+                aws_iam.CfnRole.PolicyProperty(
+                    policy_document=aws_iam.PolicyDocument(
+                        statements=[
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "ec2:AttachVolume"
+                                ],
+                                resources=["*"]
+                            )
+                        ]
+                    ),
+                    policy_name="AllowAttachVolume"
+                )
+            )
 
         self.iam_instance_role = aws_iam.CfnRole(
             self,
@@ -362,22 +379,6 @@ class Asg(Construct):
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
 
-            policies.append(
-                aws_iam.CfnRole.PolicyProperty(
-                    policy_document=aws_iam.PolicyDocument(
-                        statements=[
-                            aws_iam.PolicyStatement(
-                                effect=aws_iam.Effect.ALLOW,
-                                actions=[
-                                    "ec2:AttachVolume"
-                                ],
-                                resources=["*"]
-                            )
-                        ]
-                    ),
-                    policy_name="AllowAttachVolume"
-                )
-            )
 
         if singleton:
             subnets = [vpc.public_subnet1_id()] if use_public_subnets else [vpc.private_subnet1_id()]
