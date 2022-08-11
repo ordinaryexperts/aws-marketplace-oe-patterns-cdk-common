@@ -293,6 +293,18 @@ class Asg(Construct):
         self.ec2_instance_profile.override_logical_id(f"{id}InstanceProfile")
 
         user_data = None
+        if data_volume_size > 0:
+            script_code_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "script_attach_ebs.sh"
+            )
+            with open(script_code_path) as f:
+                script_code = f.read()
+            if user_data_contents is None:
+                user_data_contents = script_code
+            else:
+                user_data_contents = script_code + user_data_contents
+
         if user_data_contents is not None:
             user_data = (
                 Fn.base64(
