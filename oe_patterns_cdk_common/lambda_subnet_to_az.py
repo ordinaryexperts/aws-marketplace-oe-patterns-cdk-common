@@ -1,5 +1,4 @@
 import boto3
-import json
 import cfnresponse
 def handler(event, context):
     try:

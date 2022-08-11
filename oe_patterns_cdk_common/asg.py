@@ -3,7 +3,6 @@ import os
 from aws_cdk import (
     Aws,
     aws_autoscaling,
-    aws_cloudformation,
     aws_ec2,
     aws_iam,
     aws_lambda,
@@ -115,6 +114,13 @@ class Asg(Construct):
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
+        self.reprovision_string_param = CfnParameter(
+            self,
+            "AsgReprovisionString",
+            default="",
+            description="Optional: Changes to this parameter will force instance reprovision on the next CloudFormation update."
+        )
+        self.reprovision_string_param.override_logical_id(f"{id}ReprovisionString")
         if not singleton:
             self.desired_capacity_param = CfnParameter(
                 self,
@@ -429,7 +435,8 @@ class Asg(Construct):
                     self.instance_type_param.logical_id,
                     self.desired_capacity_param.logical_id,
                     self.max_size_param.logical_id,
-                    self.min_size_param.logical_id
+                    self.min_size_param.logical_id,
+                    self.reprovision_string_param.logical_id
                 ]
             }
         ]
@@ -447,5 +454,8 @@ class Asg(Construct):
             },
             self.min_size_param.logical_id: {
                 "default": "Auto Scaling Group Minimum Size"
+            },
+            self.reprovision_string_param.logical_id: {
+                "default": "Auto Scaling Group Reprovision String"
             }
         }
