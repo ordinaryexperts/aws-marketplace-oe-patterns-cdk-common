@@ -72,17 +72,17 @@ class Alb(Construct):
             to_port=443
         )
         self.https_ingress.override_logical_id(f"{id}SgHttpsIngress")
-        self.sg_https_ingress = aws_ec2.CfnSecurityGroupIngress(
+        self.sg_asg_ingress = aws_ec2.CfnSecurityGroupIngress(
             self,
-            "AppSgHttpsIngress",
-            description="Allow HTTPS traffic from Alb to App",
+            "SgAsgIngress",
+            description="Allow traffic from Alb to App",
             from_port=443,
             group_id=asg.sg.ref,
             ip_protocol="tcp",
             source_security_group_id=self.sg.ref,
-            to_port=443
+            to_port=443 if target_group_https else 80
         )
-        self.sg_https_ingress.override_logical_id(f"{id}SgAlbIngress")
+        self.sg_asg_ingress.override_logical_id(f"{id}SgAsgIngress")
 
         self.alb = aws_elasticloadbalancingv2.CfnLoadBalancer(
             self,
