@@ -18,6 +18,7 @@ class Alb(Construct):
             id: str,
             vpc: Vpc,
             asg: Asg,
+            target_group_https: bool = True,
             **props):
         super().__init__(scope, id, **props)
 
@@ -138,13 +139,13 @@ class Alb(Construct):
             ]
         )
 
-        self.https_target_group = aws_elasticloadbalancingv2.CfnTargetGroup(
+        self.target_group = aws_elasticloadbalancingv2.CfnTargetGroup(
             self,
-            "AsgHttpsTargetGroup",
+            "AsgTargetGroup",
             health_check_enabled=None,
             health_check_interval_seconds=None,
-            port=443,
-            protocol="HTTPS",
+            port=443 if target_group_https else 80,
+            protocol="HTTPS" if target_group_https else "HTTP",
             target_group_attributes=[
                 aws_elasticloadbalancingv2.CfnTargetGroup.TargetGroupAttributeProperty(
                     key='deregistration_delay.timeout_seconds',
@@ -154,9 +155,9 @@ class Alb(Construct):
             target_type="instance",
             vpc_id=vpc.id()
         )
-        self.https_target_group.override_logical_id(f"{id}HttpsTargetGroup")
+        self.target_group.override_logical_id(f"{id}TargetGroup")
         # TODO moved to calling stack?
-        # self.asg.asg.target_group_arns = [ self.https_target_group.ref ]
+        # self.asg.asg.target_group_arns = [ self.target_group.ref ]
         self.https_listener = aws_elasticloadbalancingv2.CfnListener(
             self,
             "HttpsListener",
@@ -167,7 +168,7 @@ class Alb(Construct):
             ],
             default_actions=[
                 aws_elasticloadbalancingv2.CfnListener.ActionProperty(
-                    target_group_arn=self.https_target_group.ref,
+                    target_group_arn=self.target_group.ref,
                     type="forward"
                 )
             ],
