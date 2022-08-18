@@ -76,7 +76,7 @@ class Alb(Construct):
             self,
             "SgAsgIngress",
             description="Allow traffic from Alb to App",
-            from_port=443,
+            from_port=443 if target_group_https else 80,
             group_id=asg.sg.ref,
             ip_protocol="tcp",
             source_security_group_id=self.sg.ref,
