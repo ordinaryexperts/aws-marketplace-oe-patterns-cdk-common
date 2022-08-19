@@ -379,15 +379,19 @@ class Asg(Construct):
             user_data_variables['EbsId'] = self.data_volume.ref
             user_data_variables['AsgId'] = id
 
-        if user_data_contents is not None:
-            user_data = (
-                Fn.base64(
-                    Fn.sub(
-                        user_data_contents,
-                        user_data_variables
-                    )
+        reprovision_snippet = "# reprovision string: ${AsgReprovisionString}"
+        if user_data_contents is None:
+            user_data_contents = reprovision_snippet
+        else:
+            user_data_contents = user_data_contents + "\n" + reprovision_snippet
+        user_data = (
+            Fn.base64(
+                Fn.sub(
+                    user_data_contents,
+                    user_data_variables
                 )
             )
+        )
         self.ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
             self,
             f"{id}LaunchConfig",
