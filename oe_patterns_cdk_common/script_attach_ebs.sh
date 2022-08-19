@@ -1,3 +1,4 @@
+#!/bin/bash
 function error_exit
 {
   cfn-signal --exit-code 1 --stack ${AWS::StackName} --resource ${AsgId} --region ${AWS::Region}

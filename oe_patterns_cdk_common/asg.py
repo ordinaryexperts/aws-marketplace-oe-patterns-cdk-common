@@ -292,39 +292,6 @@ class Asg(Construct):
         )
         self.ec2_instance_profile.override_logical_id(f"{id}InstanceProfile")
 
-        user_data = None
-        if data_volume_size > 0:
-            script_code_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "script_attach_ebs.sh"
-            )
-            with open(script_code_path) as f:
-                script_code = f.read()
-            if user_data_contents is None:
-                user_data_contents = script_code
-            else:
-                user_data_contents = script_code + user_data_contents
-
-        if user_data_contents is not None:
-            user_data = (
-                Fn.base64(
-                    Fn.sub(
-                        user_data_contents,
-                        user_data_variables
-                    )
-                )
-            )
-        self.ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
-            self,
-            f"{id}LaunchConfig",
-            image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
-            instance_type=self.instance_type_param.value_as_string,
-            iam_instance_profile=self.ec2_instance_profile.ref,
-            security_groups=[ self.sg.ref ],
-            user_data=user_data
-        )
-        self.ec2_launch_config.override_logical_id(f"{id}LaunchConfig")
-
         # data volume
         if data_volume_size > 0:
             # lambda to find az from subnet
@@ -397,6 +364,40 @@ class Asg(Construct):
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
 
+        user_data = None
+        if data_volume_size > 0:
+            script_code_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "script_attach_ebs.sh"
+            )
+            with open(script_code_path) as f:
+                script_code = f.read()
+            if user_data_contents is None:
+                user_data_contents = script_code
+            else:
+                user_data_contents = script_code + user_data_contents
+            user_data_variables['EbsId'] = self.data_volume.ref
+            user_data_variables['AsgId'] = id
+
+        if user_data_contents is not None:
+            user_data = (
+                Fn.base64(
+                    Fn.sub(
+                        user_data_contents,
+                        user_data_variables
+                    )
+                )
+            )
+        self.ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
+            self,
+            f"{id}LaunchConfig",
+            image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
+            instance_type=self.instance_type_param.value_as_string,
+            iam_instance_profile=self.ec2_instance_profile.ref,
+            security_groups=[ self.sg.ref ],
+            user_data=user_data
+        )
+        self.ec2_launch_config.override_logical_id(f"{id}LaunchConfig")
 
         if singleton:
             subnets = [vpc.public_subnet1_id()] if use_public_subnets else [vpc.private_subnet1_id()]
