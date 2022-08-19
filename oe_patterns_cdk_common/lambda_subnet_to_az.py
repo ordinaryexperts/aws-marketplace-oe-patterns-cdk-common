@@ -1,6 +1,9 @@
 import boto3
 import cfnresponse
 def handler(event, context):
+    if event['RequestType'] == 'Delete':
+        cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+        return
     try:
         print(event)
         subnet_id = event['ResourceProperties']['subnet_id']
