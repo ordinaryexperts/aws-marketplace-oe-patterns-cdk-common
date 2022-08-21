@@ -287,6 +287,13 @@ class Asg(Construct):
                                     "secretsmanager:ListSecrets"
                                 ],
                                 resources = ["*"]
+                            ),
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "secretsmanager:GetSecretValue"
+                                ],
+                                resources = [secret_arn]
                             )
                         ]
                     ),
