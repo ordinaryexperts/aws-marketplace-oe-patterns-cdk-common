@@ -286,7 +286,7 @@ class Asg(Construct):
                                 actions=[
                                     "secretsmanager:ListSecrets"
                                 ],
-                                resources = [ secret_arn ]
+                                resources = ["*"]
                             )
                         ]
                     ),
