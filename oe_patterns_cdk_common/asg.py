@@ -486,7 +486,7 @@ class Asg(Construct):
                         min_instances_in_service=self.min_size_param.value,
                         pause_time="PT15M",
                         wait_on_resource_signals=True
-                    )
+                    ),
                     auto_scaling_scheduled_action=core.CfnAutoScalingScheduledAction(
                         ignore_unmodified_group_size_properties=True
                     )
