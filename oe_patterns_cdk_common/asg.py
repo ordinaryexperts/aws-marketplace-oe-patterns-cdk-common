@@ -484,7 +484,7 @@ class Asg(Construct):
             if deployment_rolling_update:
                 self.asg.cfn_options.update_policy=CfnUpdatePolicy(
                     auto_scaling_rolling_update=CfnAutoScalingRollingUpdate(
-                        min_instances_in_service=self.min_size_param.value,
+                        min_instances_in_service=Token.as_number(self.min_size_param.value),
                         pause_time="PT15M",
                         wait_on_resource_signals=True
                     ),
