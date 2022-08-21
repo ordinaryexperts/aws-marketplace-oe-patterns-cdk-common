@@ -271,7 +271,8 @@ class Asg(Construct):
                                 resources = [ pipeline_bucket_arn ]
                             )
                         ]
-                    )
+                    ),
+                    policy_name="AllowReadFromPipelineBucket"
                 )
             )
 
