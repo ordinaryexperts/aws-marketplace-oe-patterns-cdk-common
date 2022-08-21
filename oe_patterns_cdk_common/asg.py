@@ -37,6 +37,7 @@ class Asg(Construct):
             allowed_instance_types: 'list[string]' = [],
             data_volume_size: int = 0,
             default_instance_type: str = 'm5.xlarge',
+            deployment_rolling_update: bool = False,
             pipeline_bucket_arn: str = None,
             secret_arn: str = None,
             singleton: bool = False,
@@ -479,11 +480,23 @@ class Asg(Construct):
                 )
             )
         else:
-            self.asg.cfn_options.update_policy=CfnUpdatePolicy(
-                auto_scaling_replacing_update=CfnAutoScalingReplacingUpdate(
-                    will_replace=True
+            if deployment_rolling_update:
+                self.asg.cfn_options.update_policy=CfnUpdatePolicy(
+                    auto_scaling_rolling_update=CfnAutoScalingRollingUpdate(
+                        min_instances_in_service=self.min_size_param.value,
+                        pause_time="PT15M",
+                        wait_on_resource_signals=True
+                    )
+                    auto_scaling_scheduled_action=core.CfnAutoScalingScheduledAction(
+                        ignore_unmodified_group_size_properties=True
+                    )
                 )
-            )
+            else:
+                self.asg.cfn_options.update_policy=CfnUpdatePolicy(
+                    auto_scaling_replacing_update=CfnAutoScalingReplacingUpdate(
+                        will_replace=True
+                    )
+                )
         Tags.of(self.asg).add("Name", "{}/Asg".format(Aws.STACK_NAME))
 
     def metadata_parameter_group(self):
