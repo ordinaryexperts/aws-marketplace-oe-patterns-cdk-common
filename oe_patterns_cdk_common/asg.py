@@ -38,6 +38,7 @@ class Asg(Construct):
             data_volume_size: int = 0,
             default_instance_type: str = 'm5.xlarge',
             pipeline_bucket_arn: str = None,
+            secret_arn: str = None,
             singleton: bool = False,
             use_public_subnets: bool = False,
             user_data_contents: str = None,
@@ -273,6 +274,23 @@ class Asg(Construct):
                         ]
                     ),
                     policy_name="AllowReadFromPipelineBucket"
+                )
+            )
+        if secret_arn:
+            policies.append(
+                aws_iam.CfnRole.PolicyProperty(
+                    policy_document=aws_iam.PolicyDocument(
+                        statements=[
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "secretsmanager:ListSecrets"
+                                ],
+                                resources = [ secret_arn ]
+                            )
+                        ]
+                    ),
+                    policy_name="AllowReadFromSecretsManager"
                 )
             )
 
