@@ -9,6 +9,7 @@ from aws_cdk import (
     aws_logs,
     CfnAutoScalingReplacingUpdate,
     CfnAutoScalingRollingUpdate,
+    CfnAutoScalingScheduledAction,
     CfnCondition,
     CfnCreationPolicy,
     CfnDeletionPolicy,
@@ -487,7 +488,7 @@ class Asg(Construct):
                         pause_time="PT15M",
                         wait_on_resource_signals=True
                     ),
-                    auto_scaling_scheduled_action=core.CfnAutoScalingScheduledAction(
+                    auto_scaling_scheduled_action=CfnAutoScalingScheduledAction(
                         ignore_unmodified_group_size_properties=True
                     )
                 )
