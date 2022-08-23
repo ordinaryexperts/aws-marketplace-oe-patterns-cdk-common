@@ -24,6 +24,7 @@ class Dns(Construct):
         # PARAMETERS
         #
 
+        self._alb = alb
         self.route_53_hosted_zone_name_param = CfnParameter(
             self,
             "Route53HostedZoneName",
@@ -99,3 +100,12 @@ class Dns(Construct):
                 "default": "DNS Hostname"
             }
         }
+
+    def hostname(self):
+        return Token.as_string(
+            Fn.condition_if(
+                self.hostname_exists_condition.logical_id,
+                self.hostname_param.value_as_string,
+                self._alb.alb.attr_dns_name
+            )
+        )
