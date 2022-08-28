@@ -2,6 +2,11 @@
 
 * Upgrading to CDK 2.20.0
 * EFS construct
+* ALB construct
+* DNS construct
+* ASG Data Volume support
+* ASG Singleton support
+* ASG updates / improvements
 
 # 2.1.0
 
