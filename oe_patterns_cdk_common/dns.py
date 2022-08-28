@@ -1,4 +1,5 @@
 from aws_cdk import (
+    Aws,
     aws_route53,
     aws_ssm,
     CfnCondition,
@@ -82,7 +83,8 @@ class Dns(Construct):
             self,
             "HostnameParameter",
             type="String",
-            value=self.hostname()
+            value=self.hostname(),
+            name=Aws.STACK_NAME + "-hostname"
         )
 
     def metadata_parameter_group(self):
