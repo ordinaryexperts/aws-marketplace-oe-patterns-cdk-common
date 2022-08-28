@@ -1,5 +1,6 @@
 from aws_cdk import (
     aws_route53,
+    aws_ssm,
     CfnCondition,
     CfnOutput,
     CfnParameter,
@@ -77,6 +78,12 @@ class Dns(Construct):
             ))
         )
         self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
+        self.hostname_ssm_param = aws_ssm.CfnParameter(
+            self,
+            "HostnameParameter",
+            type="String",
+            value=self.hostname()
+        )
 
     def metadata_parameter_group(self):
         return [
