@@ -28,9 +28,8 @@ class Alb(Construct):
 
         self.certificate_arn_param = CfnParameter(
             self,
-            "CertificateArn",
-            default="",
-            description="Optional: Specify the ARN of a ACM Certificate to configure HTTPS."
+            "AlbCertificateArn",
+            description="Required: Specify the ARN of a ACM Certificate to configure HTTPS."
         )
         self.certificate_arn_param.override_logical_id(f"{id}CertificateArn")
         self.ingress_cidr_param = CfnParameter(
