@@ -150,7 +150,7 @@ class Efs(Construct):
             self.efs_transition_to_ia_param.logical_id: {
                 "default": "EFS Transition to IA"
             },
-            self.efs_transition_to_primary_storage_class_param: {
+            self.efs_transition_to_primary_storage_class_param.logical_id: {
                 "default": "EFS Transition to Primary Storage Class"
             }
         }
