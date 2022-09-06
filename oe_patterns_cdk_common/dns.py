@@ -80,14 +80,14 @@ class Dns(Construct):
             ))
         )
         self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
-        # self.hostname_ssm_param = aws_ssm.CfnParameter(
-        #     self,
-        #     "HostnameParameter",
-        #     type="String",
-        #     value=self.hostname(),
-        #     name=Aws.STACK_NAME + "-hostname"
-        # )
-        # self.hostname_ssm_param.override_logical_id(f"{id}HostnameParameter")
+        self.hostname_ssm_param = aws_ssm.CfnParameter(
+            self,
+            "HostnameParameter",
+            type="String",
+            value=self.hostname(),
+            name=Aws.STACK_NAME + "-hostname"
+        )
+        self.hostname_ssm_param.override_logical_id(f"{id}HostnameParameter")
 
     def metadata_parameter_group(self):
         return [
