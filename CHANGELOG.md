@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.0.1
+
+* Fixing EFS parameter labels
+
 # 3.0.0
 
 * Upgrading to CDK 2.20.0
