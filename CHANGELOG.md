@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.0.0
+
 * Upgrading to CDK 2.20.0
 * EFS construct
 * ALB construct
