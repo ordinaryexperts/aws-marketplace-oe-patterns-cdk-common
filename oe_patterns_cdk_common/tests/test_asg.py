@@ -1,8 +1,8 @@
 import json
 from aws_cdk import (
-        core,
-        assertions
-    )
+  assertions,
+  Stack
+)
 
 from oe_patterns_cdk_common.vpc import Vpc
 from oe_patterns_cdk_common.asg import Asg
@@ -14,7 +14,7 @@ def print_resource(template, type):
   print('******')
 
 def test_asg():
-  stack = core.Stack()
+  stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
   asg = Asg(
     stack,
@@ -30,7 +30,7 @@ def test_asg():
   })
 
 def test_singleton_asg():
-  stack = core.Stack()
+  stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
   asg = Asg(
     stack,
@@ -42,6 +42,38 @@ def test_singleton_asg():
   )
   template = assertions.Template.from_stack(stack)
   # print_resource(template, 'AWS::AutoScaling::AutoScalingGroup')
+  template.has_resource('AWS::AutoScaling::AutoScalingGroup', {
+    'UpdatePolicy': {'AutoScalingRollingUpdate': assertions.Match.any_value()}
+  })
+
+def test_data_asg():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  asg = Asg(
+    stack,
+    'TestAsg',
+    data_volume_size=10,
+    user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
+    user_data_variables={ 'MYVAR': 'Ref: MyParam' },
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  template.resource_count_is("AWS::EC2::Volume", 1)
+
+def test_rolling_deploy_asg():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  asg = Asg(
+    stack,
+    'TestAsg',
+    deployment_rolling_update=True,
+    user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
+    user_data_variables={ 'MYVAR': 'Ref: MyParam' },
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
   template.has_resource('AWS::AutoScaling::AutoScalingGroup', {
     'UpdatePolicy': {'AutoScalingRollingUpdate': assertions.Match.any_value()}
   })

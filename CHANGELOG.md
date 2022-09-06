@@ -1,5 +1,13 @@
 # Unreleased
 
+* Upgrading to CDK 2.20.0
+* EFS construct
+* ALB construct
+* DNS construct
+* ASG Data Volume support
+* ASG Singleton support
+* ASG updates / improvements
+
 # 2.1.0
 
 * [PublicSubnet2NATGateway should be on subnet2](https://github.com/ordinaryexperts/aws-marketplace-oe-patterns-cdk-common/pull/4)

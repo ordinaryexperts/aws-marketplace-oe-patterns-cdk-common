@@ -3,7 +3,7 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-CDK_VERSION="1.148.0"
+CDK_VERSION="2.20.0"
 
 setuptools.setup(
     name="oe-patterns-cdk-common",
@@ -11,17 +11,17 @@ setuptools.setup(
     author="Ordinary Experts",
     author_email="aaron@ordinaryexperts.com",
     description="Common CDK code for re-use in other AWS Marketplace patterns.",
+    include_package_data=True,
+    package_data={
+        'oe_patterns_cdk_common': ['*.sh']
+    },
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ordinaryexperts/aws-marketplace-oe-patterns-cdk-common",
     packages=setuptools.find_packages(),
+    url="https://github.com/ordinaryexperts/aws-marketplace-oe-patterns-cdk-common",
 
     install_requires=[
-        f"aws-cdk.assertions>={CDK_VERSION}"
-        f"aws-cdk.core>={CDK_VERSION}",
-        f"aws-cdk.aws-autoscaling>={CDK_VERSION}",
-        f"aws-cdk.aws-ec2>={CDK_VERSION}",
-        f"aws-cdk.aws-iam>={CDK_VERSION}"
+        f"aws-cdk-lib>={CDK_VERSION}"
     ],
 
     classifiers=[
