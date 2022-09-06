@@ -48,6 +48,7 @@ class Dns(Construct):
             "Route53HostedZoneNameExists",
             expression=Fn.condition_not(Fn.condition_equals(self.route_53_hosted_zone_name_param.value, ""))
         )
+        self.route_53_hosted_zone_name_exists_condition.override_logical_id(f"{id}Route53HostedZoneNameExists")
         self.hostname_exists_condition = CfnCondition(
             self,
             "HostnameExists",
@@ -86,6 +87,7 @@ class Dns(Construct):
             value=self.hostname(),
             name=Aws.STACK_NAME + "-hostname"
         )
+        self.hostname_ssm_param.override_logical_id(f"{id}HostnameParameter")
 
     def metadata_parameter_group(self):
         return [
