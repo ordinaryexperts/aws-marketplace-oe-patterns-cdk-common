@@ -1,4 +1,5 @@
-FROM ordinaryexperts/aws-marketplace-patterns-devenv:feature-more-scripts
+FROM ordinaryexperts/aws-marketplace-patterns-devenv:2.0.0
+# FROM devenv:latest
 
 # install dependencies
 RUN pip3 install pytest

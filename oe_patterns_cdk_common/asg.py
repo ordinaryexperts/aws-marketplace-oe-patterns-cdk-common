@@ -1,24 +1,48 @@
+import os
+
 from aws_cdk import (
+    Aws,
     aws_autoscaling,
     aws_ec2,
     aws_iam,
-    core
+    aws_lambda,
+    aws_logs,
+    CfnAutoScalingReplacingUpdate,
+    CfnAutoScalingRollingUpdate,
+    CfnAutoScalingScheduledAction,
+    CfnCondition,
+    CfnCreationPolicy,
+    CfnDeletionPolicy,
+    CfnParameter,
+    CfnResourceSignal,
+    CfnUpdatePolicy,
+    CustomResource,
+    Fn,
+    Tags,
+    Token
 )
 
+from constructs import Construct
 from oe_patterns_cdk_common.vpc import Vpc
 
-class Asg(core.Construct):
+class Asg(Construct):
+
+    TWO_YEARS_IN_DAYS=731
 
     def __init__(
             self,
-            scope: core.Construct,
+            scope: Construct,
             id: str,
             vpc: Vpc,
             allow_associate_address: bool = False,
             allowed_instance_types: 'list[string]' = [],
+            data_volume_size: int = 0,
             default_instance_type: str = 'm5.xlarge',
-            log_group_arns: 'list[string]' = [],
+            deployment_rolling_update: bool = False,
+            pipeline_bucket_arn: str = None,
+            secret_arn: str = None,
             singleton: bool = False,
+            use_public_subnets: bool = False,
             user_data_contents: str = None,
             user_data_variables: dict = None,
             **props):
@@ -86,7 +110,7 @@ class Asg(core.Construct):
             "t3.2xlarge"
         ]
 
-        self.instance_type_param = core.CfnParameter(
+        self.instance_type_param = CfnParameter(
             self,
             "AsgInstanceType",
             allowed_values=allowed_instance_types if allowed_instance_types else default_allowed_instance_types,
@@ -94,8 +118,15 @@ class Asg(core.Construct):
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
+        self.reprovision_string_param = CfnParameter(
+            self,
+            "AsgReprovisionString",
+            default="",
+            description="Optional: Changes to this parameter will force instance reprovision on the next CloudFormation update."
+        )
+        self.reprovision_string_param.override_logical_id(f"{id}ReprovisionString")
         if not singleton:
-            self.desired_capacity_param = core.CfnParameter(
+            self.desired_capacity_param = CfnParameter(
                 self,
                 "AsgDesiredCapacity",
                 default=1,
@@ -104,7 +135,7 @@ class Asg(core.Construct):
                 type="Number"
             )
             self.desired_capacity_param.override_logical_id(f"{id}DesiredCapacity")
-            self.max_size_param = core.CfnParameter(
+            self.max_size_param = CfnParameter(
                 self,
                 "AsgMaxSize",
                 default=2,
@@ -113,7 +144,7 @@ class Asg(core.Construct):
                 type="Number"
             )
             self.max_size_param.override_logical_id(f"{id}MaxSize")
-            self.min_size_param = core.CfnParameter(
+            self.min_size_param = CfnParameter(
                 self,
                 "AsgMinSize",
                 default=1,
@@ -122,6 +153,24 @@ class Asg(core.Construct):
                 type="Number"
             )
             self.min_size_param.override_logical_id(f"{id}MinSize")
+
+        # cloudwatch
+        self.app_log_group = aws_logs.CfnLogGroup(
+            self,
+            "AppLogGroup",
+            retention_in_days=Asg.TWO_YEARS_IN_DAYS
+        )
+        self.app_log_group.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
+        self.app_log_group.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
+        self.app_log_group.override_logical_id(f"{id}AppLogGroup")
+        self.system_log_group = aws_logs.CfnLogGroup(
+            self,
+            "SystemLogGroup",
+            retention_in_days=Asg.TWO_YEARS_IN_DAYS
+        )
+        self.system_log_group.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
+        self.system_log_group.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
+        self.system_log_group.override_logical_id(f"{id}SystemLogGroup")
 
         # iam
         policies = [
@@ -156,25 +205,27 @@ class Asg(core.Construct):
                 policy_name="AllowDescribeAutoScaling"
             )
         ]
-        if log_group_arns:
-            policies.append(
-                aws_iam.CfnRole.PolicyProperty(
-                    policy_document=aws_iam.PolicyDocument(
-                        statements=[
-                            aws_iam.PolicyStatement(
-                                effect=aws_iam.Effect.ALLOW,
-                                actions=[
-                                    "logs:CreateLogStream",
-                                    "logs:DescribeLogStreams",
-                                    "logs:PutLogEvents"
-                                ],
-                                resources=log_group_arns
-                            )
-                        ]
-                    ),
-                    policy_name="AllowStreamLogsToCloudWatch"
-                )
+        policies.append(
+            aws_iam.CfnRole.PolicyProperty(
+                policy_document=aws_iam.PolicyDocument(
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[
+                                "logs:CreateLogStream",
+                                "logs:DescribeLogStreams",
+                                "logs:PutLogEvents"
+                            ],
+                            resources=[
+                                self.system_log_group.attr_arn,
+                                self.app_log_group.attr_arn
+                            ]
+                        )
+                    ]
+                ),
+                policy_name="AllowStreamLogsToCloudWatch"
             )
+        )
         if allow_associate_address:
             policies.append(
                 aws_iam.CfnRole.PolicyProperty(
@@ -190,6 +241,65 @@ class Asg(core.Construct):
                         ]
                     ),
                     policy_name="AllowAssociateAddress"
+                )
+            )
+        if data_volume_size > 0:
+            policies.append(
+                aws_iam.CfnRole.PolicyProperty(
+                    policy_document=aws_iam.PolicyDocument(
+                        statements=[
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "ec2:AttachVolume"
+                                ],
+                                resources=["*"]
+                            )
+                        ]
+                    ),
+                    policy_name="AllowAttachVolume"
+                )
+            )
+        if pipeline_bucket_arn:
+            policies.append(
+                aws_iam.CfnRole.PolicyProperty(
+                    policy_document=aws_iam.PolicyDocument(
+                        statements=[
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "s3:Get*",
+                                    "s3:Head*"
+                                ],
+                                resources = [ pipeline_bucket_arn ]
+                            )
+                        ]
+                    ),
+                    policy_name="AllowReadFromPipelineBucket"
+                )
+            )
+        if secret_arn:
+            policies.append(
+                aws_iam.CfnRole.PolicyProperty(
+                    policy_document=aws_iam.PolicyDocument(
+                        statements=[
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "secretsmanager:ListSecrets"
+                                ],
+                                resources = ["*"]
+                            ),
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "secretsmanager:GetSecretValue"
+                                ],
+                                resources = [secret_arn]
+                            )
+                        ]
+                    ),
+                    policy_name="AllowReadFromSecretsManager"
                 )
             )
 
@@ -228,20 +338,110 @@ class Asg(core.Construct):
         )
         self.ec2_instance_profile.override_logical_id(f"{id}InstanceProfile")
 
-        user_data = None
-        if user_data_contents is not None:
-            user_data = (
-                core.Fn.base64(
-                    core.Fn.sub(
-                        user_data_contents,
-                        user_data_variables
-                    )
+        # data volume
+        if data_volume_size > 0:
+            # lambda to find az from subnet
+            lambda_code_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "lambda_subnet_to_az.py"
+            )
+            with open(lambda_code_path) as f:
+                lambda_code = f.read()
+            self.subnet_to_az_lambda = aws_lambda.Function(
+                self,
+                "AsgSubnetToAzLambda",
+                runtime=aws_lambda.Runtime.PYTHON_3_8,
+                handler="index.handler",
+                code=aws_lambda.Code.from_inline(lambda_code)
+            )
+            self.subnet_to_az_lambda.node.default_child.override_logical_id(f"{id}SubnetToAzLambda")
+            self.subnet_to_az_lambda.role.node.default_child.override_logical_id(f"{id}SubnetToAzLambdaRole")
+            self.subnet_to_az_lambda.role.attach_inline_policy(
+                aws_iam.Policy(
+                    self,
+                    "describe-subnets-policy",
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            actions=["ec2:DescribeSubnets"],
+                            resources=["*"]
+                        )
+                    ]
                 )
             )
+            self.subnet_to_az_custom_resource = CustomResource(
+                self,
+                "AsgSubnetToAzCustomResource",
+                service_token=self.subnet_to_az_lambda.function_arn,
+                properties={
+                    "aws_region": Aws.REGION,
+                    "subnet_id": vpc.public_subnet1_id() if use_public_subnets else vpc.private_subnet1_id()
+                }
+            )
+            self.subnet_to_az_custom_resource.node.default_child.override_logical_id(f"{id}SubnetToAzCustomResource")
+
+            self.data_volume_snapshot_param = CfnParameter(
+                self,
+                "AsgDataVolumeSnapshot",
+                default="",
+                description="Optional: An EBS snapshot to restore as a starting point for the data volume.",
+            )
+            self.data_volume_snapshot_param.override_logical_id(f"{id}DataVolumeSnapshot")
+
+            self.data_volume_snapshot_condition = CfnCondition(
+                self,
+                "AsgDataVolumeSnapshotCondition",
+                expression=Fn.condition_not(Fn.condition_equals(self.data_volume_snapshot_param.value, ""))
+            )
+            self.data_volume_snapshot_condition.override_logical_id(f"{id}DataVolumeSnapshotCondition")
+
+            self.data_volume = aws_ec2.CfnVolume(
+                self,
+                "AsgDataVolume",
+                availability_zone=Token.as_string(self.subnet_to_az_custom_resource.get_att('az')),
+                snapshot_id=Token.as_string(
+                    Fn.condition_if(
+                        self.data_volume_snapshot_condition.logical_id,
+                        self.data_volume_snapshot_param.value_as_string,
+                        Aws.NO_VALUE
+                    )
+                ),
+                encrypted=True,
+                size=data_volume_size
+            )
+            self.data_volume.override_logical_id(f"{id}DataVolume")
+
+        user_data = None
+        if data_volume_size > 0:
+            script_code_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                "script_attach_ebs.sh"
+            )
+            with open(script_code_path) as f:
+                script_code = f.read()
+            if user_data_contents is None:
+                user_data_contents = script_code
+            else:
+                user_data_contents = script_code + user_data_contents
+            user_data_variables['EbsId'] = self.data_volume.ref
+            user_data_variables['AsgId'] = id
+
+        reprovision_snippet = "# reprovision string: ${AsgReprovisionString}"
+        if user_data_contents is None:
+            user_data_contents = reprovision_snippet
+        else:
+            user_data_contents = user_data_contents + "\n" + reprovision_snippet
+        user_data = (
+            Fn.base64(
+                Fn.sub(
+                    user_data_contents,
+                    user_data_variables
+                )
+            )
+        )
         self.ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
             self,
             f"{id}LaunchConfig",
-            image_id=core.Fn.find_in_map("AWSAMIRegionMap", core.Aws.REGION, "AMI"),
+            image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
             instance_type=self.instance_type_param.value_as_string,
             iam_instance_profile=self.ec2_instance_profile.ref,
             security_groups=[ self.sg.ref ],
@@ -249,26 +449,31 @@ class Asg(core.Construct):
         )
         self.ec2_launch_config.override_logical_id(f"{id}LaunchConfig")
 
+        if singleton:
+            subnets = [vpc.public_subnet1_id()] if use_public_subnets else [vpc.private_subnet1_id()]
+        else:
+            subnets = vpc.public_subnet_ids() if use_public_subnets else vpc.private_subnet_ids()
+
         # autoscaling
         self.asg = aws_autoscaling.CfnAutoScalingGroup(
             self,
             "Asg",
             launch_configuration_name=self.ec2_launch_config.ref,
-            desired_capacity="1" if singleton else core.Token.as_string(self.desired_capacity_param.value),
-            max_size="1" if singleton else core.Token.as_string(self.max_size_param.value),
-            min_size="1" if singleton else core.Token.as_string(self.min_size_param.value),
-            vpc_zone_identifier=vpc.public_subnet_ids()
+            desired_capacity="1" if singleton else Token.as_string(self.desired_capacity_param.value),
+            max_size="1" if singleton else Token.as_string(self.max_size_param.value),
+            min_size="1" if singleton else Token.as_string(self.min_size_param.value),
+            vpc_zone_identifier=subnets
         )
-        self.asg.override_logical_id(f"{id}Asg")
-        self.asg.cfn_options.creation_policy=core.CfnCreationPolicy(
-            resource_signal=core.CfnResourceSignal(
+        self.asg.override_logical_id(id)
+        self.asg.cfn_options.creation_policy=CfnCreationPolicy(
+            resource_signal=CfnResourceSignal(
                 count=1,
                 timeout="PT15M"
             )
         )
         if singleton:
-            self.asg.cfn_options.update_policy=core.CfnUpdatePolicy(
-                auto_scaling_rolling_update=core.CfnAutoScalingRollingUpdate(
+            self.asg.cfn_options.update_policy=CfnUpdatePolicy(
+                auto_scaling_rolling_update=CfnAutoScalingRollingUpdate(
                     max_batch_size=1,
                     min_instances_in_service=0,
                     pause_time="PT15M",
@@ -276,12 +481,24 @@ class Asg(core.Construct):
                 )
             )
         else:
-            self.asg.cfn_options.update_policy=core.CfnUpdatePolicy(
-                auto_scaling_replacing_update=core.CfnAutoScalingReplacingUpdate(
-                    will_replace=True
+            if deployment_rolling_update:
+                self.asg.cfn_options.update_policy=CfnUpdatePolicy(
+                    auto_scaling_rolling_update=CfnAutoScalingRollingUpdate(
+                        min_instances_in_service=Token.as_number(self.min_size_param.value),
+                        pause_time="PT15M",
+                        wait_on_resource_signals=True
+                    ),
+                    auto_scaling_scheduled_action=CfnAutoScalingScheduledAction(
+                        ignore_unmodified_group_size_properties=True
+                    )
                 )
-            )
-        core.Tags.of(self.asg).add("Name", "{}/Asg".format(core.Aws.STACK_NAME))
+            else:
+                self.asg.cfn_options.update_policy=CfnUpdatePolicy(
+                    auto_scaling_replacing_update=CfnAutoScalingReplacingUpdate(
+                        will_replace=True
+                    )
+                )
+        Tags.of(self.asg).add("Name", "{}/Asg".format(Aws.STACK_NAME))
 
     def metadata_parameter_group(self):
         return [
@@ -293,7 +510,8 @@ class Asg(core.Construct):
                     self.instance_type_param.logical_id,
                     self.desired_capacity_param.logical_id,
                     self.max_size_param.logical_id,
-                    self.min_size_param.logical_id
+                    self.min_size_param.logical_id,
+                    self.reprovision_string_param.logical_id
                 ]
             }
         ]
@@ -311,5 +529,8 @@ class Asg(core.Construct):
             },
             self.min_size_param.logical_id: {
                 "default": "Auto Scaling Group Minimum Size"
+            },
+            self.reprovision_string_param.logical_id: {
+                "default": "Auto Scaling Group Reprovision String"
             }
         }
