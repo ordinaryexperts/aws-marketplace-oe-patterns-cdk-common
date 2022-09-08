@@ -47,6 +47,7 @@ class Asg(Construct):
             user_data_variables: dict = None,
             **props):
         super().__init__(scope, id, **props)
+        self._singleton = singleton
 
         default_allowed_instance_types = [
             "c5.large",
@@ -505,7 +506,7 @@ class Asg(Construct):
             self.instance_type_param.logical_id,
             self.reprovision_string_param.logical_id
         ]
-        if not singleton:
+        if not self._singleton:
             params += [
                 self.desired_capacity_param.logical_id,
                 self.max_size_param.logical_id,
@@ -529,7 +530,7 @@ class Asg(Construct):
                 "default": "Auto Scaling Group Reprovision String"
             }
         }
-        if not singleton:
+        if not self._singleton:
             params = {
                 **params,
                 self.desired_capacity_param.logical_id: {
