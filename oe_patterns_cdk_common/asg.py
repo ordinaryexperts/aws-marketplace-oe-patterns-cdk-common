@@ -501,18 +501,22 @@ class Asg(Construct):
         Tags.of(self.asg).add("Name", "{}/Asg".format(Aws.STACK_NAME))
 
     def metadata_parameter_group(self):
+        params = [
+            self.instance_type_param.logical_id,
+            self.desired_capacity_param.logical_id
+        ]
+        if not singleton:
+            params += [
+                self.desired_capacity_param.logical_id,
+                self.max_size_param.logical_id,
+                self.min_size_param.logical_id
+            ]
         return [
             {
                 "Label": {
                     "default": "ASG Configuration"
                 },
-                "Parameters": [
-                    self.instance_type_param.logical_id,
-                    self.desired_capacity_param.logical_id,
-                    self.max_size_param.logical_id,
-                    self.min_size_param.logical_id,
-                    self.reprovision_string_param.logical_id
-                ]
+                "Parameters": params
             }
         ]
 
