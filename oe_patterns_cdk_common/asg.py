@@ -517,20 +517,25 @@ class Asg(Construct):
         ]
 
     def metadata_parameter_labels(self):
-        return {
+        params = {
             self.instance_type_param.logical_id: {
                 "default": "EC2 instance type"
-            },
-            self.desired_capacity_param.logical_id: {
-                "default": "Auto Scaling Group Desired Capacity"
-            },
-            self.max_size_param.logical_id: {
-                "default": "Auto Scaling Group Maximum Size"
-            },
-            self.min_size_param.logical_id: {
-                "default": "Auto Scaling Group Minimum Size"
             },
             self.reprovision_string_param.logical_id: {
                 "default": "Auto Scaling Group Reprovision String"
             }
         }
+        if not singleton:
+            params = {
+                **params,
+                self.desired_capacity_param.logical_id: {
+                    "default": "Auto Scaling Group Desired Capacity"
+                },
+                self.max_size_param.logical_id: {
+                    "default": "Auto Scaling Group Maximum Size"
+                },
+                self.min_size_param.logical_id: {
+                    "default": "Auto Scaling Group Minimum Size"
+                }
+            }
+        return params

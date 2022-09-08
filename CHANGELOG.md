@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.0.2
+
+* Fixing bug with ASG parameters when singleton == True
+
 # 3.0.1
 
 * Fixing EFS parameter labels
