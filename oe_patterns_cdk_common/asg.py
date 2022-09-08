@@ -47,6 +47,7 @@ class Asg(Construct):
             user_data_variables: dict = None,
             **props):
         super().__init__(scope, id, **props)
+        self._singleton = singleton
 
         default_allowed_instance_types = [
             "c5.large",
@@ -356,18 +357,18 @@ class Asg(Construct):
             )
             self.subnet_to_az_lambda.node.default_child.override_logical_id(f"{id}SubnetToAzLambda")
             self.subnet_to_az_lambda.role.node.default_child.override_logical_id(f"{id}SubnetToAzLambdaRole")
-            self.subnet_to_az_lambda.role.attach_inline_policy(
-                aws_iam.Policy(
-                    self,
-                    "describe-subnets-policy",
-                    statements=[
-                        aws_iam.PolicyStatement(
-                            actions=["ec2:DescribeSubnets"],
-                            resources=["*"]
-                        )
-                    ]
-                )
+            self.subnet_to_az_lambda_subnet_policy = aws_iam.Policy(
+                self,
+                "DescribeSubnetsPolicy",
+                statements=[
+                    aws_iam.PolicyStatement(
+                        actions=["ec2:DescribeSubnets"],
+                        resources=["*"]
+                    )
+                ]
             )
+            self.subnet_to_az_lambda_subnet_policy.node.default_child.override_logical_id(f"{id}DescribeSubnetsPolicy")
+            self.subnet_to_az_lambda.role.attach_inline_policy(self.subnet_to_az_lambda_subnet_policy)
             self.subnet_to_az_custom_resource = CustomResource(
                 self,
                 "AsgSubnetToAzCustomResource",
@@ -501,36 +502,45 @@ class Asg(Construct):
         Tags.of(self.asg).add("Name", "{}/Asg".format(Aws.STACK_NAME))
 
     def metadata_parameter_group(self):
+        params = [
+            self.instance_type_param.logical_id,
+            self.reprovision_string_param.logical_id
+        ]
+        if not self._singleton:
+            params += [
+                self.desired_capacity_param.logical_id,
+                self.max_size_param.logical_id,
+                self.min_size_param.logical_id
+            ]
         return [
             {
                 "Label": {
                     "default": "ASG Configuration"
                 },
-                "Parameters": [
-                    self.instance_type_param.logical_id,
-                    self.desired_capacity_param.logical_id,
-                    self.max_size_param.logical_id,
-                    self.min_size_param.logical_id,
-                    self.reprovision_string_param.logical_id
-                ]
+                "Parameters": params
             }
         ]
 
     def metadata_parameter_labels(self):
-        return {
+        params = {
             self.instance_type_param.logical_id: {
                 "default": "EC2 instance type"
-            },
-            self.desired_capacity_param.logical_id: {
-                "default": "Auto Scaling Group Desired Capacity"
-            },
-            self.max_size_param.logical_id: {
-                "default": "Auto Scaling Group Maximum Size"
-            },
-            self.min_size_param.logical_id: {
-                "default": "Auto Scaling Group Minimum Size"
             },
             self.reprovision_string_param.logical_id: {
                 "default": "Auto Scaling Group Reprovision String"
             }
         }
+        if not self._singleton:
+            params = {
+                **params,
+                self.desired_capacity_param.logical_id: {
+                    "default": "Auto Scaling Group Desired Capacity"
+                },
+                self.max_size_param.logical_id: {
+                    "default": "Auto Scaling Group Maximum Size"
+                },
+                self.min_size_param.logical_id: {
+                    "default": "Auto Scaling Group Minimum Size"
+                }
+            }
+        return params
