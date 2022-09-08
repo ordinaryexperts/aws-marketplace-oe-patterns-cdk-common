@@ -503,7 +503,7 @@ class Asg(Construct):
     def metadata_parameter_group(self):
         params = [
             self.instance_type_param.logical_id,
-            self.desired_capacity_param.logical_id
+            self.reprovision_string_param.logical_id
         ]
         if not singleton:
             params += [
