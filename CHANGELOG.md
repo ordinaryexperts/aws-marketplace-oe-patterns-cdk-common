@@ -3,6 +3,7 @@
 # 3.0.2
 
 * Fixing bug with ASG parameters when singleton == True
+* Fixing logical id for describe subnets lambda policy
 
 # 3.0.1
 
