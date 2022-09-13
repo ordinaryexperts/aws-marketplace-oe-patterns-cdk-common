@@ -36,8 +36,7 @@ class Alb(Construct):
             self,
             "AlbIngressCidr",
             allowed_pattern=r"^((\d{1,3})\.){3}\d{1,3}/\d{1,2}$",
-            default="0.0.0.0/0",
-            description="Optional: VPC IPv4 CIDR block to restrict public access to ALB (default is 0.0.0.0/0 which is open to internet)."
+            description="Required: VPC IPv4 CIDR block to restrict access to ALB. Set to '0.0.0.0/0' to allow all access, or set to 'X.X.X.X/32' to restrict to one IP (replace Xs with your IP), or set to another CIDR range."
         )
         self.ingress_cidr_param.override_logical_id(f"{id}IngressCidr")
 

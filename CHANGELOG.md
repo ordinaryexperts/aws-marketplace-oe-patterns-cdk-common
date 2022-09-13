@@ -1,5 +1,7 @@
 # Unreleased
 
+* ALB: Requiring CIDR range for AlbIngressCidr parameter
+
 # 3.0.2
 
 * Fixing bug with ASG parameters when singleton == True
