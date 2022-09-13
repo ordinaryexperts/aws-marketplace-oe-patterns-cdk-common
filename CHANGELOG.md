@@ -1,8 +1,7 @@
 # Unreleased
 
 * ALB: Requiring CIDR range for AlbIngressCidr parameter
-* EFS: Explicit SG egress rule
-* ASG: Explicit SG egress rule
+* ALB, ASG, EFS: Explicit SG egress rule
 
 # 3.0.2
 
