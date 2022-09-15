@@ -1,5 +1,8 @@
 # Unreleased
 
+* ALB: Requiring CIDR range for AlbIngressCidr parameter
+* ALB, ASG, EFS: Explicit SG egress rule
+
 # 3.0.2
 
 * Fixing bug with ASG parameters when singleton == True
