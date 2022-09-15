@@ -328,6 +328,13 @@ class Asg(Construct):
             self,
             "AsgSg",
             group_description=f"{id} security group",
+            security_group_egress=[
+                aws_ec2.CfnSecurityGroup.EgressProperty(
+                    ip_protocol="-1",
+                    cidr_ip="0.0.0.0/0",
+                    description="all IPv4 egress traffic allowed"
+                )
+            ],
             vpc_id=vpc.id()
         )
         self.sg.override_logical_id(f"{id}Sg")
