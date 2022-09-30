@@ -15,6 +15,7 @@ from aws_cdk import (
 )
 
 from constructs import Construct
+from oe_patterns_cdk_common.asg import Asg
 from oe_patterns_cdk_common.vpc import Vpc
 
 class AuroraPostgresql(Construct):
@@ -22,6 +23,7 @@ class AuroraPostgresql(Construct):
             self,
             scope: Construct,
             id: str,
+            asg: Asg,
             vpc: Vpc,
             allowed_instance_types: 'list[string]' = [],
             default_instance_type: str = 'db.r5.large',
@@ -154,6 +156,17 @@ class AuroraPostgresql(Construct):
             vpc_id=vpc.id()
         )
         self.db_sg.override_logical_id(f"{id}Sg")
+        self.db_ingress = aws_ec2.CfnSecurityGroupIngress(
+            self,
+            "DbSgIngress",
+            source_security_group_id=asg.sg.ref,
+            description="Allow traffic from ASG to DB",
+            from_port=5432,
+            group_id=self.db_sg.ref,
+            ip_protocol="tcp",
+            to_port=5432
+        )
+        self.db_ingress.override_logical_id(f"{id}SgIngress")
         self.db_subnet_group = aws_rds.CfnDBSubnetGroup(
             self,
             "DbSubnetGroup",
@@ -244,3 +257,4 @@ class AuroraPostgresql(Construct):
             engine="aurora-postgresql",
             publicly_accessible=False
         )
+        self.db_primary_instance.override_logical_id(f"{id}PrimaryInstance")
