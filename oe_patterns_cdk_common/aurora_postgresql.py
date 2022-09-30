@@ -130,7 +130,7 @@ class AuroraPostgresql(Construct):
             default="",
             description="Optional: SecretsManager secret ARN used to store database credentials and other configuration. If not specified, a secret will be created."
         )
-        self.secret_arn_param.override_logical_id("SecretArn")
+        self.secret_arn_param.override_logical_id("DbSecretArn")
 
         #
         # CONDITIONS
@@ -186,15 +186,17 @@ class AuroraPostgresql(Construct):
             ],
             vpc_id=vpc.id()
         )
+        self.db_sg.override_logical_id(f"{id}Sg")
         self.db_subnet_group = aws_rds.CfnDBSubnetGroup(
             self,
             "DbSubnetGroup",
             db_subnet_group_description="Aurora Postgresql DB Subnet Group",
             subnet_ids=vpc.private_subnet_ids()
         )
+        self.db_subnet_group.override_logical_id(f"{id}SubnetGroup")
         self.secret = aws_secretsmanager.CfnSecret(
             self,
-            "Secret",
+            "DbSecret",
             generate_secret_string=aws_secretsmanager.CfnSecret.GenerateSecretStringProperty(
                 exclude_characters="\"@/\\\"'$,[]*?{}~\#%<>|^",
                 exclude_punctuation=True,
@@ -204,6 +206,7 @@ class AuroraPostgresql(Construct):
             name="{}/db/secret".format(Aws.STACK_NAME)
         )
         self.secret.cfn_options.condition = self.secret_arn_not_exists_condition
+        self.secret.override_logical_id(f"DbSecret")
 
         self.db_cluster = aws_rds.CfnDBCluster(
             self,
@@ -220,8 +223,8 @@ class AuroraPostgresql(Construct):
                     Aws.NO_VALUE,
                     Fn.condition_if(
                         self.secret_arn_exists_condition.logical_id,
-                        Fn.sub("{{resolve:secretsmanager:${SecretArn}:SecretString:username}}"),
-                        Fn.sub("{{resolve:secretsmanager:${Secret}:SecretString:username}}")
+                        Fn.sub("{{resolve:secretsmanager:${DbSecretArn}:SecretString:username}}"),
+                        Fn.sub("{{resolve:secretsmanager:${DbSecret}:SecretString:username}}")
                     ),
                 )
             ),
@@ -231,8 +234,8 @@ class AuroraPostgresql(Construct):
                     Aws.NO_VALUE,
                     Fn.condition_if(
                         self.secret_arn_exists_condition.logical_id,
-                        Fn.sub("{{resolve:secretsmanager:${SecretArn}:SecretString:password}}"),
-                        Fn.sub("{{resolve:secretsmanager:${Secret}:SecretString:password}}"),
+                        Fn.sub("{{resolve:secretsmanager:${DbSecretArn}:SecretString:password}}"),
+                        Fn.sub("{{resolve:secretsmanager:${DbSecret}:SecretString:password}}"),
                     ),
                 )
             ),
@@ -256,7 +259,7 @@ class AuroraPostgresql(Construct):
                 )
             )
         )
-        db_primary_instance = aws_rds.CfnDBInstance(
+        self.db_primary_instance = aws_rds.CfnDBInstance(
             self,
             "DbPrimaryInstance",
             db_cluster_identifier=self.db_cluster.ref,
