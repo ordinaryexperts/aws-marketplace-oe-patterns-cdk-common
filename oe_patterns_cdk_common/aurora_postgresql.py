@@ -7,6 +7,8 @@ from aws_cdk import (
     aws_secretsmanager,
     CfnCondition,
     CfnParameter,
+    CfnRule,
+    CfnRuleAssertion,
     Fn,
     Tags,
     Token
@@ -84,11 +86,12 @@ class AuroraPostgresql(Construct):
             "db.t2.small",
             "db.t2.medium"
         ]
+
         #
         # PARAMETERS
         #
 
-        db_backup_retention_period_param = CfnParameter(
+        self.db_backup_retention_period_param = CfnParameter(
             self,
             "DbBackupRetentionPeriod",
             type="Number",
@@ -97,58 +100,80 @@ class AuroraPostgresql(Construct):
             default="7",
             description="Required: The number of days to retain automated db backups."
         )
-        db_instance_class_param = CfnParameter(
+        self.db_backup_retention_period_param.override_logical_id(f"{id}BackupRetentionPeriod")
+        self.db_instance_class_param = CfnParameter(
             self,
             "DbInstanceClass",
             allowed_values=allowed_instance_types if allowed_instance_types else default_allowed_instance_types,
             default=default_instance_type,
             description="Required: The class profile for memory and compute capacity for the database instance."
         )
-        db_engine_version_param = CfnParameter(
+        self.db_instance_class_param.override_logical_id(f"{id}InstanceClass")
+        self.db_engine_version_param = CfnParameter(
             self,
             "DbEngineVersion",
             allowed_values=engine_versions,
             default=default_engine_version,
             description="Required: The engine version for the the database instance."
         )
-        db_snapshot_identifier_param = CfnParameter(
+        self.db_engine_version_param.override_logical_id(f"{id}EngineVersion")
+        self.db_snapshot_identifier_param = CfnParameter(
             self,
             "DbSnapshotIdentifier",
             default="",
             description="Optional: RDS snapshot ARN from which to restore. If specified, manually edit the secret values to specify the snapshot credentials for the application. WARNING: Changing this value will re-provision the database."
         )
-        secret_arn_param = CfnParameter(
+        self.db_snapshot_identifier_param.override_logical_id(f"{id}SnapshotIdentifier")
+        self.secret_arn_param = CfnParameter(
             self,
-            "SecretArn",
+            "DbSecretArn",
             default="",
             description="Optional: SecretsManager secret ARN used to store database credentials and other configuration. If not specified, a secret will be created."
         )
+        self.secret_arn_param.override_logical_id("SecretArn")
 
         #
         # CONDITIONS
         #
 
-        db_snapshot_identifier_exists_condition = CfnCondition(
+        self.db_snapshot_identifier_exists_condition = CfnCondition(
             self,
             "DbSnapshotIdentifierExistsCondition",
-            expression=Fn.condition_not(Fn.condition_equals(db_snapshot_identifier_param.value, ""))
+            expression=Fn.condition_not(Fn.condition_equals(self.db_snapshot_identifier_param.value, ""))
         )
-        secret_arn_exists_condition = CfnCondition(
+        self.db_snapshot_identifier_exists_condition.override_logical_id(f"{id}SnapshotIdentifierExistsCondition")
+        self.secret_arn_exists_condition = CfnCondition(
             self,
-            "SecretArnExistsCondition",
-            expression=Fn.condition_not(Fn.condition_equals(secret_arn_param.value, ""))
+            "DbSecretArnExistsCondition",
+            expression=Fn.condition_not(Fn.condition_equals(self.secret_arn_param.value, ""))
         )
-        secret_arn_not_exists_condition = CfnCondition(
+        self.secret_arn_exists_condition.override_logical_id(f"{id}SecretArnExistsCondition")
+        self.secret_arn_not_exists_condition = CfnCondition(
             self,
-            "SecretArnNotExistsCondition",
-            expression=Fn.condition_equals(secret_arn_param.value, "")
+            "DbSecretArnNotExistsCondition",
+            expression=Fn.condition_equals(self.secret_arn_param.value, "")
         )
+        self.secret_arn_not_exists_condition.override_logical_id(f"{id}SecretArnNotExistsCondition")
+        self.db_snapshot_secret_rule = CfnRule(
+            self,
+            "DbSnapshotIdentifierAndSecretRequiredRule",
+            assertions=[
+                CfnRuleAssertion(
+                    assert_=Fn.condition_not(Fn.condition_equals(self.secret_arn_param.value_as_string, "")),
+                    assert_description="When restoring the database from a snapshot, a secret ARN must also be supplied, prepopulated with username and password key-value pairs which correspond to the snapshot image"
+                )
+            ],
+            rule_condition=Fn.condition_not(
+                Fn.condition_equals(self.db_snapshot_identifier_param.value_as_string, "")
+            )
+        )
+        self.db_snapshot_secret_rule.override_logical_id(f"{id}SnapshotIdentifierAndSecretRequiredRule")
 
         #
         # RESOURCES
         #
         
-        db_sg = aws_ec2.CfnSecurityGroup(
+        self.db_sg = aws_ec2.CfnSecurityGroup(
             self,
             "DbSg",
             group_description="Database SG",
@@ -161,13 +186,13 @@ class AuroraPostgresql(Construct):
             ],
             vpc_id=vpc.id()
         )
-        db_subnet_group = aws_rds.CfnDBSubnetGroup(
+        self.db_subnet_group = aws_rds.CfnDBSubnetGroup(
             self,
             "DbSubnetGroup",
             db_subnet_group_description="Aurora Postgresql DB Subnet Group",
             subnet_ids=vpc.private_subnet_ids()
         )
-        secret = aws_secretsmanager.CfnSecret(
+        self.secret = aws_secretsmanager.CfnSecret(
             self,
             "Secret",
             generate_secret_string=aws_secretsmanager.CfnSecret.GenerateSecretStringProperty(
@@ -178,23 +203,23 @@ class AuroraPostgresql(Construct):
             ),
             name="{}/db/secret".format(Aws.STACK_NAME)
         )
-        secret.cfn_options.condition = secret_arn_not_exists_condition
+        self.secret.cfn_options.condition = self.secret_arn_not_exists_condition
 
-        db_cluster = aws_rds.CfnDBCluster(
+        self.db_cluster = aws_rds.CfnDBCluster(
             self,
             "DbCluster",
-            backup_retention_period=db_backup_retention_period_param.value_as_number,
+            backup_retention_period=self.db_backup_retention_period_param.value_as_number,
             db_cluster_parameter_group_name="default.aurora-postgresql10",
-            db_subnet_group_name=db_subnet_group.ref,
+            db_subnet_group_name=self.db_subnet_group.ref,
             engine="aurora-postgresql",
             engine_mode="provisioned",
-            engine_version=db_engine_version_param.value_as_string,
+            engine_version=self.db_engine_version_param.value_as_string,
             master_username=Token.as_string(
                 Fn.condition_if(
-                    db_snapshot_identifier_exists_condition.logical_id,
+                    self.db_snapshot_identifier_exists_condition.logical_id,
                     Aws.NO_VALUE,
                     Fn.condition_if(
-                        secret_arn_exists_condition.logical_id,
+                        self.secret_arn_exists_condition.logical_id,
                         Fn.sub("{{resolve:secretsmanager:${SecretArn}:SecretString:username}}"),
                         Fn.sub("{{resolve:secretsmanager:${Secret}:SecretString:username}}")
                     ),
@@ -202,10 +227,10 @@ class AuroraPostgresql(Construct):
             ),
             master_user_password=Token.as_string(
                 Fn.condition_if(
-                    db_snapshot_identifier_exists_condition.logical_id,
+                    self.db_snapshot_identifier_exists_condition.logical_id,
                     Aws.NO_VALUE,
                     Fn.condition_if(
-                        secret_arn_exists_condition.logical_id,
+                        self.secret_arn_exists_condition.logical_id,
                         Fn.sub("{{resolve:secretsmanager:${SecretArn}:SecretString:password}}"),
                         Fn.sub("{{resolve:secretsmanager:${Secret}:SecretString:password}}"),
                     ),
@@ -213,38 +238,38 @@ class AuroraPostgresql(Construct):
             ),
             snapshot_identifier=Token.as_string(
                 Fn.condition_if(
-                    db_snapshot_identifier_exists_condition.logical_id,
-                    db_snapshot_identifier_param.value_as_string,
+                    self.db_snapshot_identifier_exists_condition.logical_id,
+                    self.db_snapshot_identifier_param.value_as_string,
                     Aws.NO_VALUE
                 )
             ),
             storage_encrypted=True,
-            vpc_security_group_ids=[ db_sg.ref ]
+            vpc_security_group_ids=[ self.db_sg.ref ]
         )
-        Tags.of(db_cluster).add(
+        Tags.of(self.db_cluster).add(
             "oe:patterns:db:secretarn",
             Token.as_string(
                 Fn.condition_if(
-                    secret_arn_exists_condition.logical_id,
-                    secret_arn_param.value_as_string,
-                    secret.ref
+                    self.secret_arn_exists_condition.logical_id,
+                    self.secret_arn_param.value_as_string,
+                    self.secret.ref
                 )
             )
         )
         db_primary_instance = aws_rds.CfnDBInstance(
             self,
             "DbPrimaryInstance",
-            db_cluster_identifier=db_cluster.ref,
-            db_instance_class=db_instance_class_param.value_as_string,
+            db_cluster_identifier=self.db_cluster.ref,
+            db_instance_class=self.db_instance_class_param.value_as_string,
             db_instance_identifier=Token.as_string(
                 Fn.condition_if(
-                    db_snapshot_identifier_exists_condition.logical_id,
+                    self.db_snapshot_identifier_exists_condition.logical_id,
                     Aws.NO_VALUE,
                     append_stack_uuid("db")
                 )
             ),
             db_parameter_group_name="default.aurora-postgresql10",
-            db_subnet_group_name=db_subnet_group.ref,
+            db_subnet_group_name=self.db_subnet_group.ref,
             engine="aurora-postgresql",
             publicly_accessible=False
         )

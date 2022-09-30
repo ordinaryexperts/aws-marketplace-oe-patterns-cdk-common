@@ -1,5 +1,7 @@
 # Unreleased
 
+* Postgres Aurora construct
+
 # 3.1.0
 
 * ALB: Requiring CIDR range for AlbIngressCidr parameter
