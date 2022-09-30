@@ -24,7 +24,6 @@ class AuroraPostgresql(Construct):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[string]' = [],
-            default_engine_version: str = '13.7',
             default_instance_type: str = 'db.r5.large',
             **props):
         super().__init__(scope, id, **props)
@@ -37,32 +36,8 @@ class AuroraPostgresql(Construct):
                 Fn.select(2, Fn.split("/", Aws.STACK_ID))
             ])
 
-        engine_versions = [
-            "10.17",
-            "10.18",
-            "10.18",
-            "10.19",
-            "10.20",
-            "10.21",
-            "11.9",
-            "11.12",
-            "11.13",
-            "11.13",
-            "11.14",
-            "11.15",
-            "11.16",
-            "12.7",
-            "12.8",
-            "12.9",
-            "12.10",
-            "12.11",
-            "13.3",
-            "13.4",
-            "13.5",
-            "13.6",
-            "13.7",
-            "14.3"
-        ]
+        parameter_group_name = "default.aurora-postgresql13"
+        engine_version = "13.7"
 
         default_allowed_instance_types = [
             "db.r5.large",
@@ -109,14 +84,6 @@ class AuroraPostgresql(Construct):
             description="Required: The class profile for memory and compute capacity for the database instance."
         )
         self.db_instance_class_param.override_logical_id(f"{id}InstanceClass")
-        self.db_engine_version_param = CfnParameter(
-            self,
-            "DbEngineVersion",
-            allowed_values=engine_versions,
-            default=default_engine_version,
-            description="Required: The engine version for the the database instance."
-        )
-        self.db_engine_version_param.override_logical_id(f"{id}EngineVersion")
         self.db_snapshot_identifier_param = CfnParameter(
             self,
             "DbSnapshotIdentifier",
@@ -212,11 +179,11 @@ class AuroraPostgresql(Construct):
             self,
             "DbCluster",
             backup_retention_period=self.db_backup_retention_period_param.value_as_number,
-            db_cluster_parameter_group_name="default.aurora-postgresql10",
+            db_cluster_parameter_group_name=parameter_group_name,
             db_subnet_group_name=self.db_subnet_group.ref,
             engine="aurora-postgresql",
             engine_mode="provisioned",
-            engine_version=self.db_engine_version_param.value_as_string,
+            engine_version=engine_version,
             master_username=Token.as_string(
                 Fn.condition_if(
                     self.db_snapshot_identifier_exists_condition.logical_id,
@@ -249,6 +216,7 @@ class AuroraPostgresql(Construct):
             storage_encrypted=True,
             vpc_security_group_ids=[ self.db_sg.ref ]
         )
+        self.db_cluster.override_logical_id(f"{id}Cluster")
         Tags.of(self.db_cluster).add(
             "oe:patterns:db:secretarn",
             Token.as_string(
@@ -271,7 +239,7 @@ class AuroraPostgresql(Construct):
                     append_stack_uuid("db")
                 )
             ),
-            db_parameter_group_name="default.aurora-postgresql10",
+            db_parameter_group_name=parameter_group_name,
             db_subnet_group_name=self.db_subnet_group.ref,
             engine="aurora-postgresql",
             publicly_accessible=False
