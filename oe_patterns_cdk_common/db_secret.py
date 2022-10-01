@@ -57,7 +57,7 @@ class DbSecret(Construct):
                 generate_string_key="password",
                 secret_string_template=json.dumps({"username":"dbadmin"})
             ),
-            name="{}/db/secret".format(Aws.STACK_NAME)
+            name="/{}/db/secret".format(Aws.STACK_NAME)
         )
         self.secret.cfn_options.condition = self.secret_arn_not_exists_condition
         self.secret.override_logical_id(id)
