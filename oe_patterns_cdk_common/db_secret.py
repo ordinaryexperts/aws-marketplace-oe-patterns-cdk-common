@@ -33,20 +33,20 @@ class DbSecret(Construct):
             default="",
             description="Optional: SecretsManager secret ARN used to store database credentials and other configuration. If not specified, a secret will be created."
         )
-        self.secret_arn_param.override_logical_id("DbSecretArn")
+        self.secret_arn_param.override_logical_id(f"{id}Arn")
 
         self.secret_arn_exists_condition = CfnCondition(
             self,
             "DbSecretArnExistsCondition",
             expression=Fn.condition_not(Fn.condition_equals(self.secret_arn_param.value, ""))
         )
-        self.secret_arn_exists_condition.override_logical_id(f"{id}SecretArnExistsCondition")
+        self.secret_arn_exists_condition.override_logical_id(f"{id}ArnExistsCondition")
         self.secret_arn_not_exists_condition = CfnCondition(
             self,
             "DbSecretArnNotExistsCondition",
             expression=Fn.condition_equals(self.secret_arn_param.value, "")
         )
-        self.secret_arn_not_exists_condition.override_logical_id(f"{id}SecretArnNotExistsCondition")
+        self.secret_arn_not_exists_condition.override_logical_id(f"{id}ArnNotExistsCondition")
 
         self.secret = aws_secretsmanager.CfnSecret(
             self,
@@ -60,7 +60,7 @@ class DbSecret(Construct):
             name="{}/db/secret".format(Aws.STACK_NAME)
         )
         self.secret.cfn_options.condition = self.secret_arn_not_exists_condition
-        self.secret.override_logical_id(f"DbSecret")
+        self.secret.override_logical_id(id)
 
 
         self.db_secret_arn_ssm_param = aws_ssm.CfnParameter(
@@ -70,7 +70,7 @@ class DbSecret(Construct):
             value=self.secret_arn(),
             name=Aws.STACK_NAME + "-db-secret-arn"
         )
-        self.db_secret_arn_ssm_param.override_logical_id(f"{id}SecretArnParameter")
+        self.db_secret_arn_ssm_param.override_logical_id(f"{id}ArnParameter")
 
     def secret_arn(self):
         return Token.as_string(
