@@ -5,6 +5,7 @@ from aws_cdk import (
     aws_ec2,
     aws_rds,
     aws_secretsmanager,
+    aws_ssm,
     CfnCondition,
     CfnParameter,
     CfnRule,
@@ -259,3 +260,20 @@ class AuroraPostgresql(Construct):
             publicly_accessible=False
         )
         self.db_primary_instance.override_logical_id(f"{id}PrimaryInstance")
+        self.db_secret_arn_ssm_param = aws_ssm.CfnParameter(
+            self,
+            "DbSecretArnParameter",
+            type="String",
+            value=self.secret_arn(),
+            name=Aws.STACK_NAME + "-db-secret-arn"
+        )
+        self.db_secret_arn_ssm_param.override_logical_id(f"{id}SecretArnParameter")
+
+    def secret_arn(self):
+        return Token.as_string(
+            Fn.condition_if(
+                self.secret_arn_exists_condition.logical_id,
+                self.secret_arn_param.value_as_string,
+                self.secret.ref
+            )
+        )
