@@ -219,6 +219,7 @@ class AuroraPostgresql(Construct):
                     ),
                 )
             ),
+            port="5432",
             snapshot_identifier=Token.as_string(
                 Fn.condition_if(
                     self.db_snapshot_identifier_exists_condition.logical_id,
