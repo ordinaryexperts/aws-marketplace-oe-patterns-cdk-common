@@ -20,7 +20,7 @@ from oe_patterns_cdk_common.asg import Asg
 from oe_patterns_cdk_common.db_secret import DbSecret
 from oe_patterns_cdk_common.vpc import Vpc
 
-class AuroraPostgresql(Construct):
+class AuroraCluster(Construct):
     def __init__(
             self,
             scope: Construct,
@@ -33,18 +33,9 @@ class AuroraPostgresql(Construct):
             **props):
         super().__init__(scope, id, **props)
 
-        # utility function to parse the unique id from the stack id for
-        # shorter resource names using cloudformation functions
-        def append_stack_uuid(name):
-            return Fn.join("-", [
-                name,
-                Fn.select(2, Fn.split("/", Aws.STACK_ID))
-            ])
-
-        parameter_group_name = "default.aurora-postgresql13"
-        engine_version = "13.7"
-
-        default_allowed_instance_types = [
+        self.allowed_instance_types = allowed_instance_types
+        self.default_instance_type = default_instance_type
+        self.default_allowed_instance_types = [
             "db.r5.large",
             "db.r5.xlarge",
             "db.r5.2xlarge",
@@ -84,8 +75,8 @@ class AuroraPostgresql(Construct):
         self.db_instance_class_param = CfnParameter(
             self,
             "DbInstanceClass",
-            allowed_values=allowed_instance_types if allowed_instance_types else default_allowed_instance_types,
-            default=default_instance_type,
+            allowed_values=self.allowed_instance_types if self.allowed_instance_types else self.default_allowed_instance_types,
+            default=self.default_instance_type,
             description="Required: The class profile for memory and compute capacity for the database instance."
         )
         self.db_instance_class_param.override_logical_id(f"{id}InstanceClass")
@@ -145,10 +136,10 @@ class AuroraPostgresql(Construct):
             "DbSgIngress",
             source_security_group_id=asg.sg.ref,
             description="Allow traffic from ASG to DB",
-            from_port=5432,
+            from_port=self.port,
             group_id=self.db_sg.ref,
             ip_protocol="tcp",
-            to_port=5432
+            to_port=self.port
         )
         self.db_ingress.override_logical_id(f"{id}SgIngress")
 
@@ -164,11 +155,11 @@ class AuroraPostgresql(Construct):
             self,
             "DbCluster",
             backup_retention_period=self.db_backup_retention_period_param.value_as_number,
-            db_cluster_parameter_group_name=parameter_group_name,
+            db_cluster_parameter_group_name=self.parameter_group_name,
             db_subnet_group_name=self.db_subnet_group.ref,
-            engine="aurora-postgresql",
+            engine=self.engine,
             engine_mode="provisioned",
-            engine_version=engine_version,
+            engine_version=self.engine_version,
             master_username=Token.as_string(
                 Fn.condition_if(
                     self.db_snapshot_identifier_exists_condition.logical_id,
@@ -191,7 +182,7 @@ class AuroraPostgresql(Construct):
                     ),
                 )
             ),
-            port=5432,
+            port=self.port,
             snapshot_identifier=Token.as_string(
                 Fn.condition_if(
                     self.db_snapshot_identifier_exists_condition.logical_id,
@@ -216,12 +207,42 @@ class AuroraPostgresql(Construct):
                 Fn.condition_if(
                     self.db_snapshot_identifier_exists_condition.logical_id,
                     Aws.NO_VALUE,
-                    append_stack_uuid("db")
+                    Fn.join("-", [
+                        "db",
+                        Fn.select(2, Fn.split("/", Aws.STACK_ID))
+                    ])
                 )
             ),
-            db_parameter_group_name=parameter_group_name,
+            db_parameter_group_name=self.parameter_group_name,
             db_subnet_group_name=self.db_subnet_group.ref,
-            engine="aurora-postgresql",
+            engine=self.engine,
             publicly_accessible=False
         )
         self.db_primary_instance.override_logical_id(f"{id}PrimaryInstance")
+
+class AuroraPostgresql(AuroraCluster):
+    def __init__(
+            self,
+            scope: Construct,
+            id: str,
+            asg: Asg,
+            db_secret: DbSecret,
+            vpc: Vpc,
+            allowed_instance_types: 'list[string]' = [],
+            default_instance_type: str = 'db.r5.large',
+            **props):
+
+        self.engine = "aurora-postgresql"
+        self.engine_version = "13.7"
+        self.parameter_group_name = "default.aurora-postgresql13"
+        self.port = 5432
+
+        super().__init__(
+            scope,
+            id,
+            asg=asg,
+            db_secret=db_secret,
+            vpc=vpc,
+            allowed_instance_types=allowed_instance_types,
+            default_instance_type=default_instance_type,
+            **props)
