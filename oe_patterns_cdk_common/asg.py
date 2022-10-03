@@ -40,7 +40,7 @@ class Asg(Construct):
             default_instance_type: str = 'm5.xlarge',
             deployment_rolling_update: bool = False,
             pipeline_bucket_arn: str = None,
-            secret_arn: str = None,
+            secret_arns: 'list[string]' = [],
             singleton: bool = False,
             use_public_subnets: bool = False,
             user_data_contents: str = None,
@@ -279,7 +279,7 @@ class Asg(Construct):
                     policy_name="AllowReadFromPipelineBucket"
                 )
             )
-        if secret_arn:
+        if secret_arns:
             policies.append(
                 aws_iam.CfnRole.PolicyProperty(
                     policy_document=aws_iam.PolicyDocument(
@@ -296,7 +296,7 @@ class Asg(Construct):
                                 actions=[
                                     "secretsmanager:GetSecretValue"
                                 ],
-                                resources = [secret_arn]
+                                resources = secret_arns
                             )
                         ]
                     ),
