@@ -296,7 +296,7 @@ class Asg(Construct):
                                 actions=[
                                     "secretsmanager:GetSecretValue"
                                 ],
-                                resources = secret_arns
+                                resources = Token.as_list(secret_arns)
                             )
                         ]
                     ),
