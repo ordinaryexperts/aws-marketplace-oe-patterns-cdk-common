@@ -8,7 +8,7 @@ from aws_cdk import (
 from oe_patterns_cdk_common.asg import Asg
 from oe_patterns_cdk_common.db_secret import DbSecret
 from oe_patterns_cdk_common.vpc import Vpc
-from oe_patterns_cdk_common.aurora_postgresql import AuroraPostgresql
+from oe_patterns_cdk_common.aurora_cluster import AuroraPostgresql
 
 def test_aurora_postgresql():
   stack = Stack()
