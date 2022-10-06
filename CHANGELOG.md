@@ -1,6 +1,7 @@
 # Unreleased
 
 * Postgres Aurora construct
+* allow customization of alb health_check_path
 
 # 3.1.0
 
