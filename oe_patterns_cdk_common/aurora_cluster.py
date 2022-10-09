@@ -1,11 +1,7 @@
-import json
-
 from aws_cdk import (
     Aws,
     aws_ec2,
     aws_rds,
-    aws_secretsmanager,
-    aws_ssm,
     CfnCondition,
     CfnParameter,
     CfnRule,
@@ -28,7 +24,7 @@ class AuroraCluster(Construct):
             asg: Asg,
             db_secret: DbSecret,
             vpc: Vpc,
-            allowed_instance_types: 'list[string]' = [],
+            allowed_instance_types: 'list[str]' = [],
             default_instance_type: str = 'db.r5.large',
             **props):
         super().__init__(scope, id, **props)
@@ -228,7 +224,7 @@ class AuroraPostgresql(AuroraCluster):
             asg: Asg,
             db_secret: DbSecret,
             vpc: Vpc,
-            allowed_instance_types: 'list[string]' = [],
+            allowed_instance_types: 'list[str]' = [],
             default_instance_type: str = 'db.r5.large',
             **props):
 

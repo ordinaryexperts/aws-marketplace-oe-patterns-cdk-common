@@ -1,7 +1,8 @@
 # Unreleased
 
-* Postgres Aurora construct
+* Aurora Postgres construct
 * allow customization of alb health_check_path
+* ElastiCache Cluster construct
 
 # 3.1.0
 

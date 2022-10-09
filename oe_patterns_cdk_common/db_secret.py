@@ -2,22 +2,15 @@ import json
 
 from aws_cdk import (
     Aws,
-    aws_ec2,
-    aws_rds,
     aws_secretsmanager,
     aws_ssm,
     CfnCondition,
     CfnParameter,
-    CfnRule,
-    CfnRuleAssertion,
     Fn,
-    Tags,
     Token
 )
 
 from constructs import Construct
-from oe_patterns_cdk_common.asg import Asg
-from oe_patterns_cdk_common.vpc import Vpc
 
 class DbSecret(Construct):
     def __init__(
