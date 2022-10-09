@@ -5,15 +5,13 @@ from aws_cdk import (
   Stack
 )
 
-from oe_patterns_cdk_common.asg import Asg
 from oe_patterns_cdk_common.vpc import Vpc
 from oe_patterns_cdk_common.elasticache_cluster import ElasticacheRedis
 
 def test_aurora_postgresql():
   stack = Stack()
   vpc = Vpc(stack, "TestVpc")
-  asg = Asg(stack, "TestAsg", vpc=vpc)
-  redis = ElasticacheRedis(stack, "TestRedis", asg=asg, vpc=vpc)
+  redis = ElasticacheRedis(stack, "TestRedis", vpc=vpc)
   template = assertions.Template.from_stack(stack)
   # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
 
