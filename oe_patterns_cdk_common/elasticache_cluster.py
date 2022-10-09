@@ -45,18 +45,11 @@ class ElasticacheCluster(Construct):
             default=self.default_instance_type,
             description="Required: Instance type for the cluster nodes."
         )
-        self.elasticache_cluster_engine_version_param = CfnParameter(
-            self,
-            "ElastiCacheClusterEngineVersion",
-            allowed_values=[ "1.4.14", "1.4.24", "1.4.33", "1.4.34", "1.4.5", "1.5.10", "1.5.16" ],
-            default="1.5.16",
-            description="Required: The version of the cache cluster."
-        )
         self.elasticache_cluster_num_cache_nodes_param = CfnParameter(
             self,
             "ElastiCacheClusterNumCacheNodes",
-            default=2,
-            description="Required: The number of cache nodes in the memcached cluster (only applies ElastiCache enabled).",
+            default=1,
+            description="Required: The number of cache nodes in the cluster.",
             min_value=1,
             max_value=20,
             type="Number"
@@ -90,11 +83,32 @@ class ElasticacheCluster(Construct):
             cache_node_type=self.elasticache_cluster_cache_node_type_param.value_as_string,
             cache_subnet_group_name=self.elasticache_subnet_group.ref,
             engine=self.engine,
-            engine_version=self.elasticache_cluster_engine_version_param.value_as_string,
+            engine_version=self.engine_version,
             num_cache_nodes=self.elasticache_cluster_num_cache_nodes_param.value_as_number,
             vpc_security_group_ids=[ self.elasticache_sg.ref ]
         )
 
+
+class ElasticacheMemcached(ElasticacheCluster):
+    def __init__(
+            self,
+            scope: Construct,
+            id: str,
+            vpc: Vpc,
+            allowed_instance_types: 'list[str]' = [],
+            default_instance_type: str = 'cache.t3.micro',
+            **props):
+
+        self.engine = "memcached"
+        self.engine_version = "1.6.6"
+
+        super().__init__(
+            scope,
+            id,
+            vpc=vpc,
+            allowed_instance_types=allowed_instance_types,
+            default_instance_type=default_instance_type,
+            **props)
 
 class ElasticacheRedis(ElasticacheCluster):
     def __init__(
@@ -107,6 +121,7 @@ class ElasticacheRedis(ElasticacheCluster):
             **props):
 
         self.engine = "redis"
+        self.engine_version = "6.2"
 
         super().__init__(
             scope,
