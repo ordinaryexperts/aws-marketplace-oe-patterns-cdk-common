@@ -1,5 +1,11 @@
 # Unreleased
 
+# 3.2.0
+
+* Aurora Postgres construct
+* allow customization of alb health_check_path
+* ElastiCache Cluster construct
+
 # 3.1.0
 
 * ALB: Requiring CIDR range for AlbIngressCidr parameter
