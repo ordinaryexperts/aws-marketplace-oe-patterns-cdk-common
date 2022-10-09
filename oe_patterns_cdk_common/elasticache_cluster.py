@@ -2,8 +2,7 @@ from aws_cdk import (
     Aws,
     aws_ec2,
     aws_elasticache,
-    CfnParameter,
-    CfnResource
+    CfnParameter
 )
 
 from constructs import Construct
