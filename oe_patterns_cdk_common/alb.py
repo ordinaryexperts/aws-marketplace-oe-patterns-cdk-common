@@ -18,6 +18,7 @@ class Alb(Construct):
             id: str,
             vpc: Vpc,
             asg: Asg,
+            health_check_path: str = "/",
             target_group_https: bool = True,
             **props):
         super().__init__(scope, id, **props)
@@ -149,6 +150,7 @@ class Alb(Construct):
             "AsgTargetGroup",
             health_check_enabled=None,
             health_check_interval_seconds=None,
+            health_check_path=health_check_path,
             port=443 if target_group_https else 80,
             protocol="HTTPS" if target_group_https else "HTTP",
             target_group_attributes=[
