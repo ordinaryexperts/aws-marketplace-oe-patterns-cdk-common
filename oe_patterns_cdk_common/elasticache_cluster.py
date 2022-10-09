@@ -1,4 +1,5 @@
 from aws_cdk import (
+    Aws,
     aws_ec2,
     aws_elasticache,
     CfnParameter,
@@ -45,6 +46,7 @@ class ElasticacheCluster(Construct):
             default=self.default_instance_type,
             description="Required: Instance type for the cluster nodes."
         )
+        self.elasticache_cluster_cache_node_type_param.override_logical_id(f"{id}ClusterCacheNodeType")
         self.elasticache_cluster_num_cache_nodes_param = CfnParameter(
             self,
             "ElastiCacheClusterNumCacheNodes",
@@ -54,6 +56,7 @@ class ElasticacheCluster(Construct):
             max_value=20,
             type="Number"
         )
+        self.elasticache_cluster_num_cache_nodes_param.override_logical_id(f"{id}ClusterNumCacheNodes")
         self.elasticache_sg = aws_ec2.CfnSecurityGroup(
             self,
             "ElastiCacheSg",
@@ -67,19 +70,22 @@ class ElasticacheCluster(Construct):
             ],
             vpc_id=vpc.id()
         )
-        self.elasticache_subnet_group = CfnResource(
+        self.elasticache_sg.override_logical_id(f"{id}Sg")
+        self.elasticache_subnet_group = aws_elasticache.CfnSubnetGroup(
             self,
             "ElastiCacheSubnetGroup",
-            type="AWS::ElastiCache::SubnetGroup",
-            properties={
-                "Description": "ElastiCache subnet group.",
-                "SubnetIds":  vpc.private_subnet_ids()
-            }
+            description="ElastiCache subnet group.",
+            subnet_ids=vpc.private_subnet_ids()
         )
+        self.elasticache_subnet_group.override_logical_id(f"{id}SubnetGroup")
+        if self.engine == "redis":
+            az_mode = Aws.NO_VALUE
+        else:
+            az_mode = "cross-az" # TODO fix for memcached case of single node
         self.elasticache_cluster = aws_elasticache.CfnCacheCluster(
             self,
             "ElastiCacheCluster",
-            az_mode="cross-az",
+            az_mode=az_mode,
             cache_node_type=self.elasticache_cluster_cache_node_type_param.value_as_string,
             cache_subnet_group_name=self.elasticache_subnet_group.ref,
             engine=self.engine,
@@ -87,6 +93,7 @@ class ElasticacheCluster(Construct):
             num_cache_nodes=self.elasticache_cluster_num_cache_nodes_param.value_as_number,
             vpc_security_group_ids=[ self.elasticache_sg.ref ]
         )
+        self.elasticache_cluster.override_logical_id(f"{id}Cluster")
 
 
 class ElasticacheMemcached(ElasticacheCluster):
