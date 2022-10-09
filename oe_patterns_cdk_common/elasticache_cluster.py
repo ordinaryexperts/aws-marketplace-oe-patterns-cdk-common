@@ -7,6 +7,7 @@ from aws_cdk import (
 )
 
 from constructs import Construct
+from oe_patterns_cdk_common.asg import Asg
 from oe_patterns_cdk_common.vpc import Vpc
 
 class ElasticacheCluster(Construct):
@@ -14,6 +15,7 @@ class ElasticacheCluster(Construct):
             self,
             scope: Construct,
             id: str,
+            asg: Asg,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
             default_instance_type: str = 'cache.t3.micro',
@@ -71,6 +73,18 @@ class ElasticacheCluster(Construct):
             vpc_id=vpc.id()
         )
         self.elasticache_sg.override_logical_id(f"{id}Sg")
+        self.elasticache_ingress = aws_ec2.CfnSecurityGroupIngress(
+            self,
+            "ElasticacheSgIngress",
+            source_security_group_id=asg.sg.ref,
+            description="Allow traffic from ASG to ElastiCache",
+            from_port=self.port,
+            group_id=self.elasticache_sg.ref,
+            ip_protocol="tcp",
+            to_port=self.port
+        )
+        self.elasticache_ingress.override_logical_id(f"{id}SgIngress")
+
         self.elasticache_subnet_group = aws_elasticache.CfnSubnetGroup(
             self,
             "ElastiCacheSubnetGroup",
@@ -108,6 +122,7 @@ class ElasticacheMemcached(ElasticacheCluster):
 
         self.engine = "memcached"
         self.engine_version = "1.6.6"
+        self.port = 11211
 
         super().__init__(
             scope,
@@ -122,6 +137,7 @@ class ElasticacheRedis(ElasticacheCluster):
             self,
             scope: Construct,
             id: str,
+            asg: Asg,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
             default_instance_type: str = 'cache.t3.micro',
@@ -129,10 +145,12 @@ class ElasticacheRedis(ElasticacheCluster):
 
         self.engine = "redis"
         self.engine_version = "6.2"
+        self.port = 6379
 
         super().__init__(
             scope,
             id,
+            asg=asg,
             vpc=vpc,
             allowed_instance_types=allowed_instance_types,
             default_instance_type=default_instance_type,
