@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.3.0
+
 * Remove unnecessary asg parameter from constructs
 
 # 3.2.0
