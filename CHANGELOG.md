@@ -1,5 +1,7 @@
 # Unreleased
 
+* Remove unnecessary asg parameter from constructs
+
 # 3.2.0
 
 * Aurora Postgres construct
