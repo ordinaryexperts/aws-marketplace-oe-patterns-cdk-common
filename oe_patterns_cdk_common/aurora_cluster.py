@@ -12,7 +12,6 @@ from aws_cdk import (
 )
 
 from constructs import Construct
-from oe_patterns_cdk_common.asg import Asg
 from oe_patterns_cdk_common.db_secret import DbSecret
 from oe_patterns_cdk_common.vpc import Vpc
 
@@ -21,7 +20,6 @@ class AuroraCluster(Construct):
             self,
             scope: Construct,
             id: str,
-            asg: Asg,
             db_secret: DbSecret,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
@@ -29,6 +27,7 @@ class AuroraCluster(Construct):
             **props):
         super().__init__(scope, id, **props)
 
+        self.id = id
         self.allowed_instance_types = allowed_instance_types
         self.default_instance_type = default_instance_type
         self.default_allowed_instance_types = [
@@ -127,18 +126,6 @@ class AuroraCluster(Construct):
         )
         self.db_sg.override_logical_id(f"{id}Sg")
 
-        self.db_ingress = aws_ec2.CfnSecurityGroupIngress(
-            self,
-            "DbSgIngress",
-            source_security_group_id=asg.sg.ref,
-            description="Allow traffic from ASG to DB",
-            from_port=self.port,
-            group_id=self.db_sg.ref,
-            ip_protocol="tcp",
-            to_port=self.port
-        )
-        self.db_ingress.override_logical_id(f"{id}SgIngress")
-
         self.db_subnet_group = aws_rds.CfnDBSubnetGroup(
             self,
             "DbSubnetGroup",
@@ -221,7 +208,6 @@ class AuroraPostgresql(AuroraCluster):
             self,
             scope: Construct,
             id: str,
-            asg: Asg,
             db_secret: DbSecret,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
@@ -236,9 +222,23 @@ class AuroraPostgresql(AuroraCluster):
         super().__init__(
             scope,
             id,
-            asg=asg,
             db_secret=db_secret,
             vpc=vpc,
             allowed_instance_types=allowed_instance_types,
             default_instance_type=default_instance_type,
             **props)
+
+        
+    def add_asg_ingress(self, asg):
+        db_ingress = aws_ec2.CfnSecurityGroupIngress(
+            self,
+            "DbSgIngress",
+            source_security_group_id=asg.sg.ref,
+            description="Allow traffic from ASG to DB",
+            from_port=self.port,
+            group_id=self.db_sg.ref,
+            ip_protocol="tcp",
+            to_port=self.port
+        )
+        db_ingress.override_logical_id(f"{self.id}SgIngress")
+        return db_ingress
