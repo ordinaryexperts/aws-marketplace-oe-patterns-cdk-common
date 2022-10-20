@@ -242,5 +242,3 @@ class AuroraPostgresql(AuroraCluster):
         )
         db_ingress.override_logical_id(f"{self.id}SgIngress")
         return db_ingress
-
-
