@@ -105,13 +105,13 @@ class Dns(Construct):
             }
         }
 
-    def hostname(self):
-        if self._alb:
+    def hostname(self, alb=None):
+        if alb:
             return Token.as_string(
                 Fn.condition_if(
                     self.hostname_exists_condition.logical_id,
                     self.hostname_param.value_as_string,
-                    self._alb.alb.attr_dns_name
+                    alb.alb.attr_dns_name
                 )
             )
         else:
