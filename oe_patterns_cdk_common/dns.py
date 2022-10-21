@@ -80,7 +80,7 @@ class Dns(Construct):
                 "https://{}".format(alb.alb.attr_dns_name)
             ))
         )
-        self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
+        self.site_url_output.override_logical_id(f"{self.id}SiteUrlOutput")
 
     def metadata_parameter_group(self):
         return [
