@@ -106,10 +106,13 @@ class Dns(Construct):
         }
 
     def hostname(self):
-        return Token.as_string(
-            Fn.condition_if(
-                self.hostname_exists_condition.logical_id,
-                self.hostname_param.value_as_string,
-                self._alb.alb.attr_dns_name
+        if self._alb:
+            return Token.as_string(
+                Fn.condition_if(
+                    self.hostname_exists_condition.logical_id,
+                    self.hostname_param.value_as_string,
+                    self._alb.alb.attr_dns_name
+                )
             )
-        )
+        else:
+            return self.hostname_param.value_as_string
