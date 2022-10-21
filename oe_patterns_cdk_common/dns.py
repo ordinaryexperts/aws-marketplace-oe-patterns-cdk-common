@@ -25,6 +25,7 @@ class Dns(Construct):
         # PARAMETERS
         #
 
+        self.id = id
         self.route_53_hosted_zone_name_param = CfnParameter(
             self,
             "Route53HostedZoneName",
@@ -64,7 +65,7 @@ class Dns(Construct):
             resource_records=[ alb.alb.attr_dns_name ],
             type="CNAME"
         )
-        self.record_set.override_logical_id(f"{id}RecordSet")
+        self.record_set.override_logical_id(f"{self.id}RecordSet")
         # https://github.com/aws/aws-cdk/issues/8431
         self.record_set.add_property_override("TTL", 60)
         self.record_set.cfn_options.condition = self.route_53_hosted_zone_name_exists_condition
