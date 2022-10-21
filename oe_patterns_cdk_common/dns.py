@@ -18,7 +18,6 @@ class Dns(Construct):
             self,
             scope: Construct,
             id: str,
-            alb: Alb,
             **props):
         super().__init__(scope, id, **props)
 
@@ -26,7 +25,6 @@ class Dns(Construct):
         # PARAMETERS
         #
 
-        self._alb = alb
         self.route_53_hosted_zone_name_param = CfnParameter(
             self,
             "Route53HostedZoneName",
@@ -55,6 +53,8 @@ class Dns(Construct):
             expression=Fn.condition_not(Fn.condition_equals(self.hostname_param.value, ""))
         )
         self.hostname_exists_condition.override_logical_id(f"{id}HostnameExists")
+
+    def add_alb(self, alb):
         # route 53
         self.record_set = aws_route53.CfnRecordSet(
             self,
@@ -80,14 +80,6 @@ class Dns(Construct):
             ))
         )
         self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
-        self.hostname_ssm_param = aws_ssm.CfnParameter(
-            self,
-            "HostnameParameter",
-            type="String",
-            value=self.hostname(),
-            name=Aws.STACK_NAME + "-hostname"
-        )
-        self.hostname_ssm_param.override_logical_id(f"{id}HostnameParameter")
 
     def metadata_parameter_group(self):
         return [
