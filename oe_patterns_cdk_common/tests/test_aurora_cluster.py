@@ -18,6 +18,6 @@ def test_aurora_postgresql():
   aurora = AuroraPostgresql(stack, "TestAurora", db_secret=db_secret, vpc=vpc)
   ingress = aurora.add_asg_ingress(asg)
   template = assertions.Template.from_stack(stack)
-  print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
 
   template.resource_count_is("AWS::RDS::DBCluster", 1)

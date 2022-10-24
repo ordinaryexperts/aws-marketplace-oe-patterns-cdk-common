@@ -1,5 +1,7 @@
 # Unreleased
 
+* Remove alb from dns
+
 # 3.3.0
 
 * Remove unnecessary asg parameter from constructs
