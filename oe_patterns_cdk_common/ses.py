@@ -165,3 +165,8 @@ class Ses(Construct):
             }
         )
         self.generate_smtp_password_custom_resource.node.default_child.override_logical_id("GenerateSMTPPasswordCustomResource")
+
+    def secret_arn(self):
+        return Token.as_string(
+            self.generate_smtp_password_custom_resource.get_att('arn')
+        )
