@@ -29,11 +29,28 @@ class Ses(Construct):
         self.id = id
         self.ttl = "300"
 
+        self.create_domain_identity_param = CfnParameter(
+            self,
+            "SesCreateDomainIdentity",
+            allowed_values=[ "true", "false" ],
+            default="true",
+            description="Whether or not to create a SES Identity from the hosted zone."
+        )
+        self.create_domain_identity_param.override_logical_id(f"{id}CreateDomainIdentity")
+
+        self.create_domain_identity_condition = CfnCondition(
+            self,
+            "SesCreateDomainIdentityCondition",
+            expression=Fn.condition_equals(self.create_domain_identity_param.value, "true")
+        )
+        self.create_domain_identity_condition.override_logical_id(f"{id}CreateDomainIdentityCondition")
+
         self.domain_identity = aws_ses.CfnEmailIdentity(
             self,
             "SesDomainIdentity",
             email_identity=hosted_zone_name
         )
+        self.domain_identity.cfn_options.condition=self.create_domain_identity_condition
         self.domain_identity.override_logical_id(f"{id}DomainIdentity")
 
         self.dkim_dns_record_set1 = aws_route53.CfnRecordSet(
@@ -45,6 +62,7 @@ class Ses(Construct):
             ttl=self.ttl,
             type="CNAME"
         )
+        self.dkim_dns_record_set1.cfn_options.condition=self.create_domain_identity_condition
         self.dkim_dns_record_set1.override_logical_id(f"{id}DkimDnsRecordSet1")
 
         self.dkim_dns_record_set2 = aws_route53.CfnRecordSet(
@@ -56,6 +74,7 @@ class Ses(Construct):
             ttl=self.ttl,
             type="CNAME"
         )
+        self.dkim_dns_record_set2.cfn_options.condition=self.create_domain_identity_condition
         self.dkim_dns_record_set2.override_logical_id(f"{id}DkimDnsRecordSet2")
 
         self.dkim_dns_record_set3 = aws_route53.CfnRecordSet(
@@ -67,9 +86,9 @@ class Ses(Construct):
             ttl=self.ttl,
             type="CNAME"
         )
+        self.dkim_dns_record_set3.cfn_options.condition=self.create_domain_identity_condition
         self.dkim_dns_record_set3.override_logical_id(f"{id}DkimDnsRecordSet3")
 
-        # iam user for ses
         self.instance_user = aws_iam.CfnUser(
             self,
             "InstanceUser",
@@ -96,7 +115,6 @@ class Ses(Construct):
         self.instance_user.override_logical_id("InstanceUser")
 
         # actual creds are required to generate the SMTP password
-        # also Mastodon paperclip config expects an access key and secret
         self.instance_user_access_key = aws_iam.AccessKey(
             self,
             "InstanceUserAccessKey",
@@ -168,5 +186,5 @@ class Ses(Construct):
 
     def secret_arn(self):
         return Token.as_string(
-            self.generate_smtp_password_custom_resource.get_att('arn')
+            self.generate_smtp_password_custom_resource.get_att("arn")
         )
