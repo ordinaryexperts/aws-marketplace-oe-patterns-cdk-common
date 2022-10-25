@@ -1,6 +1,7 @@
 # Unreleased
 
 * Remove alb from dns
+* SES construct
 
 # 3.3.0
 

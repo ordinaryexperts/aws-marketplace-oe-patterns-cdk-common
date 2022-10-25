@@ -1,7 +1,5 @@
 from aws_cdk import (
-    Aws,
     aws_route53,
-    aws_ssm,
     CfnCondition,
     CfnOutput,
     CfnParameter,
@@ -10,7 +8,6 @@ from aws_cdk import (
 )
 
 from constructs import Construct
-from oe_patterns_cdk_common.alb import Alb
 
 class Dns(Construct):
 
