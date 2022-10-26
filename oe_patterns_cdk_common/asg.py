@@ -34,6 +34,7 @@ class Asg(Construct):
             scope: Construct,
             id: str,
             vpc: Vpc,
+            additional_iam_role_policies: 'list[str]' = [],
             allow_associate_address: bool = False,
             allowed_instance_types: 'list[str]' = [],
             data_volume_size: int = 0,
@@ -303,6 +304,9 @@ class Asg(Construct):
                     policy_name="AllowReadFromSecretsManager"
                 )
             )
+
+        if additional_iam_role_policies:
+            policies.append(additional_iam_role_policies)
 
         self.iam_instance_role = aws_iam.CfnRole(
             self,

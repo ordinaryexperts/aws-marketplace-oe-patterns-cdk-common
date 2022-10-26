@@ -7,7 +7,6 @@ from aws_cdk import (
     aws_route53,
     aws_ses,
     CfnCondition,
-    CfnOutput,
     CfnParameter,
     CustomResource,
     Fn,
