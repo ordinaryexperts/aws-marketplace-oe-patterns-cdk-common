@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.4.1
+
+* Add option for additional policies on ses user
+
 # 3.4.0
 
 * Remove alb from dns
