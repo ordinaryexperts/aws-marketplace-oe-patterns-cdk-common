@@ -1,5 +1,11 @@
 # Unreleased
 
+# 3.4.0
+
+* Remove alb from dns
+* SES construct
+* Add option for additional policies on asg
+
 # 3.3.0
 
 * Remove unnecessary asg parameter from constructs

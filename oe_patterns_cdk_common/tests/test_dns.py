@@ -1,6 +1,5 @@
 from aws_cdk import (
   assertions,
-  aws_ec2,
   Stack
 )
 
@@ -14,7 +13,8 @@ def test_dns():
   vpc = Vpc(stack, "TestVpc")
   asg = Asg(stack, "TestAsg", vpc=vpc)
   alb = Alb(stack, "TestAlb", asg=asg, vpc=vpc)
-  dns = Dns(stack, "TestDns", alb=alb)
+  dns = Dns(stack, "TestDns")
+  dns.add_alb(alb)
   template = assertions.Template.from_stack(stack)
 
   template.resource_count_is("AWS::ElasticLoadBalancingV2::LoadBalancer", 1)

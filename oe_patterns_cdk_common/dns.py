@@ -1,7 +1,5 @@
 from aws_cdk import (
-    Aws,
     aws_route53,
-    aws_ssm,
     CfnCondition,
     CfnOutput,
     CfnParameter,
@@ -10,7 +8,6 @@ from aws_cdk import (
 )
 
 from constructs import Construct
-from oe_patterns_cdk_common.alb import Alb
 
 class Dns(Construct):
 
@@ -18,7 +15,6 @@ class Dns(Construct):
             self,
             scope: Construct,
             id: str,
-            alb: Alb,
             **props):
         super().__init__(scope, id, **props)
 
@@ -26,7 +22,7 @@ class Dns(Construct):
         # PARAMETERS
         #
 
-        self._alb = alb
+        self.id = id
         self.route_53_hosted_zone_name_param = CfnParameter(
             self,
             "Route53HostedZoneName",
@@ -55,6 +51,8 @@ class Dns(Construct):
             expression=Fn.condition_not(Fn.condition_equals(self.hostname_param.value, ""))
         )
         self.hostname_exists_condition.override_logical_id(f"{id}HostnameExists")
+
+    def add_alb(self, alb):
         # route 53
         self.record_set = aws_route53.CfnRecordSet(
             self,
@@ -64,7 +62,7 @@ class Dns(Construct):
             resource_records=[ alb.alb.attr_dns_name ],
             type="CNAME"
         )
-        self.record_set.override_logical_id(f"{id}RecordSet")
+        self.record_set.override_logical_id(f"{self.id}RecordSet")
         # https://github.com/aws/aws-cdk/issues/8431
         self.record_set.add_property_override("TTL", 60)
         self.record_set.cfn_options.condition = self.route_53_hosted_zone_name_exists_condition
@@ -79,15 +77,7 @@ class Dns(Construct):
                 "https://{}".format(alb.alb.attr_dns_name)
             ))
         )
-        self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
-        self.hostname_ssm_param = aws_ssm.CfnParameter(
-            self,
-            "HostnameParameter",
-            type="String",
-            value=self.hostname(),
-            name=Aws.STACK_NAME + "-hostname"
-        )
-        self.hostname_ssm_param.override_logical_id(f"{id}HostnameParameter")
+        self.site_url_output.override_logical_id(f"{self.id}SiteUrlOutput")
 
     def metadata_parameter_group(self):
         return [
@@ -112,11 +102,14 @@ class Dns(Construct):
             }
         }
 
-    def hostname(self):
-        return Token.as_string(
-            Fn.condition_if(
-                self.hostname_exists_condition.logical_id,
-                self.hostname_param.value_as_string,
-                self._alb.alb.attr_dns_name
+    def hostname(self, alb=None):
+        if alb:
+            return Token.as_string(
+                Fn.condition_if(
+                    self.hostname_exists_condition.logical_id,
+                    self.hostname_param.value_as_string,
+                    alb.alb.attr_dns_name
+                )
             )
-        )
+        else:
+            return self.hostname_param.value_as_string

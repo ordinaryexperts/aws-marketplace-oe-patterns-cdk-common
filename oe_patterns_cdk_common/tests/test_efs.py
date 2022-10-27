@@ -16,7 +16,7 @@ def test_efs():
     group_description="test",
     vpc_id=vpc.id()
   )
-  efs = Efs(stack, "TestEfs", app_sg=app_sg, vpc=vpc)
+  Efs(stack, "TestEfs", app_sg=app_sg, vpc=vpc)
   template = assertions.Template.from_stack(stack)
 
   template.resource_count_is("AWS::EFS::FileSystem", 1)
