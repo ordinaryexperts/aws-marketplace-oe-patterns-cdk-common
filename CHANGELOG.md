@@ -2,7 +2,7 @@
 
 # 3.4.1
 
-* Add optino for additional policies on ses user
+* Add option for additional policies on ses user
 
 # 3.4.0
 
