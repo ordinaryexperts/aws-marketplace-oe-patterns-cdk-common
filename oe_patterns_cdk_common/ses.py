@@ -22,6 +22,7 @@ class Ses(Construct):
             scope: Construct,
             id: str,
             hosted_zone_name: str,
+            additional_iam_user_policies: 'list[object]' = [],
             **props):
         super().__init__(scope, id, **props)
 
@@ -88,27 +89,32 @@ class Ses(Construct):
         self.dkim_dns_record_set3.cfn_options.condition=self.create_domain_identity_condition
         self.dkim_dns_record_set3.override_logical_id(f"{id}DkimDnsRecordSet3")
 
+        policies = [
+            aws_iam.CfnUser.PolicyProperty(
+                policy_document=aws_iam.PolicyDocument(
+                    statements=[
+                        aws_iam.PolicyStatement(
+                            effect=aws_iam.Effect.ALLOW,
+                            actions=[
+                                "ses:SendEmail",
+                                "ses:SendRawEmail"
+                            ],
+                            resources=["*"]
+                        )
+                    ]
+                ),
+                policy_name="AllowSendEmail"
+            )
+        ]
+
+        if additional_iam_user_policies:
+            policies.extend(additional_iam_user_policies)
+
         self.instance_user = aws_iam.CfnUser(
             self,
             "InstanceUser",
             path="/",
-            policies=[
-                aws_iam.CfnUser.PolicyProperty(
-                    policy_document=aws_iam.PolicyDocument(
-                        statements=[
-                            aws_iam.PolicyStatement(
-                                effect=aws_iam.Effect.ALLOW,
-                                actions=[
-                                    "ses:SendEmail",
-                                    "ses:SendRawEmail"
-                                ],
-                                resources=["*"]
-                            )
-                        ]
-                    ),
-                    policy_name="AllowSendEmail"
-                )
-            ],
+            policies=policies,
             user_name=f"{Aws.REGION}-{Aws.STACK_NAME}-instance"
         )
         self.instance_user.override_logical_id("InstanceUser")
