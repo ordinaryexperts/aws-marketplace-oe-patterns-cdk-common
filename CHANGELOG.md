@@ -2,6 +2,7 @@
 
 * Remove alb from dns
 * SES construct
+* Add option for additional policies on asg
 
 # 3.3.0
 
