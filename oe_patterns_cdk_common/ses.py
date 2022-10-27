@@ -21,8 +21,8 @@ class Ses(Construct):
             self,
             scope: Construct,
             id: str,
-            additional_iam_role_policies: 'list[object]' = [],
             hosted_zone_name: str,
+            additional_iam_role_policies: 'list[object]' = [],
             **props):
         super().__init__(scope, id, **props)
 
