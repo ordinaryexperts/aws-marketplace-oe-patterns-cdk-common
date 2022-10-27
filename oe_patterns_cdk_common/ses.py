@@ -22,7 +22,7 @@ class Ses(Construct):
             scope: Construct,
             id: str,
             hosted_zone_name: str,
-            additional_iam_role_policies: 'list[object]' = [],
+            additional_iam_user_policies: 'list[object]' = [],
             **props):
         super().__init__(scope, id, **props)
 
@@ -107,8 +107,8 @@ class Ses(Construct):
             )
         ]
 
-        if additional_iam_role_policies:
-            policies.extend(additional_iam_role_policies)
+        if additional_iam_user_policies:
+            policies.extend(additional_iam_user_policies)
 
         self.instance_user = aws_iam.CfnUser(
             self,
