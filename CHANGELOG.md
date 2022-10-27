@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.4.0
+
 * Remove alb from dns
 * SES construct
 * Add option for additional policies on asg
