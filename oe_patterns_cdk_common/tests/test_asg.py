@@ -1,6 +1,7 @@
 import json
 from aws_cdk import (
   assertions,
+  aws_iam,
   Stack
 )
 
@@ -16,7 +17,7 @@ def print_resource(template, type):
 def test_asg():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
-  asg = Asg(
+  Asg(
     stack,
     'TestAsg',
     user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
@@ -32,7 +33,7 @@ def test_asg():
 def test_singleton_asg():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
-  asg = Asg(
+  Asg(
     stack,
     'TestAsg',
     singleton=True,
@@ -49,7 +50,7 @@ def test_singleton_asg():
 def test_data_asg():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
-  asg = Asg(
+  Asg(
     stack,
     'TestAsg',
     data_volume_size=10,
@@ -64,7 +65,7 @@ def test_data_asg():
 def test_rolling_deploy_asg():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
-  asg = Asg(
+  Asg(
     stack,
     'TestAsg',
     deployment_rolling_update=True,
@@ -77,3 +78,31 @@ def test_rolling_deploy_asg():
   template.has_resource('AWS::AutoScaling::AutoScalingGroup', {
     'UpdatePolicy': {'AutoScalingRollingUpdate': assertions.Match.any_value()}
   })
+
+def test_additional_iam_role_policies_asg():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  asg_update_secret_policy = aws_iam.CfnRole.PolicyProperty(
+    policy_document=aws_iam.PolicyDocument(
+      statements=[
+        aws_iam.PolicyStatement(
+          effect=aws_iam.Effect.ALLOW,
+          actions=["secretsmanager:UpdateSecret"],
+          resources=["*"]
+        )
+      ]
+    ),
+    policy_name="AllowUpdateAllSecrets"
+  )
+
+  Asg(
+    stack,
+    'TestAsg',
+    additional_iam_role_policies=[asg_update_secret_policy],
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  role = template.find_resources('AWS::IAM::Role')
+
+  assert role['TestAsgInstanceRole']['Properties']['Policies'][-1]['PolicyName'] == 'AllowUpdateAllSecrets'

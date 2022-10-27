@@ -1,6 +1,5 @@
 from aws_cdk import (
   assertions,
-  aws_ec2,
   Stack
 )
 

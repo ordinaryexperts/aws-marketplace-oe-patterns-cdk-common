@@ -53,10 +53,17 @@ def handler(event, context):
                     SecretId=arn
                 )
                 current_secret = json.loads(response["SecretString"])
-                if secret != current_secret:
+                if ('access_key_id'     not in current_secret or current_secret['access_key_id']     != secret['access_key_id'] or
+                    'smtp_password'     not in current_secret or current_secret['smtp_password']     != secret['smtp_password'] or
+                    'secret_access_key' not in current_secret or current_secret['secret_access_key'] != secret['secret_access_key']):
+
+                    current_secret['access_key_id']     = secret['access_key_id']
+                    current_secret['smtp_password']     = secret['smtp_password']
+                    current_secret['secret_access_key'] = secret['secret_access_key']
+
                     client.update_secret(
                         SecretId=arn,
-                        SecretString=json.dumps(secret)
+                        SecretString=json.dumps(current_secret)
                     )
                 responseData = {"arn": arn}
             else:
