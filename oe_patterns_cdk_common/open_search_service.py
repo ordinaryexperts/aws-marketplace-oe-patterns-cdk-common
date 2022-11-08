@@ -1,6 +1,7 @@
 from aws_cdk import (
     Aws,
     aws_ec2,
+    aws_kms,
     aws_opensearchservice,
     CfnTag
 )
@@ -18,6 +19,12 @@ class OpenSearchService(Construct):
             default_instance_type: str = 'm5.large.search',
             **props):
         super().__init__(scope, id, **props)
+
+        self.key = aws_kms.Key(
+            self,
+            'OpenSearchServiceKey',
+            enable_key_rotation=False
+        )
 
         self.sg = aws_ec2.CfnSecurityGroup(
             self,
@@ -67,7 +74,8 @@ class OpenSearchService(Construct):
             #     ebs_enabled=False
             # ),
             encryption_at_rest_options=aws_opensearchservice.CfnDomain.EncryptionAtRestOptionsProperty(
-                enabled=False
+                enabled=True,
+                kms_key_id=self.key.key_id
             ),
             engine_version="Elasticsearch_7.10",
             # log_publishing_options={
