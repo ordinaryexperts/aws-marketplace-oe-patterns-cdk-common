@@ -42,7 +42,7 @@ class OpenSearchService(Construct):
                 "override_main_response_version": "true"
             },
             advanced_security_options=aws_opensearchservice.CfnDomain.AdvancedSecurityOptionsInputProperty(
-                enabled=False,
+                enabled=True,
                 internal_user_database_enabled=True,
                 master_user_options=aws_opensearchservice.CfnDomain.MasterUserOptionsProperty(
                     master_user_name="masterUserName",
