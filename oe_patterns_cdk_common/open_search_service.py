@@ -62,13 +62,10 @@ class OpenSearchService(Construct):
                 instance_type="m5.large.search",
                 zone_awareness_enabled=False
             ),
-            # domain_endpoint_options=aws_opensearchservice.CfnDomain.DomainEndpointOptionsProperty(
-            #     custom_endpoint="customEndpoint",
-            #     custom_endpoint_certificate_arn="customEndpointCertificateArn",
-            #     custom_endpoint_enabled=False,
-            #     enforce_https=False,
-            #     tls_security_policy="tlsSecurityPolicy"
-            # ),
+            domain_endpoint_options=aws_opensearchservice.CfnDomain.DomainEndpointOptionsProperty(
+                enforce_https=True,
+                tls_security_policy="Policy-Min-TLS-1-2-2019-07"
+            ),
             # domain_name="domainName",
             # ebs_options=aws_opensearchservice.CfnDomain.EBSOptionsProperty(
             #     ebs_enabled=False
