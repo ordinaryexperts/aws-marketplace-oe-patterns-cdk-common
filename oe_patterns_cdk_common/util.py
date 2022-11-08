@@ -1,5 +1,6 @@
 from aws_cdk import (
     Aws,
+    aws_ec2,
     Fn
 )
 

@@ -24,6 +24,7 @@ class OpenSearchService(Construct):
             **props):
         super().__init__(scope, id, **props)
 
+        self.id = id
         self.port = 443
 
         self.default_instance_type = default_instance_type
