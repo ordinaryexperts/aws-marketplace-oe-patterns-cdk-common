@@ -188,7 +188,7 @@ class OpenSearchService(Construct):
             ),
             vpc_options=aws_opensearchservice.CfnDomain.VPCOptionsProperty(
                 security_group_ids=[ self.sg.ref ],
-                subnet_ids=vpc.private_subnet_ids()
+                subnet_ids=[vpc.private_subnet1_id()]
             )
         )
         self.domain.override_logical_id(f"{id}Domain")
