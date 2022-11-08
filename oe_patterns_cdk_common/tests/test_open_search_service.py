@@ -11,6 +11,6 @@ def test_open_search_service():
   vpc = Vpc(stack, "TestVpc")
   OpenSearchService(stack, "TestOpenSearchService", vpc=vpc)
   template = assertions.Template.from_stack(stack)
-  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
 
   template.resource_count_is("AWS::OpenSearchService::Domain", 1)

@@ -1,8 +1,13 @@
 from aws_cdk import (
+    Aws,
+    aws_cloudformation,
     aws_ec2,
+    aws_iam,
     aws_kms,
     aws_opensearchservice,
-    CfnParameter
+    CfnCondition,
+    CfnParameter,
+    Fn
 )
 
 from constructs import Construct
@@ -142,6 +147,43 @@ class OpenSearchService(Construct):
         )
         self.sg.override_logical_id(f"{id}Sg")
 
+        self.create_service_linked_role_param = CfnParameter(
+            self,
+            "OpenSearchServiceCreateServiceLinkedRole",
+            allowed_values=[ "true", "false" ],
+            default="true",
+            description="Whether or not to create a Service Linked Role for OpenSearch VPC access."
+        )
+        self.create_service_linked_role_param.override_logical_id(f"{id}CreateServiceLinkedRole")
+
+        self.create_service_linked_role_condition = CfnCondition(
+            self,
+            "OpenSearchServiceCreateServiceLinkedRoleCondition",
+            expression=Fn.condition_equals(self.create_service_linked_role_param.value, "true")
+        )
+        self.create_service_linked_role_condition.override_logical_id(f"{id}CreateServiceLinkedRoleCondition")
+
+        self.service_linked_role = aws_iam.CfnServiceLinkedRole(
+            self,
+            "OpenSearchServiceServiceLinkedRole",
+            aws_service_name="opensearchservice.amazonaws.com"
+        )
+        self.service_linked_role.cfn_options.condition=self.create_service_linked_role_condition
+        self.service_linked_role.override_logical_id(f"{id}ServiceLinkedRole")
+
+        self.service_linked_role_wait_handle = aws_cloudformation.CfnWaitConditionHandle(
+            self,
+            "OpenSearchServiceWaitConditionHandle"
+        )
+        self.service_linked_role_wait_handle.override_logical_id(f"{id}WaitConditionHandle")
+        self.service_linked_role_wait_handle.cfn_options.metadata = {
+            "ServiceLinkedRoleAvailable": Fn.condition_if(
+                self.create_service_linked_role_condition.logical_id,
+                self.service_linked_role.ref,
+                Aws.NO_VALUE
+            )
+        }
+
         self.domain = aws_opensearchservice.CfnDomain(
             self,
             "OpenSearchServiceDomain",
@@ -192,3 +234,4 @@ class OpenSearchService(Construct):
             )
         )
         self.domain.override_logical_id(f"{id}Domain")
+        self.domain.node.add_dependency(self.service_linked_role_wait_handle)
