@@ -24,6 +24,8 @@ class OpenSearchService(Construct):
             **props):
         super().__init__(scope, id, **props)
 
+        self.port = 443
+
         self.default_instance_type = default_instance_type
         self.default_allowed_instance_types = [
             "t2.micro.search",
