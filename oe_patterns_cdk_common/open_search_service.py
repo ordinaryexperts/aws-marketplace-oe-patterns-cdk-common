@@ -1,5 +1,6 @@
 from aws_cdk import (
     Aws,
+    aws_ec2,
     aws_opensearchservice,
     CfnTag
 )
@@ -14,11 +15,26 @@ class OpenSearchService(Construct):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
-            default_instance_type: str = 'cache.t3.micro',
+            default_instance_type: str = 'm5.large.search',
             **props):
         super().__init__(scope, id, **props)
 
-        cfn_domain = aws_opensearchservice.CfnDomain(
+        self.sg = aws_ec2.CfnSecurityGroup(
+            self,
+            "OpenSearchServiceSg",
+            group_description="Open Search Service SG",
+            security_group_egress=[
+                aws_ec2.CfnSecurityGroup.EgressProperty(
+                    ip_protocol="-1",
+                    cidr_ip="0.0.0.0/0",
+                    description="all IPv4 egress traffic allowed"
+                )
+            ],
+            vpc_id=vpc.id()
+        )
+        self.sg.override_logical_id(f"{id}Sg")
+
+        self.domain = aws_opensearchservice.CfnDomain(
             self,
             "OpenSearchServiceDomain",
             # access_policies=access_policies,
@@ -54,12 +70,12 @@ class OpenSearchService(Construct):
                 enabled=False
             ),
             engine_version="Elasticsearch_7.10",
-            log_publishing_options={
-                "log_publishing_options_key": aws_opensearchservice.CfnDomain.LogPublishingOptionProperty(
-                    cloud_watch_logs_log_group_arn="cloudWatchLogsLogGroupArn",
-                    enabled=True
-                )
-            },
+            # log_publishing_options={
+            #     "log_publishing_options_key": aws_opensearchservice.CfnDomain.LogPublishingOptionProperty(
+            #         cloud_watch_logs_log_group_arn="cloudWatchLogsLogGroupArn",
+            #         enabled=True
+            #     )
+            # },
             snapshot_options=aws_opensearchservice.CfnDomain.SnapshotOptionsProperty(
                 automated_snapshot_start_hour=1
             ),
@@ -68,7 +84,7 @@ class OpenSearchService(Construct):
                 value="value"
             )],
             vpc_options=aws_opensearchservice.CfnDomain.VPCOptionsProperty(
-                security_group_ids=["securityGroupIds"],
-                subnet_ids=["subnetIds"]
+                security_group_ids=[ self.sg.ref ],
+                subnet_ids=vpc.private_subnet_ids()
             )
         )
