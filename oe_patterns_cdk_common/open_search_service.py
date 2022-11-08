@@ -23,7 +23,7 @@ class OpenSearchService(Construct):
             "OpenSearchServiceDomain",
             # access_policies=access_policies,
             advanced_options={
-                "advanced_options_key": "advancedOptions"
+                "override_main_response_version": "true"
             },
             advanced_security_options=aws_opensearchservice.CfnDomain.AdvancedSecurityOptionsInputProperty(
                 enabled=False,
@@ -36,24 +36,24 @@ class OpenSearchService(Construct):
             cluster_config=aws_opensearchservice.CfnDomain.ClusterConfigProperty(
                 dedicated_master_enabled=False,
                 instance_count=1,
-                instance_type="instanceType",
+                instance_type="m5.large.search",
                 zone_awareness_enabled=False
             ),
-            domain_endpoint_options=aws_opensearchservice.CfnDomain.DomainEndpointOptionsProperty(
-                custom_endpoint="customEndpoint",
-                custom_endpoint_certificate_arn="customEndpointCertificateArn",
-                custom_endpoint_enabled=False,
-                enforce_https=False,
-                tls_security_policy="tlsSecurityPolicy"
-            ),
-            domain_name="domainName",
-            ebs_options=aws_opensearchservice.CfnDomain.EBSOptionsProperty(
-                ebs_enabled=False
-            ),
+            # domain_endpoint_options=aws_opensearchservice.CfnDomain.DomainEndpointOptionsProperty(
+            #     custom_endpoint="customEndpoint",
+            #     custom_endpoint_certificate_arn="customEndpointCertificateArn",
+            #     custom_endpoint_enabled=False,
+            #     enforce_https=False,
+            #     tls_security_policy="tlsSecurityPolicy"
+            # ),
+            # domain_name="domainName",
+            # ebs_options=aws_opensearchservice.CfnDomain.EBSOptionsProperty(
+            #     ebs_enabled=False
+            # ),
             encryption_at_rest_options=aws_opensearchservice.CfnDomain.EncryptionAtRestOptionsProperty(
-                enabled=True
+                enabled=False
             ),
-            engine_version="engineVersion",
+            engine_version="Elasticsearch_7.10",
             log_publishing_options={
                 "log_publishing_options_key": aws_opensearchservice.CfnDomain.LogPublishingOptionProperty(
                     cloud_watch_logs_log_group_arn="cloudWatchLogsLogGroupArn",
