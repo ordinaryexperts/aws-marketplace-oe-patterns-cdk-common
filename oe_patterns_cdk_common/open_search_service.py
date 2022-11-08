@@ -23,7 +23,7 @@ class OpenSearchService(Construct):
             'OpenSearchServiceKey',
             enable_key_rotation=False
         )
-        self.key.override_logical_id(f"{id}Key")
+        self.key.node.default_child.override_logical_id(f"{id}Key")
 
         self.sg = aws_ec2.CfnSecurityGroup(
             self,
