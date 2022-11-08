@@ -1,0 +1,74 @@
+from aws_cdk import (
+    Aws,
+    aws_opensearchservice,
+    CfnTag
+)
+
+from constructs import Construct
+from oe_patterns_cdk_common.vpc import Vpc
+
+class OpenSearchService(Construct):
+    def __init__(
+            self,
+            scope: Construct,
+            id: str,
+            vpc: Vpc,
+            allowed_instance_types: 'list[str]' = [],
+            default_instance_type: str = 'cache.t3.micro',
+            **props):
+        super().__init__(scope, id, **props)
+
+        cfn_domain = aws_opensearchservice.CfnDomain(
+            self,
+            "OpenSearchServiceDomain",
+            # access_policies=access_policies,
+            advanced_options={
+                "advanced_options_key": "advancedOptions"
+            },
+            advanced_security_options=aws_opensearchservice.CfnDomain.AdvancedSecurityOptionsInputProperty(
+                enabled=False,
+                internal_user_database_enabled=True,
+                master_user_options=aws_opensearchservice.CfnDomain.MasterUserOptionsProperty(
+                    master_user_name="masterUserName",
+                    master_user_password="masterUserPassword"
+                )
+            ),
+            cluster_config=aws_opensearchservice.CfnDomain.ClusterConfigProperty(
+                dedicated_master_enabled=False,
+                instance_count=1,
+                instance_type="instanceType",
+                zone_awareness_enabled=False
+            ),
+            domain_endpoint_options=aws_opensearchservice.CfnDomain.DomainEndpointOptionsProperty(
+                custom_endpoint="customEndpoint",
+                custom_endpoint_certificate_arn="customEndpointCertificateArn",
+                custom_endpoint_enabled=False,
+                enforce_https=False,
+                tls_security_policy="tlsSecurityPolicy"
+            ),
+            domain_name="domainName",
+            ebs_options=aws_opensearchservice.CfnDomain.EBSOptionsProperty(
+                ebs_enabled=False
+            ),
+            encryption_at_rest_options=aws_opensearchservice.CfnDomain.EncryptionAtRestOptionsProperty(
+                enabled=True
+            ),
+            engine_version="engineVersion",
+            log_publishing_options={
+                "log_publishing_options_key": aws_opensearchservice.CfnDomain.LogPublishingOptionProperty(
+                    cloud_watch_logs_log_group_arn="cloudWatchLogsLogGroupArn",
+                    enabled=True
+                )
+            },
+            snapshot_options=aws_opensearchservice.CfnDomain.SnapshotOptionsProperty(
+                automated_snapshot_start_hour=1
+            ),
+            tags=[CfnTag(
+                key="key",
+                value="value"
+            )],
+            vpc_options=aws_opensearchservice.CfnDomain.VPCOptionsProperty(
+                security_group_ids=["securityGroupIds"],
+                subnet_ids=["subnetIds"]
+            )
+        )
