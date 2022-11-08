@@ -76,6 +76,9 @@ class OpenSearchService(Construct):
             #         enabled=True
             #     )
             # },
+            node_to_node_encryption_options=aws_opensearchservice.CfnDomain.NodeToNodeEncryptionOptionsProperty(
+                enabled=True
+            ),
             snapshot_options=aws_opensearchservice.CfnDomain.SnapshotOptionsProperty(
                 automated_snapshot_start_hour=1
             ),
