@@ -1,9 +1,7 @@
 from aws_cdk import (
-    Aws,
     aws_ec2,
     aws_kms,
-    aws_opensearchservice,
-    CfnTag
+    aws_opensearchservice
 )
 
 from constructs import Construct
@@ -25,6 +23,7 @@ class OpenSearchService(Construct):
             'OpenSearchServiceKey',
             enable_key_rotation=False
         )
+        self.key.override_logical_id(f"{id}Key")
 
         self.sg = aws_ec2.CfnSecurityGroup(
             self,
@@ -53,7 +52,7 @@ class OpenSearchService(Construct):
                 internal_user_database_enabled=True,
                 master_user_options=aws_opensearchservice.CfnDomain.MasterUserOptionsProperty(
                     master_user_name="masterUserName",
-                    master_user_password="masterUserPassword"
+                    master_user_password="masterUserPassword1!"
                 )
             ),
             cluster_config=aws_opensearchservice.CfnDomain.ClusterConfigProperty(
@@ -84,15 +83,9 @@ class OpenSearchService(Construct):
             node_to_node_encryption_options=aws_opensearchservice.CfnDomain.NodeToNodeEncryptionOptionsProperty(
                 enabled=True
             ),
-            snapshot_options=aws_opensearchservice.CfnDomain.SnapshotOptionsProperty(
-                automated_snapshot_start_hour=1
-            ),
-            tags=[CfnTag(
-                key="key",
-                value="value"
-            )],
             vpc_options=aws_opensearchservice.CfnDomain.VPCOptionsProperty(
                 security_group_ids=[ self.sg.ref ],
                 subnet_ids=vpc.private_subnet_ids()
             )
         )
+        self.domain.override_logical_id(f"{id}Domain")
