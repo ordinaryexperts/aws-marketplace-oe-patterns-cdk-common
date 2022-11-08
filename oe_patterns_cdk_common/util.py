@@ -1,7 +1,7 @@
-from aws_cdk import {
+from aws_cdk import (
     Aws,
     Fn
-}
+)
 
 class Util:
 
