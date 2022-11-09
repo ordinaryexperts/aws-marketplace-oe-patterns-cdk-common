@@ -225,7 +225,8 @@ class OpenSearchService(Construct):
             },
             self.open_search_service_node_type_param.logical_id: {
                 "default": "OpenSearch Service Instance Type"
-            }
+            },
             self.create_service_linked_role_param.logical_id: {
                 "default": "OpenSearch Service Create Service Linked Role"
+            }
         }

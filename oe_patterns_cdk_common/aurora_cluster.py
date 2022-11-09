@@ -221,10 +221,10 @@ class AuroraCluster(Construct):
         return {
             self.db_backup_retention_period_param.logical_id: {
                 "default": "Database Backup Retention Period"
-            }
+            },
             self.db_instance_class_param.logical_id: {
                 "default": "Database Instance Type"
-            }
+            },
             self.db_snapshot_identifier_param.logical_id: {
                 "default": "Database Snapshot Identifier"
             }
