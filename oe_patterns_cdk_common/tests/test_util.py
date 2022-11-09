@@ -1,8 +1,6 @@
 from aws_cdk import (
-  assertions,
   aws_ec2,
-  Stack,
-  Token
+  Stack
 )
 
 from oe_patterns_cdk_common.open_search_service import OpenSearchService

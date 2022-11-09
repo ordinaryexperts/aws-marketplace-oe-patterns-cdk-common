@@ -4,9 +4,10 @@ from aws_cdk import (
 )
 
 from oe_patterns_cdk_common.asg import Asg
-from oe_patterns_cdk_common.db_secret import DbSecret
-from oe_patterns_cdk_common.vpc import Vpc
 from oe_patterns_cdk_common.aurora_cluster import AuroraPostgresql
+from oe_patterns_cdk_common.db_secret import DbSecret
+from oe_patterns_cdk_common.util import Util
+from oe_patterns_cdk_common.vpc import Vpc
 
 def test_aurora_postgresql():
   stack = Stack()
@@ -14,7 +15,7 @@ def test_aurora_postgresql():
   asg = Asg(stack, "TestAsg", vpc=vpc)
   db_secret = DbSecret(stack, "TestDbSecret")
   aurora = AuroraPostgresql(stack, "TestAurora", db_secret=db_secret, vpc=vpc)
-  aurora.add_asg_ingress(asg)
+  Util.add_sg_ingress(aurora, asg.sg)
   template = assertions.Template.from_stack(stack)
   # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
 
