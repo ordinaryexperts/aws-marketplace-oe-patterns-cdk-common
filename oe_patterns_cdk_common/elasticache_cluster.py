@@ -19,6 +19,7 @@ class ElasticacheCluster(Construct):
             **props):
         super().__init__(scope, id, **props)
 
+        self.id = id
         self.allowed_instance_types = allowed_instance_types
         self.default_instance_type = default_instance_type
         self.default_allowed_instance_types = [
