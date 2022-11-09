@@ -209,9 +209,6 @@ class OpenSearchService(Construct):
             self,
             "OpenSearchServiceDomain",
             access_policies=access_policies,
-            advanced_options={
-                "override_main_response_version": "true"
-            },
             cluster_config=aws_opensearchservice.CfnDomain.ClusterConfigProperty(
                 dedicated_master_enabled=False,
                 instance_count=1,
