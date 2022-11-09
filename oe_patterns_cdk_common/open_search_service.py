@@ -238,7 +238,7 @@ class OpenSearchService(Construct):
             ),
             engine_version="Elasticsearch_7.10",
             log_publishing_options={
-                "log_publishing_options_key": aws_opensearchservice.CfnDomain.LogPublishingOptionProperty(
+                "ES_APPLICATION_LOGS": aws_opensearchservice.CfnDomain.LogPublishingOptionProperty(
                     cloud_watch_logs_log_group_arn=self.log_group.attr_arn,
                     enabled=True
                 )
