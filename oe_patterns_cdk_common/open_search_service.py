@@ -187,30 +187,32 @@ class OpenSearchService(Construct):
             )
         }
 
+        access_policies=aws_iam.PolicyDocument(
+            statements=[
+                aws_iam.PolicyStatement(
+                    effect=aws_iam.Effect.ALLOW,
+                    actions=[
+                        "es:ESHttp*"
+                    ],
+                    resources=[
+                        f"arn:{Aws.PARTITION}:es:{Aws.REGION}:{Aws.ACCOUNT_ID}:domain/*"
+                    ]
+                )
+            ]
+        )
+
         self.domain = aws_opensearchservice.CfnDomain(
             self,
             "OpenSearchServiceDomain",
-            # access_policies=access_policies,
+            access_policies=access_policies,
             advanced_options={
                 "override_main_response_version": "true"
             },
-            advanced_security_options=aws_opensearchservice.CfnDomain.AdvancedSecurityOptionsInputProperty(
-                enabled=True,
-                internal_user_database_enabled=True,
-                master_user_options=aws_opensearchservice.CfnDomain.MasterUserOptionsProperty(
-                    master_user_name="masterUserName",
-                    master_user_password="masterUserPassword1!"
-                )
-            ),
             cluster_config=aws_opensearchservice.CfnDomain.ClusterConfigProperty(
                 dedicated_master_enabled=False,
                 instance_count=1,
                 instance_type=self.open_search_service_node_type_param.value_as_string,
                 zone_awareness_enabled=False
-            ),
-            domain_endpoint_options=aws_opensearchservice.CfnDomain.DomainEndpointOptionsProperty(
-                enforce_https=True,
-                tls_security_policy="Policy-Min-TLS-1-2-2019-07"
             ),
             ebs_options=aws_opensearchservice.CfnDomain.EBSOptionsProperty(
                 ebs_enabled=True,
