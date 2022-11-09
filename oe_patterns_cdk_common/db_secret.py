@@ -73,3 +73,22 @@ class DbSecret(Construct):
                 self.secret.ref
             )
         )
+
+    def metadata_parameter_group(self):
+        return [
+            {
+                "Label": {
+                    "default": "DB Secret Configuration"
+                },
+                "Parameters": [
+                    self.secret_arn_param.logical_id
+                ]
+            }
+        ]
+
+    def metadata_parameter_labels(self):
+        return {
+            self.secret_arn_param.logical_id: {
+                "default": "DB Secret ARN"
+            }
+        }

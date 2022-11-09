@@ -203,3 +203,30 @@ class OpenSearchService(Construct):
         )
         self.domain.override_logical_id(f"{id}Domain")
         self.domain.node.add_dependency(self.service_linked_role_wait_handle)
+
+    def metadata_parameter_group(self):
+        return [
+            {
+                "Label": {
+                    "default": "OpenSearch Service Configuration"
+                },
+                "Parameters": [
+                    self.open_search_service_ebs_volume_size_param.logical_id,
+                    self.open_search_service_node_type_param.logical_id,
+                    self.create_service_linked_role_param.logical_id
+                ]
+            }
+        ]
+
+    def metadata_parameter_labels(self):
+        return {
+            self.open_search_service_ebs_volume_size_param.logical_id: {
+                "default": "OpenSearch Service EBS Volume Size"
+            },
+            self.open_search_service_node_type_param.logical_id: {
+                "default": "OpenSearch Service Instance Type"
+            },
+            self.create_service_linked_role_param.logical_id: {
+                "default": "OpenSearch Service Create Service Linked Role"
+            }
+        }

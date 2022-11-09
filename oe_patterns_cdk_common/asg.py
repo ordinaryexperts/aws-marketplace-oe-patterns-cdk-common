@@ -526,7 +526,7 @@ class Asg(Construct):
         return [
             {
                 "Label": {
-                    "default": "ASG Configuration"
+                    "default": "Auto Scaling Group Configuration"
                 },
                 "Parameters": params
             }

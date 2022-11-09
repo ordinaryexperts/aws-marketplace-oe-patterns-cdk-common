@@ -193,3 +193,22 @@ class Ses(Construct):
         return Token.as_string(
             self.generate_smtp_password_custom_resource.get_att("arn")
         )
+
+    def metadata_parameter_group(self):
+        return [
+            {
+                "Label": {
+                    "default": "Simple Email Service Configuration"
+                },
+                "Parameters": [
+                    self.create_domain_identity_param.logical_id
+                ]
+            }
+        ]
+
+    def metadata_parameter_labels(self):
+        return {
+            self.create_domain_identity_param.logical_id: {
+                "default": "Create SES Domain Identity"
+            }
+        }
