@@ -212,7 +212,8 @@ class OpenSearchService(Construct):
                 },
                 "Parameters": [
                     self.open_search_service_ebs_volume_size_param.logical_id,
-                    self.open_search_service_node_type_param.logical_id
+                    self.open_search_service_node_type_param.logical_id,
+                    self.create_service_linked_role_param.logical_id
                 ]
             }
         ]
@@ -223,6 +224,8 @@ class OpenSearchService(Construct):
                 "default": "OpenSearch Service EBS Volume Size"
             },
             self.open_search_service_node_type_param.logical_id: {
-                "default": "OpenSearch Serivce Instance Type"
+                "default": "OpenSearch Service Instance Type"
             }
+            self.create_service_linked_role_param.logical_id: {
+                "default": "OpenSearch Service Create Service Linked Role"
         }

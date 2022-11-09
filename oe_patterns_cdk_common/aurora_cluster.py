@@ -203,6 +203,33 @@ class AuroraCluster(Construct):
         )
         self.db_primary_instance.override_logical_id(f"{id}PrimaryInstance")
 
+    def metadata_parameter_group(self):
+        return [
+            {
+                "Label": {
+                    "default": "Database Configuration"
+                },
+                "Parameters": [
+                    self.db_backup_retention_period_param.logical_id,
+                    self.db_instance_class_param.logical_id,
+                    self.db_snapshot_identifier_param.logical_id
+                ]
+            }
+        ]
+
+    def metadata_parameter_labels(self):
+        return {
+            self.db_backup_retention_period_param.logical_id: {
+                "default": "Database Backup Retention Period"
+            }
+            self.db_instance_class_param.logical_id: {
+                "default": "Database Instance Type"
+            }
+            self.db_snapshot_identifier_param.logical_id: {
+                "default": "Database Snapshot Identifier"
+            }
+        }
+
 class AuroraPostgresql(AuroraCluster):
     def __init__(
             self,
