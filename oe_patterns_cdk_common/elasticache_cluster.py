@@ -19,6 +19,7 @@ class ElasticacheCluster(Construct):
             **props):
         super().__init__(scope, id, **props)
 
+        self.id = id
         self.allowed_instance_types = allowed_instance_types
         self.default_instance_type = default_instance_type
         self.default_allowed_instance_types = [
@@ -56,7 +57,7 @@ class ElasticacheCluster(Construct):
             type="Number"
         )
         self.elasticache_cluster_num_cache_nodes_param.override_logical_id(f"{id}ClusterNumCacheNodes")
-        self.elasticache_sg = aws_ec2.CfnSecurityGroup(
+        self.sg = aws_ec2.CfnSecurityGroup(
             self,
             "ElastiCacheSg",
             group_description="ElastiCache SG",
@@ -69,7 +70,7 @@ class ElasticacheCluster(Construct):
             ],
             vpc_id=vpc.id()
         )
-        self.elasticache_sg.override_logical_id(f"{id}Sg")
+        self.sg.override_logical_id(f"{id}Sg")
         self.elasticache_subnet_group = aws_elasticache.CfnSubnetGroup(
             self,
             "ElastiCacheSubnetGroup",
@@ -90,7 +91,7 @@ class ElasticacheCluster(Construct):
             engine=self.engine,
             engine_version=self.engine_version,
             num_cache_nodes=self.elasticache_cluster_num_cache_nodes_param.value_as_number,
-            vpc_security_group_ids=[ self.elasticache_sg.ref ]
+            vpc_security_group_ids=[ self.sg.ref ]
         )
         self.elasticache_cluster.override_logical_id(f"{id}Cluster")
 

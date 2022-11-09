@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.5.0
+
+* OpenSearch Service construct
+
 # 3.4.1
 
 * Add option for additional policies on ses user

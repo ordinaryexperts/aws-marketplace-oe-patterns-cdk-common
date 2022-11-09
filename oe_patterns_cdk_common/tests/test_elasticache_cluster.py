@@ -6,7 +6,7 @@ from aws_cdk import (
 from oe_patterns_cdk_common.vpc import Vpc
 from oe_patterns_cdk_common.elasticache_cluster import ElasticacheRedis
 
-def test_aurora_postgresql():
+def test_elasticache_cluster():
   stack = Stack()
   vpc = Vpc(stack, "TestVpc")
   ElasticacheRedis(stack, "TestRedis", vpc=vpc)

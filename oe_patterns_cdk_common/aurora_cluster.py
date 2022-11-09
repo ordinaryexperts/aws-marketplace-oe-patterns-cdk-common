@@ -111,7 +111,7 @@ class AuroraCluster(Construct):
         #
         # RESOURCES
         #
-        self.db_sg = aws_ec2.CfnSecurityGroup(
+        self.sg = aws_ec2.CfnSecurityGroup(
             self,
             "DbSg",
             group_description="Database SG",
@@ -124,7 +124,7 @@ class AuroraCluster(Construct):
             ],
             vpc_id=vpc.id()
         )
-        self.db_sg.override_logical_id(f"{id}Sg")
+        self.sg.override_logical_id(f"{id}Sg")
 
         self.db_subnet_group = aws_rds.CfnDBSubnetGroup(
             self,
@@ -174,7 +174,7 @@ class AuroraCluster(Construct):
                 )
             ),
             storage_encrypted=True,
-            vpc_security_group_ids=[ self.db_sg.ref ]
+            vpc_security_group_ids=[ self.sg.ref ]
         )
         self.db_cluster.override_logical_id(f"{id}Cluster")
         Tags.of(self.db_cluster).add(
@@ -227,18 +227,3 @@ class AuroraPostgresql(AuroraCluster):
             allowed_instance_types=allowed_instance_types,
             default_instance_type=default_instance_type,
             **props)
-
-        
-    def add_asg_ingress(self, asg):
-        db_ingress = aws_ec2.CfnSecurityGroupIngress(
-            self,
-            "DbSgIngress",
-            source_security_group_id=asg.sg.ref,
-            description="Allow traffic from ASG to DB",
-            from_port=self.port,
-            group_id=self.db_sg.ref,
-            ip_protocol="tcp",
-            to_port=self.port
-        )
-        db_ingress.override_logical_id(f"{self.id}SgIngress")
-        return db_ingress
