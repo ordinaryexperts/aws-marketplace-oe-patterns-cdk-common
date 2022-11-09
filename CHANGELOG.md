@@ -1,6 +1,6 @@
 # Unreleased
 
-* Open Search Service construct
+* OpenSearch Service construct
 
 # 3.4.1
 

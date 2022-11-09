@@ -17,15 +17,13 @@ from oe_patterns_cdk_common.vpc import Vpc
 
 class OpenSearchService(Construct):
 
-    TWO_YEARS_IN_DAYS=731
-
     def __init__(
             self,
             scope: Construct,
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
-            default_instance_type: str = 'm5.large.search',
+            default_instance_type: str = 't2.micro.search',
             **props):
         super().__init__(scope, id, **props)
 
