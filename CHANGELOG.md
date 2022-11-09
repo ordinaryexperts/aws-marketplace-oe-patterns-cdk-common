@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.5.1
+
+* Updating parameter labels
+
 # 3.5.0
 
 * OpenSearch Service construct
