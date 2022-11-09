@@ -95,6 +95,28 @@ class ElasticacheCluster(Construct):
         )
         self.elasticache_cluster.override_logical_id(f"{id}Cluster")
 
+    def metadata_parameter_group(self):
+        return [
+            {
+                "Label": {
+                    "default": "ElastiCache Configuration"
+                },
+                "Parameters": [
+                    self.elasticache_cluster_cache_node_type_param.logical_id,
+                    self.elasticache_cluster_num_cache_nodes_param.logical_id
+                ]
+            }
+        ]
+
+    def metadata_parameter_labels(self):
+        return {
+            self.elasticache_cluster_cache_node_type_param.logical_id: {
+                "default": "ElastiCache Instance Type"
+            },
+            self.elasticache_cluster_num_cache_nodes_param.logical_id: {
+                "default": "ElastiCache Cache Nodes Number"
+            }
+        }
 
 class ElasticacheMemcached(ElasticacheCluster):
     def __init__(
