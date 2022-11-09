@@ -191,12 +191,8 @@ class OpenSearchService(Construct):
             statements=[
                 aws_iam.PolicyStatement(
                     effect=aws_iam.Effect.ALLOW,
-                    actions=[
-                        "es:ESHttp*"
-                    ],
-                    resources=[
-                        f"arn:{Aws.PARTITION}:es:{Aws.REGION}:{Aws.ACCOUNT_ID}:domain/*"
-                    ]
+                    actions=["*"],
+                    resources=["*"]
                 )
             ]
         )
