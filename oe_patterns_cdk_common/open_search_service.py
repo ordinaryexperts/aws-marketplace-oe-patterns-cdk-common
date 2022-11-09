@@ -4,8 +4,10 @@ from aws_cdk import (
     aws_ec2,
     aws_iam,
     aws_kms,
+    aws_logs,
     aws_opensearchservice,
     CfnCondition,
+    CfnDeletionPolicy,
     CfnParameter,
     Fn
 )
@@ -14,6 +16,9 @@ from constructs import Construct
 from oe_patterns_cdk_common.vpc import Vpc
 
 class OpenSearchService(Construct):
+
+    TWO_YEARS_IN_DAYS=731
+
     def __init__(
             self,
             scope: Construct,
@@ -200,6 +205,15 @@ class OpenSearchService(Construct):
             ]
         )
 
+        self.log_group = aws_logs.CfnLogGroup(
+            self,
+            "OpenSearchServiceLogGroup",
+            retention_in_days=OpenSearchService.TWO_YEARS_IN_DAYS
+        )
+        self.log_group.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
+        self.log_group.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
+        self.log_group.override_logical_id(f"{id}LogGroup")
+
         self.domain = aws_opensearchservice.CfnDomain(
             self,
             "OpenSearchServiceDomain",
@@ -223,12 +237,12 @@ class OpenSearchService(Construct):
                 kms_key_id=self.key.key_id
             ),
             engine_version="Elasticsearch_7.10",
-            # log_publishing_options={
-            #     "log_publishing_options_key": aws_opensearchservice.CfnDomain.LogPublishingOptionProperty(
-            #         cloud_watch_logs_log_group_arn="cloudWatchLogsLogGroupArn",
-            #         enabled=True
-            #     )
-            # },
+            log_publishing_options={
+                "log_publishing_options_key": aws_opensearchservice.CfnDomain.LogPublishingOptionProperty(
+                    cloud_watch_logs_log_group_arn=self.log_group.attr_arn,
+                    enabled=True
+                )
+            },
             node_to_node_encryption_options=aws_opensearchservice.CfnDomain.NodeToNodeEncryptionOptionsProperty(
                 enabled=True
             ),
