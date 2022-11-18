@@ -1,5 +1,7 @@
 # Unreleased
 
+* Adding AssetsBucket construct
+
 # 3.5.1
 
 * Updating parameter labels

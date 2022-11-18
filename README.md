@@ -110,6 +110,12 @@ $ cd ..
 $ mv [projectname] cdk
 ```
 
+4. Copy in the `Dockerfile`, `docker-compose.yml`, `Makefile`, `.gitignore` and `packer` directories from another pattern
+
+5. Tweak the `cdk/app.py` file to match other patterns
+
+6. Create an empty CHANGELOG.md
+
 
 ## Areas we can reuse
 
