@@ -4,10 +4,8 @@ from aws_cdk import (
     aws_ec2,
     aws_iam,
     aws_kms,
-    aws_logs,
     aws_opensearchservice,
     CfnCondition,
-    CfnDeletionPolicy,
     CfnParameter,
     Fn
 )
