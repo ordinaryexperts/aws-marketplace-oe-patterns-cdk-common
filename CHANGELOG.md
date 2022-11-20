@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.6.1
+
+* Fixing KMS for OpenSearch Service
+
 # 3.6.0
 
 * Adding AssetsBucket construct
