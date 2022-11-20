@@ -102,6 +102,7 @@ class OpenSearchService(Construct):
         self.key = aws_kms.Key(
             self,
             'OpenSearchServiceKey',
+            admins=[aws_iam.AccountRootPrincipal()],
             enable_key_rotation=False
         )
         self.key.node.default_child.override_logical_id(f"{id}Key")
