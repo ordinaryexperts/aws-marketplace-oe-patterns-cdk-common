@@ -99,12 +99,24 @@ class OpenSearchService(Construct):
         )
         self.open_search_service_node_type_param.override_logical_id(f"{id}NodeType")
 
-        self.key = aws_kms.Key(
+        self.key = aws_kms.CfnKey(
             self,
             'OpenSearchServiceKey',
-            enable_key_rotation=False
+            description="Encrypt OpenSearch",
+            enable_key_rotation=True,
+            enabled=True,
+            key_policy=aws_iam.PolicyDocument(
+                statements=[
+                    aws_iam.PolicyStatement(
+                        effect=aws_iam.Effect.ALLOW,
+                        actions=["kms:*"],
+                        principals=[aws_iam.ArnPrincipal(f"arn:{Aws.PARTITION}:iam::{Aws.ACCOUNT_ID}:root")],
+                        resources=["*"]
+                    )
+                ]
+            )
         )
-        self.key.node.default_child.override_logical_id(f"{id}Key")
+        self.key.override_logical_id(f"{id}Key")
 
         self.sg = aws_ec2.CfnSecurityGroup(
             self,
@@ -188,7 +200,7 @@ class OpenSearchService(Construct):
             ),
             encryption_at_rest_options=aws_opensearchservice.CfnDomain.EncryptionAtRestOptionsProperty(
                 enabled=True,
-                kms_key_id=self.key.key_id
+                kms_key_id=self.key.attr_key_id
             ),
             engine_version="Elasticsearch_7.10",
             node_to_node_encryption_options=aws_opensearchservice.CfnDomain.NodeToNodeEncryptionOptionsProperty(
