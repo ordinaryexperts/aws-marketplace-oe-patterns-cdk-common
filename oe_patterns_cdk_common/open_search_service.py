@@ -110,7 +110,7 @@ class OpenSearchService(Construct):
                     aws_iam.PolicyStatement(
                         effect=aws_iam.Effect.ALLOW,
                         actions=["kms:*"],
-                        principals=[aws_iam.AccountRootPrincipal()],
+                        principals=[aws_iam.ArnPrincipal(f"arn:{Aws.PARTITION}:iam::{Aws.ACCOUNT_ID}:root")],
                         resources=["*"]
                     )
                 ]
