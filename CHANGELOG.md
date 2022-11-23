@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.6.2
+
+* updating asg allowed instance types
+
 # 3.6.1
 
 * Fixing KMS for OpenSearch Service
