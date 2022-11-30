@@ -1,5 +1,7 @@
 # Unreleased
 
+* Adding AuroraMysql construct
+
 # 3.6.2
 
 * updating asg allowed instance types
