@@ -93,6 +93,15 @@ class AssetsBucket(Construct):
         )
 
 
+    def bucket_name(self):
+        return Token.as_string(
+            Fn.condition_if(
+                self.assets_bucket_name_not_exists_condition.logical_id,
+                self.assets_bucket.ref,
+                self.assets_bucket_name_param.value_as_string
+            )
+        )
+
     def metadata_parameter_group(self):
         return [
             {

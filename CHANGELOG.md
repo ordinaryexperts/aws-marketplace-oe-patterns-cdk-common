@@ -1,5 +1,7 @@
 # Unreleased
 
+* fixing AssetsBucket when a bucket name is provided
+
 # 3.6.2
 
 * updating asg allowed instance types
