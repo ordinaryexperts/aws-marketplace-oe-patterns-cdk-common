@@ -1,5 +1,7 @@
 # Unreleased
 
+* fixing extra test output
+
 # 3.7.0
 
 * fixing AssetsBucket when a bucket name is provided

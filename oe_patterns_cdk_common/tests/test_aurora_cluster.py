@@ -29,6 +29,6 @@ def test_aurora_mysql():
   aurora = AuroraMysql(stack, "TestAurora", db_secret=db_secret, vpc=vpc)
   Util.add_sg_ingress(aurora, asg.sg)
   template = assertions.Template.from_stack(stack)
-  import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
 
   template.resource_count_is("AWS::RDS::DBCluster", 1)
