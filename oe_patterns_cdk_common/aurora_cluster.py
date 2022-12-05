@@ -230,6 +230,31 @@ class AuroraCluster(Construct):
             }
         }
 
+class AuroraMysql(AuroraCluster):
+    def __init__(
+            self,
+            scope: Construct,
+            id: str,
+            db_secret: DbSecret,
+            vpc: Vpc,
+            allowed_instance_types: 'list[str]' = [],
+            default_instance_type: str = 'db.r5.large',
+            **props):
+
+        self.engine = "aurora-mysql"
+        self.engine_version = "5.7.mysql_aurora.2.11.0"
+        self.parameter_group_name = "default.aurora-mysql5.7"
+        self.port = 3306
+
+        super().__init__(
+            scope,
+            id,
+            db_secret=db_secret,
+            vpc=vpc,
+            allowed_instance_types=allowed_instance_types,
+            default_instance_type=default_instance_type,
+            **props)
+
 class AuroraPostgresql(AuroraCluster):
     def __init__(
             self,
