@@ -1,6 +1,7 @@
 # Unreleased
 
 * fixing AssetsBucket when a bucket name is provided
+* Adding AuroraMysql construct
 
 # 3.6.2
 
