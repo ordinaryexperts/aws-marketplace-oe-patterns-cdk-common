@@ -1,6 +1,7 @@
 # Unreleased
 
 * fixing extra test output
+* fixing ses secretvalue permissions issue
 
 # 3.7.0
 
