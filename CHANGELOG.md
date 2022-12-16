@@ -1,6 +1,7 @@
 # Unreleased
 
 * fixing extra test output
+* allowing dbadmin username to be customized in DbSecret construct
 
 # 3.7.0
 

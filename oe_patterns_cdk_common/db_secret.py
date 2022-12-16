@@ -17,6 +17,7 @@ class DbSecret(Construct):
             self,
             scope: Construct,
             id: str,
+            username: str = 'dbadmin',
             **props):
         super().__init__(scope, id, **props)
 
@@ -48,7 +49,7 @@ class DbSecret(Construct):
                 exclude_characters="\"@/\\\"'$,[]*?{}~\#%<>|^",
                 exclude_punctuation=True,
                 generate_string_key="password",
-                secret_string_template=json.dumps({"username":"dbadmin"})
+                secret_string_template=json.dumps({"username":username})
             ),
             name="{}/db/secret".format(Aws.STACK_NAME)
         )
