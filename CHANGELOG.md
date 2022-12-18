@@ -2,6 +2,7 @@
 
 * fixing extra test output
 * fixing ses secretvalue permissions issue
+* allowing dbadmin username to be customized in DbSecret construct
 
 # 3.7.0
 
