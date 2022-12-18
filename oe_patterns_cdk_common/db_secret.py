@@ -46,7 +46,7 @@ class DbSecret(Construct):
             self,
             "DbSecret",
             generate_secret_string=aws_secretsmanager.CfnSecret.GenerateSecretStringProperty(
-                exclude_characters="\"@/\\\"'$,[]*?{}~\#%<>|^",
+                exclude_characters="\"@/\\\"'$,[]*?{}~#%<>|^",
                 exclude_punctuation=True,
                 generate_string_key="password",
                 secret_string_template=json.dumps({"username":username})
