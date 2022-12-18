@@ -25,7 +25,7 @@ def test_asg():
     vpc=vpc
   )
   template = assertions.Template.from_stack(stack)
-  # print_resource(template, 'AWS::AutoScaling::AutoScalingGroup')
+  print_resource(template, 'AWS::AutoScaling::AutoScalingGroup')
   template.has_resource('AWS::AutoScaling::AutoScalingGroup', {
     'UpdatePolicy': {'AutoScalingReplacingUpdate': assertions.Match.any_value()}
   })
