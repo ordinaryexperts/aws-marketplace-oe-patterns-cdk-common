@@ -451,15 +451,18 @@ class Asg(Construct):
                 )
             )
         )
+
         self.ec2_launch_template = aws_ec2.CfnLaunchTemplate(
             self,
             f"{id}LaunchTemplate",
             launch_template_data=aws_ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
                 image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
-                instance_type=self.instance_type_param.value_as_string
-                # iam_instance_profile=self.ec2_instance_profile.ref,
-                # security_groups=[ self.sg.ref ],
-                # user_data=user_data
+                instance_type=self.instance_type_param.value_as_string,
+                iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
+                    name=self.ec2_instance_profile.ref
+                ),
+                security_groups=[ self.sg.ref ],
+                user_data=user_data
             )
         )
         self.ec2_launch_template.override_logical_id(f"{id}LaunchTemplate")
