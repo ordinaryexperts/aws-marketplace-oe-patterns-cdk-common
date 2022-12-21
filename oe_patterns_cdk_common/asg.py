@@ -451,16 +451,21 @@ class Asg(Construct):
                 )
             )
         )
-        self.ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
+
+        self.ec2_launch_template = aws_ec2.CfnLaunchTemplate(
             self,
-            f"{id}LaunchConfig",
-            image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
-            instance_type=self.instance_type_param.value_as_string,
-            iam_instance_profile=self.ec2_instance_profile.ref,
-            security_groups=[ self.sg.ref ],
-            user_data=user_data
+            f"{id}LaunchTemplate",
+            launch_template_data=aws_ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
+                image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
+                instance_type=self.instance_type_param.value_as_string,
+                iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
+                    name=self.ec2_instance_profile.ref
+                ),
+                security_group_ids=[ self.sg.attr_group_id ],
+                user_data=user_data
+            )
         )
-        self.ec2_launch_config.override_logical_id(f"{id}LaunchConfig")
+        self.ec2_launch_template.override_logical_id(f"{id}LaunchTemplate")
 
         if singleton:
             subnets = [vpc.public_subnet1_id()] if use_public_subnets else [vpc.private_subnet1_id()]
@@ -471,7 +476,10 @@ class Asg(Construct):
         self.asg = aws_autoscaling.CfnAutoScalingGroup(
             self,
             "Asg",
-            launch_configuration_name=self.ec2_launch_config.ref,
+            launch_template=aws_autoscaling.CfnAutoScalingGroup.LaunchTemplateSpecificationProperty(
+                version=self.ec2_launch_template.attr_latest_version_number,
+                launch_template_id=self.ec2_launch_template.ref
+            ),
             desired_capacity="1" if singleton else Token.as_string(self.desired_capacity_param.value),
             max_size="1" if singleton else Token.as_string(self.max_size_param.value),
             min_size="1" if singleton else Token.as_string(self.min_size_param.value),

@@ -3,6 +3,7 @@
 * fixing extra test output
 * fixing ses secretvalue permissions issue
 * allowing dbadmin username to be customized in DbSecret construct
+* switch from launch configs to launch templates in Asg construct
 
 # 3.7.0
 
