@@ -32,3 +32,27 @@ def test_aurora_mysql():
   # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
 
   template.resource_count_is("AWS::RDS::DBCluster", 1)
+  template.has_resource_properties(
+    "AWS::RDS::DBCluster",
+    {
+      "DatabaseName": assertions.Match.absent()
+    }
+  )
+
+def test_aurora_cluster_database_name():
+  stack = Stack()
+  vpc = Vpc(stack, "TestVpc")
+  asg = Asg(stack, "TestAsg", vpc=vpc)
+  db_secret = DbSecret(stack, "TestDbSecret")
+  aurora = AuroraMysql(stack, "TestAurora", database_name="testdb", db_secret=db_secret, vpc=vpc)
+  Util.add_sg_ingress(aurora, asg.sg)
+  template = assertions.Template.from_stack(stack)
+  # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+
+  template.resource_count_is("AWS::RDS::DBCluster", 1)
+  template.has_resource_properties(
+    "AWS::RDS::DBCluster",
+    {
+      "DatabaseName": "testdb"
+    }
+  )
