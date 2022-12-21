@@ -5,6 +5,7 @@
 * allowing dbadmin username to be customized in DbSecret construct
 * switch from launch configs to launch templates in Asg construct
 * allow customization of asg health check type
+* allowing default database to be customized in AuroraCluster construct
 
 # 3.7.0
 
