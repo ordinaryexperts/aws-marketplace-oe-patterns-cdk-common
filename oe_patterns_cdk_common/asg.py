@@ -40,6 +40,7 @@ class Asg(Construct):
             data_volume_size: int = 0,
             default_instance_type: str = 'm5.xlarge',
             deployment_rolling_update: bool = False,
+            health_check_type: str = 'EC2',
             pipeline_bucket_arn: str = None,
             secret_arns: 'list[str]' = [],
             singleton: bool = False,
@@ -481,6 +482,7 @@ class Asg(Construct):
                 launch_template_id=self.ec2_launch_template.ref
             ),
             desired_capacity="1" if singleton else Token.as_string(self.desired_capacity_param.value),
+            health_check_type=health_check_type,
             max_size="1" if singleton else Token.as_string(self.max_size_param.value),
             min_size="1" if singleton else Token.as_string(self.min_size_param.value),
             vpc_zone_identifier=subnets
