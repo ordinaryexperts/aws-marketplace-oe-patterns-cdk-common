@@ -461,7 +461,7 @@ class Asg(Construct):
                 iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
                     name=self.ec2_instance_profile.ref
                 ),
-                security_groups=[ self.sg.ref ],
+                security_group_ids=[ self.sg.attr_group_id ],
                 user_data=user_data
             )
         )
