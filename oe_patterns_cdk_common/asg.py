@@ -42,6 +42,8 @@ class Asg(Construct):
             deployment_rolling_update: bool = False,
             health_check_type: str = 'EC2',
             pipeline_bucket_arn: str = None,
+            root_volume_device_name: str = "/dev/sda1",
+            root_volume_size: int = 0,
             secret_arns: 'list[str]' = [],
             singleton: bool = False,
             use_public_subnets: bool = False,
@@ -453,10 +455,24 @@ class Asg(Construct):
             )
         )
 
+        block_device_mappings = None
+        if root_volume_size > 0:
+            block_device_mappings = [
+                aws_ec2.CfnLaunchTemplate.BlockDeviceMappingProperty(
+                    device_name=root_volume_device_name,
+                    ebs=aws_ec2.CfnLaunchTemplate.EbsProperty(
+                        encrypted=True,
+                        volume_size=root_volume_size,
+                        volume_type="gp3"
+                    )
+                )
+            ]
+
         self.ec2_launch_template = aws_ec2.CfnLaunchTemplate(
             self,
             f"{id}LaunchTemplate",
             launch_template_data=aws_ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
+                block_device_mappings=block_device_mappings,
                 image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
                 instance_type=self.instance_type_param.value_as_string,
                 iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
