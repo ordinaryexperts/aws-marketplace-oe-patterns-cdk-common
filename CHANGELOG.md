@@ -6,6 +6,7 @@
 * switch from launch configs to launch templates in Asg construct
 * allow customization of asg health check type
 * allowing default database to be customized in AuroraCluster construct
+* allow customization of size of root volume
 
 # 3.7.0
 
