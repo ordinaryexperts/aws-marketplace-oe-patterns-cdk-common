@@ -174,6 +174,7 @@ class ElasticacheRedis(ElasticacheCluster):
             engine_version=self.engine_version,
             num_cache_clusters=self.elasticache_cluster_num_cache_nodes_param.value_as_number,
             replication_group_description="test",
-            security_group_ids=[ self.sg.ref ]
+            security_group_ids=[ self.sg.ref ],
+            transit_encryption_enabled=True
         )
         self.replication_group.override_logical_id(f"{id}ReplicationGroup")
