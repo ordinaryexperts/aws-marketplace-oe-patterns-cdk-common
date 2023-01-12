@@ -167,6 +167,7 @@ class ElasticacheRedis(ElasticacheCluster):
             self,
             "ElasticacheReplicationGroup",
             auth_token=password,
+            automatic_failover_enabled=False,
             cache_node_type=self.elasticache_cluster_cache_node_type_param.value_as_string,
             cache_subnet_group_name=self.elasticache_subnet_group.ref,
             engine=self.engine,
