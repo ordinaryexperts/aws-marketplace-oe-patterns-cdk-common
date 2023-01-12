@@ -78,22 +78,8 @@ class ElasticacheCluster(Construct):
             subnet_ids=vpc.private_subnet_ids()
         )
         self.elasticache_subnet_group.override_logical_id(f"{id}SubnetGroup")
-        if self.engine == "redis":
-            az_mode = Aws.NO_VALUE
-        else:
-            az_mode = "cross-az" # TODO fix for memcached case of single node
-        self.elasticache_cluster = aws_elasticache.CfnCacheCluster(
-            self,
-            "ElastiCacheCluster",
-            az_mode=az_mode,
-            cache_node_type=self.elasticache_cluster_cache_node_type_param.value_as_string,
-            cache_subnet_group_name=self.elasticache_subnet_group.ref,
-            engine=self.engine,
-            engine_version=self.engine_version,
-            num_cache_nodes=self.elasticache_cluster_num_cache_nodes_param.value_as_number,
-            vpc_security_group_ids=[ self.sg.ref ]
-        )
-        self.elasticache_cluster.override_logical_id(f"{id}Cluster")
+        if self.engine == "memcached":
+            az_mode = "cross-az"
 
     def metadata_parameter_group(self):
         return [
@@ -140,6 +126,20 @@ class ElasticacheMemcached(ElasticacheCluster):
             default_instance_type=default_instance_type,
             **props)
 
+        self.elasticache_cluster = aws_elasticache.CfnCacheCluster(
+            self,
+            "ElastiCacheCluster",
+            az_mode="cross-az",
+            cache_node_type=self.elasticache_cluster_cache_node_type_param.value_as_string,
+            cache_subnet_group_name=self.elasticache_subnet_group.ref,
+            engine=self.engine,
+            engine_version=self.engine_version,
+            num_cache_nodes=self.elasticache_cluster_num_cache_nodes_param.value_as_number,
+            vpc_security_group_ids=[ self.sg.ref ]
+        )
+        self.elasticache_cluster.override_logical_id(f"{id}Cluster")
+
+
 class ElasticacheRedis(ElasticacheCluster):
     def __init__(
             self,
@@ -148,6 +148,7 @@ class ElasticacheRedis(ElasticacheCluster):
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
             default_instance_type: str = 'cache.t3.micro',
+            password: str = 'changeme',
             **props):
 
         self.engine = "redis"
@@ -161,3 +162,16 @@ class ElasticacheRedis(ElasticacheCluster):
             allowed_instance_types=allowed_instance_types,
             default_instance_type=default_instance_type,
             **props)
+
+        self.replication_group = aws_elasticache.CfnReplicationGroup(
+            self,
+            "ElasticacheReplicationGroup",
+            auth_token=password,
+            cache_node_type=self.elasticache_cluster_cache_node_type_param.value_as_string,
+            cache_subnet_group_name=self.elasticache_subnet_group.ref,
+            engine=self.engine,
+            engine_version=self.engine_version,
+            replication_group_description="test",
+            security_group_ids=[ self.sg.ref ]
+        )
+        self.replication_group.override_logical_id(f"{id}ReplicationGroup")

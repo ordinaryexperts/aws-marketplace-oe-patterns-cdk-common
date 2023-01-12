@@ -7,6 +7,7 @@
 * allow customization of asg health check type
 * allowing default database to be customized in AuroraCluster construct
 * allow customization of size of root volume
+* use replication group for Redis Elasticache
 
 # 3.7.0
 
