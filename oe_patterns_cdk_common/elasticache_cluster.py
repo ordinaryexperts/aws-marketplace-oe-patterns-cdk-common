@@ -148,7 +148,7 @@ class ElasticacheRedis(ElasticacheCluster):
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
             default_instance_type: str = 'cache.t3.micro',
-            password: str = 'changeme',
+            password: str = 'changemechangemechangeme',
             **props):
 
         self.engine = "redis"
