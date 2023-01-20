@@ -71,8 +71,6 @@ class Dns(Construct):
             ]
         )
         self.record_set.override_logical_id(f"{self.id}RecordSetGroup")
-        # https://github.com/aws/aws-cdk/issues/8431
-        self.record_set.add_property_override("TTL", 60)
         self.record_set.cfn_options.condition = self.route_53_hosted_zone_name_exists_condition
         self.site_url_output = CfnOutput(
             self,
