@@ -7,6 +7,7 @@
 * allow customization of asg health check type
 * allowing default database to be customized in AuroraCluster construct
 * allow customization of size of root volume
+* [Apex DNS issue](https://github.com/ordinaryexperts/aws-marketplace-oe-patterns-cdk-common/issues/5)
 
 # 3.7.0
 
