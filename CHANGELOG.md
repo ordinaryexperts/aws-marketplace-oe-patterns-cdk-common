@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.8.0
+
 * fixing extra test output
 * fixing ses secretvalue permissions issue
 * allowing dbadmin username to be customized in DbSecret construct
