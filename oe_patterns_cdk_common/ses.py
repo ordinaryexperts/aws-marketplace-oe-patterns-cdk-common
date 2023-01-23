@@ -183,7 +183,7 @@ class Ses(Construct):
             properties={
                 "access_key_id": self.instance_user_access_key.access_key_id,
                 "aws_region": Aws.REGION,
-                "secret_access_key": self.instance_user_access_key.secret_access_key,
+                "secret_access_key": self.instance_user_access_key.secret_access_key.unsafe_unwrap(),
                 "stack_name": Aws.STACK_NAME
             }
         )

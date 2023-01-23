@@ -54,17 +54,23 @@ class Dns(Construct):
 
     def add_alb(self, alb):
         # route 53
-        self.record_set = aws_route53.CfnRecordSet(
+        self.record_set = aws_route53.CfnRecordSetGroup(
             self,
-            "RecordSet",
+            "RecordSetGroup",
             hosted_zone_name=f"{self.route_53_hosted_zone_name_param.value_as_string}.",
-            name=self.hostname_param.value_as_string,
-            resource_records=[ alb.alb.attr_dns_name ],
-            type="CNAME"
+            comment=self.hostname_param.value_as_string,
+            record_sets=[
+                aws_route53.CfnRecordSetGroup.RecordSetProperty(
+                    name=f"{self.hostname_param.value_as_string}.",
+                    type="A",
+                    alias_target=aws_route53.CfnRecordSetGroup.AliasTargetProperty(
+                        dns_name=alb.alb.attr_dns_name,
+                        hosted_zone_id=alb.alb.attr_canonical_hosted_zone_id
+                    )
+                )
+            ]
         )
-        self.record_set.override_logical_id(f"{self.id}RecordSet")
-        # https://github.com/aws/aws-cdk/issues/8431
-        self.record_set.add_property_override("TTL", 60)
+        self.record_set.override_logical_id(f"{self.id}RecordSetGroup")
         self.record_set.cfn_options.condition = self.route_53_hosted_zone_name_exists_condition
         self.site_url_output = CfnOutput(
             self,

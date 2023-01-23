@@ -23,12 +23,14 @@ class AuroraCluster(Construct):
             db_secret: DbSecret,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
+            database_name: str = None,
             default_instance_type: str = 'db.r5.large',
             **props):
         super().__init__(scope, id, **props)
 
         self.id = id
         self.allowed_instance_types = allowed_instance_types
+        self.database_name = database_name
         self.default_instance_type = default_instance_type
         self.default_allowed_instance_types = [
             "db.r5.large",
@@ -138,6 +140,7 @@ class AuroraCluster(Construct):
             self,
             "DbCluster",
             backup_retention_period=self.db_backup_retention_period_param.value_as_number,
+            database_name=self.database_name,
             db_cluster_parameter_group_name=self.parameter_group_name,
             db_subnet_group_name=self.db_subnet_group.ref,
             engine=self.engine,

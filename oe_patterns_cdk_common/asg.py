@@ -40,7 +40,10 @@ class Asg(Construct):
             data_volume_size: int = 0,
             default_instance_type: str = 'm5.xlarge',
             deployment_rolling_update: bool = False,
+            health_check_type: str = 'EC2',
             pipeline_bucket_arn: str = None,
+            root_volume_device_name: str = "/dev/sda1",
+            root_volume_size: int = 0,
             secret_arns: 'list[str]' = [],
             singleton: bool = False,
             use_public_subnets: bool = False,
@@ -451,16 +454,35 @@ class Asg(Construct):
                 )
             )
         )
-        self.ec2_launch_config = aws_autoscaling.CfnLaunchConfiguration(
+
+        block_device_mappings = None
+        if root_volume_size > 0:
+            block_device_mappings = [
+                aws_ec2.CfnLaunchTemplate.BlockDeviceMappingProperty(
+                    device_name=root_volume_device_name,
+                    ebs=aws_ec2.CfnLaunchTemplate.EbsProperty(
+                        encrypted=True,
+                        volume_size=root_volume_size,
+                        volume_type="gp3"
+                    )
+                )
+            ]
+
+        self.ec2_launch_template = aws_ec2.CfnLaunchTemplate(
             self,
-            f"{id}LaunchConfig",
-            image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
-            instance_type=self.instance_type_param.value_as_string,
-            iam_instance_profile=self.ec2_instance_profile.ref,
-            security_groups=[ self.sg.ref ],
-            user_data=user_data
+            f"{id}LaunchTemplate",
+            launch_template_data=aws_ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
+                block_device_mappings=block_device_mappings,
+                image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
+                instance_type=self.instance_type_param.value_as_string,
+                iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
+                    name=self.ec2_instance_profile.ref
+                ),
+                security_group_ids=[ self.sg.attr_group_id ],
+                user_data=user_data
+            )
         )
-        self.ec2_launch_config.override_logical_id(f"{id}LaunchConfig")
+        self.ec2_launch_template.override_logical_id(f"{id}LaunchTemplate")
 
         if singleton:
             subnets = [vpc.public_subnet1_id()] if use_public_subnets else [vpc.private_subnet1_id()]
@@ -471,8 +493,12 @@ class Asg(Construct):
         self.asg = aws_autoscaling.CfnAutoScalingGroup(
             self,
             "Asg",
-            launch_configuration_name=self.ec2_launch_config.ref,
+            launch_template=aws_autoscaling.CfnAutoScalingGroup.LaunchTemplateSpecificationProperty(
+                version=self.ec2_launch_template.attr_latest_version_number,
+                launch_template_id=self.ec2_launch_template.ref
+            ),
             desired_capacity="1" if singleton else Token.as_string(self.desired_capacity_param.value),
+            health_check_type=health_check_type,
             max_size="1" if singleton else Token.as_string(self.max_size_param.value),
             min_size="1" if singleton else Token.as_string(self.min_size_param.value),
             vpc_zone_identifier=subnets
