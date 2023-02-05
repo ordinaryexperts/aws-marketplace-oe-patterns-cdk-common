@@ -38,7 +38,7 @@ class Asg(Construct):
             allow_associate_address: bool = False,
             allowed_instance_types: 'list[str]' = [],
             data_volume_size: int = 0,
-            default_instance_type: str = 't4g.nano'
+            default_instance_type: str = 't4g.nano',
             deployment_rolling_update: bool = False,
             health_check_type: str = 'EC2',
             pipeline_bucket_arn: str = None,
