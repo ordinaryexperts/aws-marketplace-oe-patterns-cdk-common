@@ -1,5 +1,8 @@
 # Unreleased
 
+* Default to smallest instance type for asg
+* Move to graviton for asg
+
 # 3.8.0
 
 * fixing extra test output
