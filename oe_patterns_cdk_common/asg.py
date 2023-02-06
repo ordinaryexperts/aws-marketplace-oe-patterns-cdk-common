@@ -56,7 +56,7 @@ class Asg(Construct):
 
         if use_graviton:
             if not default_instance_type:
-                default_instance_type = 't4g.nano'
+                default_instance_type = 't4g.small'
             default_allowed_instance_types = [
                 "a1.medium",
                 "a1.large",
@@ -96,7 +96,7 @@ class Asg(Construct):
             ]
         else:
             if not default_instance_type:
-                default_instance_type = 't2.nano'
+                default_instance_type = 't2.micro'
             default_allowed_instance_types = [
                 "c5.large",
                 "c5.xlarge",

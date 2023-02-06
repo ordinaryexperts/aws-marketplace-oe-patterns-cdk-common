@@ -122,7 +122,7 @@ def test_root_instance_size():
 
   assert launch_template['TestAsgLaunchTemplate']['Properties']['LaunchTemplateData']['BlockDeviceMappings'][0]['Ebs']['VolumeSize'] == 100
 
-def test_graviton():
+def test_graviton_default():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
   Asg(
@@ -134,9 +134,9 @@ def test_graviton():
   template = assertions.Template.from_stack(stack)
   instance_type_param = template.find_parameters('TestAsgInstanceType')['TestAsgInstanceType']
 
-  assert instance_type_param['Default'] == 't4g.nano'
+  assert instance_type_param['Default'] == 't4g.small'
 
-def test_no_graviton():
+def test_no_graviton_default():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
   Asg(
@@ -148,4 +148,4 @@ def test_no_graviton():
   template = assertions.Template.from_stack(stack)
   instance_type_param = template.find_parameters('TestAsgInstanceType')['TestAsgInstanceType']
 
-  assert instance_type_param['Default'] == 't2.nano'
+  assert instance_type_param['Default'] == 't2.micro'
