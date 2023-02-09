@@ -1,6 +1,6 @@
 # Unreleased
 
-* use replication group for Redis Elasticache
+* use Replication Group for REDIS ElastiCache
 
 # 3.8.0
 
