@@ -1,5 +1,9 @@
 # Unreleased
 
+* use replication group for Redis Elasticache
+
+# 3.8.0
+
 * fixing extra test output
 * fixing ses secretvalue permissions issue
 * allowing dbadmin username to be customized in DbSecret construct
@@ -7,7 +11,7 @@
 * allow customization of asg health check type
 * allowing default database to be customized in AuroraCluster construct
 * allow customization of size of root volume
-* use replication group for Redis Elasticache
+* [Apex DNS issue](https://github.com/ordinaryexperts/aws-marketplace-oe-patterns-cdk-common/issues/5)
 
 # 3.7.0
 
