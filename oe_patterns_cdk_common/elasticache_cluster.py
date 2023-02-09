@@ -148,6 +148,7 @@ class ElasticacheRedis(ElasticacheCluster):
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
             default_instance_type: str = 'cache.t3.micro',
+            transit_encryption_enabled: bool = True,
             password: str = 'changemechangemechangeme', # TODO: migrate to secrets manager - accept secret arn?
             **props):
 
@@ -176,6 +177,6 @@ class ElasticacheRedis(ElasticacheCluster):
             num_cache_clusters=self.elasticache_cluster_num_cache_nodes_param.value_as_number,
             replication_group_description="TODO",
             security_group_ids=[ self.sg.ref ],
-            transit_encryption_enabled=True
+            transit_encryption_enabled=transit_encryption_enabled
         )
         self.replication_group.override_logical_id(f"{id}ReplicationGroup")
