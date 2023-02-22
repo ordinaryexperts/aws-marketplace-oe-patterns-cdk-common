@@ -1,5 +1,7 @@
 # Unreleased
 
+* Adding AmazonMQ for RabbitMQ
+
 # 3.8.0
 
 * fixing extra test output
