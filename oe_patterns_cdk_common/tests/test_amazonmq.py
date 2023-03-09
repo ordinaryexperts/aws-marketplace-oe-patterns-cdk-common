@@ -13,6 +13,6 @@ def test_rabbitmq():
   db_secret = DbSecret(stack, "TestDbSecret")
   RabbitMQ(stack, "TestRabbitMQ", db_secret=db_secret, vpc=vpc)
   template = assertions.Template.from_stack(stack)
-  # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
 
   template.resource_count_is("AWS::AmazonMQ::Broker", 1)

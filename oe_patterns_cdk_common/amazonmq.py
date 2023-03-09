@@ -42,9 +42,9 @@ class AmazonMQ(Construct):
         )
         self.sg.override_logical_id(f"{id}Sg")
 
-        self.cfn_broker = aws_amazonmq.CfnBroker(
+        self.broker = aws_amazonmq.CfnBroker(
             self,
-            "MqBroker",
+            "Broker",
             auto_minor_version_upgrade=True,
             broker_name="TODO",
             deployment_mode="SINGLE_INSTANCE",
@@ -54,74 +54,33 @@ class AmazonMQ(Construct):
             publicly_accessible=False,
             users=[aws_amazonmq.CfnBroker.UserProperty(
                 password="password",
-                username="username",
-
-                # the properties below are optional
-                console_access=False,
-                groups=["groups"]
+                username="username"
             )],
-
-            # the properties below are optional
-            authentication_strategy="authenticationStrategy",
-            configuration=aws_amazonmq.CfnBroker.ConfigurationIdProperty(
-                id="id",
-                revision=123
-            ),
-            encryption_options=aws_amazonmq.CfnBroker.EncryptionOptionsProperty(
-                use_aws_owned_key=False,
-
-                # the properties below are optional
-                kms_key_id="kmsKeyId"
-            ),
-            ldap_server_metadata=aws_amazonmq.CfnBroker.LdapServerMetadataProperty(
-                hosts=["hosts"],
-                role_base="roleBase",
-                role_search_matching="roleSearchMatching",
-                service_account_password="serviceAccountPassword",
-                service_account_username="serviceAccountUsername",
-                user_base="userBase",
-                user_search_matching="userSearchMatching",
-
-                # the properties below are optional
-                role_name="roleName",
-                role_search_subtree=False,
-                user_role_name="userRoleName",
-                user_search_subtree=False
-            ),
             logs=aws_amazonmq.CfnBroker.LogListProperty(
                 audit=False,
                 general=False
             ),
-            maintenance_window_start_time=aws_amazonmq.CfnBroker.MaintenanceWindowProperty(
-                day_of_week="dayOfWeek",
-                time_of_day="timeOfDay",
-                time_zone="timeZone"
-            ),
             security_groups=["securityGroups"],
-            storage_type="storageType",
-            subnet_ids=["subnetIds"],
-            tags=[aws_amazonmq.CfnBroker.TagsEntryProperty(
-                key="key",
-                value="value"
-            )]
+            subnet_ids=["subnetIds"]
         )
+        self.broker.override_logical_id(f"{id}Broker")
 
 
     def metadata_parameter_group(self):
         return [
             {
                 "Label": {
-                    "default": " Configuration"
+                    "default": "AmazonMQ Configuration"
                 },
                 "Parameters": [
-                    self.db_instance_class_param.logical_id
+                    self.amazonmq_instance_class_param.logical_id
                 ]
             }
         ]
 
     def metadata_parameter_labels(self):
         return {
-            self.db_instance_class_param.logical_id: {
+            self.amazonmq_instance_class_param.logical_id: {
                 "default": "AmazonMQ Instance Type"
             }
         }
