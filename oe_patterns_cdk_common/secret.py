@@ -12,60 +12,60 @@ from aws_cdk import (
 
 from constructs import Construct
 
-# deprecated - use Secret instead
-class DbSecret(Construct):
+class Secret(Construct):
     def __init__(
             self,
             scope: Construct,
             id: str,
-            username: str = 'dbadmin',
+            username: str = 'admin',
             **props):
         super().__init__(scope, id, **props)
 
+        self.id = id
+
         self.secret_arn_param = CfnParameter(
             self,
-            "DbSecretArn",
+            "SecretArn",
             default="",
-            description="Optional: SecretsManager secret ARN used to store database credentials and other configuration. If not specified, a secret will be created."
+            description=f"Optional: Secrets Manager Secret ARN used to store {id} credentials. If not specified, a secret will be created."
         )
-        self.secret_arn_param.override_logical_id(f"{id}Arn")
+        self.secret_arn_param.override_logical_id(f"{id}SecretArn")
 
         self.secret_arn_exists_condition = CfnCondition(
             self,
-            "DbSecretArnExistsCondition",
+            "SecretArnExistsCondition",
             expression=Fn.condition_not(Fn.condition_equals(self.secret_arn_param.value, ""))
         )
-        self.secret_arn_exists_condition.override_logical_id(f"{id}ArnExistsCondition")
+        self.secret_arn_exists_condition.override_logical_id(f"{id}SecretArnExistsCondition")
         self.secret_arn_not_exists_condition = CfnCondition(
             self,
-            "DbSecretArnNotExistsCondition",
+            "SecretArnNotExistsCondition",
             expression=Fn.condition_equals(self.secret_arn_param.value, "")
         )
-        self.secret_arn_not_exists_condition.override_logical_id(f"{id}ArnNotExistsCondition")
+        self.secret_arn_not_exists_condition.override_logical_id(f"{id}SecretArnNotExistsCondition")
 
         self.secret = aws_secretsmanager.CfnSecret(
             self,
-            "DbSecret",
+            "Secret",
             generate_secret_string=aws_secretsmanager.CfnSecret.GenerateSecretStringProperty(
                 exclude_characters="\"@/\\\"'$,[]*?{}~#%<>|^",
                 exclude_punctuation=True,
                 generate_string_key="password",
                 secret_string_template=json.dumps({"username":username})
             ),
-            name="{}/db/secret".format(Aws.STACK_NAME)
+            name="{}/{}/secret".format(Aws.STACK_NAME, self.id.lower())
         )
         self.secret.cfn_options.condition = self.secret_arn_not_exists_condition
-        self.secret.override_logical_id(id)
+        self.secret.override_logical_id(f"{id}Secret")
 
-
-        self.db_secret_arn_ssm_param = aws_ssm.CfnParameter(
+        self.secret_arn_ssm_param = aws_ssm.CfnParameter(
             self,
-            "DbSecretArnParameter",
+            "SecretArnParameter",
             type="String",
             value=self.secret_arn(),
-            name=Aws.STACK_NAME + "-db-secret-arn"
+            name=Aws.STACK_NAME + f"-{id.lower()}-secret-arn"
         )
-        self.db_secret_arn_ssm_param.override_logical_id(f"{id}ArnParameter")
+        self.secret_arn_ssm_param.override_logical_id(f"{id}SecretArnParameter")
 
     def secret_arn(self):
         return Token.as_string(
@@ -80,7 +80,7 @@ class DbSecret(Construct):
         return [
             {
                 "Label": {
-                    "default": "DB Secret Configuration"
+                    "default": f"{self.id} Secret Configuration"
                 },
                 "Parameters": [
                     self.secret_arn_param.logical_id
@@ -91,6 +91,6 @@ class DbSecret(Construct):
     def metadata_parameter_labels(self):
         return {
             self.secret_arn_param.logical_id: {
-                "default": "DB Secret ARN"
+                "default": f"{self.id} Secret ARN"
             }
         }

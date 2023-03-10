@@ -1,23 +1,26 @@
 from aws_cdk import (
     aws_amazonmq,
     aws_ec2,
-    CfnParameter
+    CfnParameter,
+    Fn
 )
 
 from constructs import Construct
-from oe_patterns_cdk_common.db_secret import DbSecret
+from oe_patterns_cdk_common.secret import Secret
 from oe_patterns_cdk_common.util import Util
 from oe_patterns_cdk_common.vpc import Vpc
+
+DEFAULT_INSTANCE_TYPE = 'mq.t3.micro'
 
 class AmazonMQ(Construct):
     def __init__(
             self,
             scope: Construct,
             id: str,
-            db_secret: DbSecret,
+            secret: Secret,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
-            default_instance_type: str = 'mq.t3.micro',
+            default_instance_type: str = DEFAULT_INSTANCE_TYPE,
             **props):
         super().__init__(scope, id, **props)
 
@@ -65,14 +68,23 @@ class AmazonMQ(Construct):
             auto_minor_version_upgrade=True,
             broker_name=Util.append_stack_uuid("rabbitmq"),
             deployment_mode="SINGLE_INSTANCE",
-            engine_type="RABBITMQ",
-            engine_version="3.10.17",
+            engine_type=self.engine_type,
+            engine_version=self.engine_version,
             host_instance_type=self.instance_class_param.value_as_string,
             publicly_accessible=False,
-            users=[aws_amazonmq.CfnBroker.UserProperty(
-                password="password",
-                username="username"
-            )],
+            users=[
+                Fn.condition_if(
+                    secret.secret_arn_exists_condition.logical_id,
+                    aws_amazonmq.CfnBroker.UserProperty(
+                        password=Fn.sub("{{resolve:secretsmanager:${SecretArn}:SecretString:password}}"),
+                        username=Fn.sub("{{resolve:secretsmanager:${SecretArn}:SecretString:username}}")
+                    ),
+                    aws_amazonmq.CfnBroker.UserProperty(
+                        password=Fn.sub("{{resolve:secretsmanager:${Secret}:SecretString:password}}"),
+                        username=Fn.sub("{{resolve:secretsmanager:${Secret}:SecretString:username}}")
+                    )
+                )
+            ],
             logs=aws_amazonmq.CfnBroker.LogListProperty(
                 audit=False,
                 general=False
@@ -107,20 +119,20 @@ class RabbitMQ(AmazonMQ):
             self,
             scope: Construct,
             id: str,
-            db_secret: DbSecret,
+            secret: Secret,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
-            default_instance_type: str = 'db.r5.large',
+            default_instance_type: str = DEFAULT_INSTANCE_TYPE,
             **props):
 
         self.engine_type = "RABBITMQ"
-        self.engine_version = "3.10.10"
+        self.engine_version = "3.10.17"
         self.port = 5671
 
         super().__init__(
             scope,
             id,
-            db_secret=db_secret,
+            secret=secret,
             vpc=vpc,
             allowed_instance_types=allowed_instance_types,
             default_instance_type=default_instance_type,
