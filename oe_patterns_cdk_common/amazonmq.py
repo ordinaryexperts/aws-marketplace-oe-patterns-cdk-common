@@ -76,12 +76,12 @@ class AmazonMQ(Construct):
                 Fn.condition_if(
                     secret.secret_arn_exists_condition.logical_id,
                     aws_amazonmq.CfnBroker.UserProperty(
-                        password=Fn.sub("{{resolve:secretsmanager:${SecretArn}:SecretString:password}}"),
-                        username=Fn.sub("{{resolve:secretsmanager:${SecretArn}:SecretString:username}}")
+                        password=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:password}}}}"),
+                        username=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:username}}}}")
                     ),
                     aws_amazonmq.CfnBroker.UserProperty(
-                        password=Fn.sub("{{resolve:secretsmanager:${Secret}:SecretString:password}}"),
-                        username=Fn.sub("{{resolve:secretsmanager:${Secret}:SecretString:username}}")
+                        password=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:password}}}}"),
+                        username=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:username}}}}")
                     )
                 )
             ],
