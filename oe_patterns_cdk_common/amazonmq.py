@@ -91,7 +91,7 @@ class AmazonMQ(Construct):
                 general=False
             ),
             security_groups=[self.sg.ref],
-            subnet_ids=[vpc.private_subnet1_id(), vpc.private_subnet2_id()]
+            subnet_ids=[vpc.private_subnet1_id()]
         )
         self.broker.override_logical_id(f"{id}Broker")
         self.broker.add_override(
