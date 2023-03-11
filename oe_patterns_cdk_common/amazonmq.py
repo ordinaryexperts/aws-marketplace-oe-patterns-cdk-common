@@ -73,22 +73,8 @@ class AmazonMQ(Construct):
             host_instance_type=self.instance_class_param.value_as_string,
             publicly_accessible=False,
             users=[],
- #            users=[
-#                 Fn.condition_if(
-#                     secret.secret_arn_exists_condition.logical_id,
-#                     aws_amazonmq.CfnBroker.UserProperty(
-#                         Password=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:password}}}}"),
-#                         Username=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:username}}}}")
-#                     ),
-# qaws_amazonmq.CfnBroker.UserProperty(
-#                         Password=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:password}}}}"),
-#                         Username=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:username}}}}")
-#                     )
-#                 )
-#             ],
             logs=aws_amazonmq.CfnBroker.LogListProperty(
-                audit=False,
-                general=False
+                general=True
             ),
             security_groups=[self.sg.ref],
             subnet_ids=[vpc.private_subnet1_id()]
