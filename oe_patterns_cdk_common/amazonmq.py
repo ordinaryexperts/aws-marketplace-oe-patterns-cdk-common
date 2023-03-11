@@ -72,19 +72,20 @@ class AmazonMQ(Construct):
             engine_version=self.engine_version,
             host_instance_type=self.instance_class_param.value_as_string,
             publicly_accessible=False,
-            users=[
-                Fn.condition_if(
-                    secret.secret_arn_exists_condition.logical_id,
-                    aws_amazonmq.CfnBroker.UserProperty(
-                        password=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:password}}}}"),
-                        username=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:username}}}}")
-                    ),
-                    aws_amazonmq.CfnBroker.UserProperty(
-                        password=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:password}}}}"),
-                        username=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:username}}}}")
-                    )
-                )
-            ],
+            users=[],
+ #            users=[
+#                 Fn.condition_if(
+#                     secret.secret_arn_exists_condition.logical_id,
+#                     aws_amazonmq.CfnBroker.UserProperty(
+#                         Password=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:password}}}}"),
+#                         Username=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:username}}}}")
+#                     ),
+# qaws_amazonmq.CfnBroker.UserProperty(
+#                         Password=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:password}}}}"),
+#                         Username=Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:username}}}}")
+#                     )
+#                 )
+#             ],
             logs=aws_amazonmq.CfnBroker.LogListProperty(
                 audit=False,
                 general=False
@@ -93,6 +94,22 @@ class AmazonMQ(Construct):
             subnet_ids=[vpc.private_subnet1_id(), vpc.private_subnet2_id()]
         )
         self.broker.override_logical_id(f"{id}Broker")
+        self.broker.add_override(
+            "Properties.Users",
+            [
+                Fn.condition_if(
+                    secret.secret_arn_exists_condition.logical_id,
+                    {
+                        'Password':Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:password}}}}"),
+                        'Username':Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret_arn_param.logical_id}}}:SecretString:username}}}}")
+                    },
+                    {
+                        'Password':Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:password}}}}"),
+                        'Username':Fn.sub(f"{{{{resolve:secretsmanager:${{{secret.secret.logical_id}}}:SecretString:username}}}}")
+                    }
+                )
+            ]
+        )
 
 
     def metadata_parameter_group(self):

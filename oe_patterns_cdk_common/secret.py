@@ -29,7 +29,7 @@ class Secret(Construct):
             default="",
             description=f"Optional: Secrets Manager Secret ARN used to store {id} credentials. If not specified, a secret will be created."
         )
-        self.secret_arn_param.override_logical_id(f"{id}SecretArn")
+        self.secret_arn_param.override_logical_id(f"{id}Arn")
 
         self.secret_arn_exists_condition = CfnCondition(
             self,
