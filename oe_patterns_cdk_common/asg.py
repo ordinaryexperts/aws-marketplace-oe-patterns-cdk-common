@@ -96,7 +96,7 @@ class Asg(Construct):
             ]
         else:
             if not default_instance_type:
-                default_instance_type = 't2.micro'
+                default_instance_type = 't3.micro'
             default_allowed_instance_types = [
                 "t2.nano",
                 "t2.micro",
