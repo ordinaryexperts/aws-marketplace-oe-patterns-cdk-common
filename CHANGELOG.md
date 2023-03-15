@@ -3,6 +3,10 @@
 * Default to smallest instance type for asg
 * Move to graviton for asg
 
+# 3.9.0
+
+* updating aurora version to 5.7.mysql_aurora.2.11.1
+
 # 3.8.0
 
 * fixing extra test output

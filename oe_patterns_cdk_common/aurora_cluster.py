@@ -261,7 +261,7 @@ class AuroraMysql(AuroraCluster):
             **props):
 
         self.engine = "aurora-mysql"
-        self.engine_version = "5.7.mysql_aurora.2.11.0"
+        self.engine_version = "5.7.mysql_aurora.2.11.1"
         self.parameter_group_name = "default.aurora-mysql5.7"
         self.port = 3306
 
