@@ -24,7 +24,7 @@ class AuroraCluster(Construct):
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
             database_name: str = None,
-            default_instance_type: str = 'db.t4g.medium',
+            default_instance_type: str = '',
             **props):
         super().__init__(scope, id, **props)
 
@@ -32,7 +32,7 @@ class AuroraCluster(Construct):
         self.allowed_instance_types = allowed_instance_types
         self.database_name = database_name
 
-        self.default_instance_type = default_instance_type
+        self.default_instance_type = default_instance_type if default_instance_type else 'db.t4g.medium'
         self.default_allowed_instance_types = [
             "db.t3.medium",
             "db.t3.large",
