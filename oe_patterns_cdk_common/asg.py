@@ -58,6 +58,14 @@ class Asg(Construct):
             if not default_instance_type:
                 default_instance_type = 't4g.small'
             default_allowed_instance_types = [
+                "t4g.nano",
+                "t4g.micro",
+                "t4g.small",
+                "t4g.medium",
+                "t4g.large",
+                "t4g.xlarge",
+                "t4g.2xlarge",
+                "t4g.4xlarge"
                 "a1.medium",
                 "a1.large",
                 "a1.xlarge",
@@ -85,19 +93,25 @@ class Asg(Construct):
                 "r6g.8xlarge",
                 "r6g.12xlarge",
                 "r6g.16xlarge",
-                "t4g.nano",
-                "t4g.micro",
-                "t4g.small",
-                "t4g.medium",
-                "t4g.large",
-                "t4g.xlarge",
-                "t4g.2xlarge",
-                "t4g.4xlarge"
             ]
         else:
             if not default_instance_type:
                 default_instance_type = 't2.micro'
             default_allowed_instance_types = [
+                "t2.nano",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "t2.xlarge",
+                "t2.2xlarge",
+                "t3.nano",
+                "t3.micro",
+                "t3.small",
+                "t3.medium",
+                "t3.large",
+                "t3.xlarge",
+                "t3.2xlarge",
                 "c5.large",
                 "c5.xlarge",
                 "c5.2xlarge",
@@ -150,13 +164,7 @@ class Asg(Construct):
                 "r5d.12xlarge",
                 "r5d.16xlarge",
                 "r5d.24xlarge",
-                "r5d.metal",
-                "t3.nano",
-                "t3.micro",
-                "t3.small",
-                "t3.medium",
-                "t3.large",
-                "t3.xlarge"
+                "r5d.metal"
             ]
 
         self.instance_type_param = CfnParameter(

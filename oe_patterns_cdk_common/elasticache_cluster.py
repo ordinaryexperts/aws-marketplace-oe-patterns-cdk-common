@@ -15,7 +15,7 @@ class ElasticacheCluster(Construct):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
-            default_instance_type: str = 'cache.t3.micro',
+            default_instance_type: str = 'cache.t4g.micro',
             **props):
         super().__init__(scope, id, **props)
 
@@ -23,6 +23,13 @@ class ElasticacheCluster(Construct):
         self.allowed_instance_types = allowed_instance_types
         self.default_instance_type = default_instance_type
         self.default_allowed_instance_types = [
+            "cache.m6g.large",
+            "cache.m6g.xlarge",
+            "cache.m6g.2xlarge",
+            "cache.m6g.4xlarge",
+            "cache.m6g.8xlarge",
+            "cache.m6g.12xlarge",
+            "cache.m6g.16xlarge",
             "cache.m5.large",
             "cache.m5.xlarge",
             "cache.m5.2xlarge",
@@ -34,9 +41,31 @@ class ElasticacheCluster(Construct):
             "cache.m4.2xlarge",
             "cache.m4.4xlarge",
             "cache.m4.10xlarge",
+            "cache.t4g.micro",
+            "cache.t4g.small",
+            "cache.t4g.medium",
             "cache.t3.micro",
             "cache.t3.small",
             "cache.t3.medium"
+            "cache.r6g.large",
+            "cache.r6g.xlarge",
+            "cache.r6g.2xlarge",
+            "cache.r6g.4xlarge",
+            "cache.r6g.8xlarge",
+            "cache.r6g.12xlarge",
+            "cache.r6g.16xlarge",
+            "cache.r5.large",
+            "cache.r5.xlarge",
+            "cache.r5.2xlarge",
+            "cache.r5.4xlarge",
+            "cache.r5.12xlarge",
+            "cache.r5.24xlarge",
+            "cache.r4.large",
+            "cache.r4.xlarge",
+            "cache.r4.2xlarge",
+            "cache.r4.4xlarge",
+            "cache.r4.8xlarge",
+            "cache.r4.16xlarge"
         ]
 
         self.elasticache_cluster_cache_node_type_param = CfnParameter(
