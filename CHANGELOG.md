@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.10.0
+
 * Default to smallest instance type for asg
 * Move to graviton for asg
 
