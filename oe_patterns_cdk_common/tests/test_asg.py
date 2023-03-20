@@ -121,3 +121,31 @@ def test_root_instance_size():
   launch_template = template.find_resources('AWS::EC2::LaunchTemplate')
 
   assert launch_template['TestAsgLaunchTemplate']['Properties']['LaunchTemplateData']['BlockDeviceMappings'][0]['Ebs']['VolumeSize'] == 100
+
+def test_graviton_default():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    use_graviton=True, # default
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  instance_type_param = template.find_parameters('TestAsgInstanceType')['TestAsgInstanceType']
+
+  assert instance_type_param['Default'] == 't4g.small'
+
+def test_no_graviton_default():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    use_graviton=False,
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  instance_type_param = template.find_parameters('TestAsgInstanceType')['TestAsgInstanceType']
+
+  assert instance_type_param['Default'] == 't2.micro'
