@@ -46,7 +46,7 @@ class ElasticacheCluster(Construct):
             "cache.t4g.medium",
             "cache.t3.micro",
             "cache.t3.small",
-            "cache.t3.medium"
+            "cache.t3.medium",
             "cache.r6g.large",
             "cache.r6g.xlarge",
             "cache.r6g.2xlarge",
