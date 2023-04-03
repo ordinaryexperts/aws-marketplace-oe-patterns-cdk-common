@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.10.1
+
+* Fixing typo in cache instance types
+
 # 3.10.0
 
 * Default to smallest instance type for asg
