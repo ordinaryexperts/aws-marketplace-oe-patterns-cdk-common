@@ -24,35 +24,51 @@ class AuroraCluster(Construct):
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
             database_name: str = None,
-            default_instance_type: str = 'db.r5.large',
+            default_instance_type: str = '',
             **props):
         super().__init__(scope, id, **props)
 
         self.id = id
         self.allowed_instance_types = allowed_instance_types
         self.database_name = database_name
-        self.default_instance_type = default_instance_type
+
+        self.default_instance_type = default_instance_type if default_instance_type else 'db.t4g.medium'
         self.default_allowed_instance_types = [
+            "db.t3.medium",
+            "db.t3.large",
+            "db.t4g.medium",
+            "db.t4g.large",
             "db.r5.large",
             "db.r5.xlarge",
             "db.r5.2xlarge",
             "db.r5.4xlarge",
             "db.r5.8xlarge",
             "db.r5.12xlarge",
-            "db.r4.large",
-            "db.r4.xlarge",
-            "db.r4.2xlarge",
-            "db.r4.4xlarge",
-            "db.r4.8xlarge",
-            "db.r4.16xlarge",
-            "db.t3.micro",
-            "db.t3.small",
-            "db.t3.medium",
-            "db.t3.large",
-            "db.t3.xlarge",
-            "db.t3.2xlarge",
-            "db.t2.small",
-            "db.t2.medium"
+            "db.r5.16xlarge",
+            "db.r5.24xlarge",
+            "db.r6i.large",
+            "db.r6i.xlarge",
+            "db.r6i.2xlarge",
+            "db.r6i.4xlarge",
+            "db.r6i.8xlarge",
+            "db.r6i.12xlarge",
+            "db.r6i.16xlarge",
+            "db.r6i.24xlarge",
+            "db.r6i.32xlarge",
+            "db.r6g.large",
+            "db.r6g.xlarge",
+            "db.r6g.2xlarge",
+            "db.r6g.4xlarge",
+            "db.r6g.8xlarge",
+            "db.r6g.12xlarge",
+            "db.r6g.16xlarge",
+            "db.x2g.large",
+            "db.x2g.xlarge",
+            "db.x2g.2xlarge",
+            "db.x2g.4xlarge",
+            "db.x2g.8xlarge",
+            "db.x2g.12xlarge",
+            "db.x2g.16xlarge"
         ]
 
         #
@@ -241,7 +257,7 @@ class AuroraMysql(AuroraCluster):
             db_secret: DbSecret,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
-            default_instance_type: str = 'db.r5.large',
+            default_instance_type: str = '',
             **props):
 
         self.engine = "aurora-mysql"
@@ -266,7 +282,7 @@ class AuroraPostgresql(AuroraCluster):
             db_secret: DbSecret,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
-            default_instance_type: str = 'db.r5.large',
+            default_instance_type: str = '',
             **props):
 
         self.engine = "aurora-postgresql"
