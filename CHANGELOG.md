@@ -1,5 +1,7 @@
 # Unreleased
 
+* Adding AmazonMQ for RabbitMQ
+
 # 3.10.1
 
 * Fixing typo in cache instance types
