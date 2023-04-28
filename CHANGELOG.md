@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.11.0
+
 * Adding AmazonMQ for RabbitMQ
 
 # 3.10.1
