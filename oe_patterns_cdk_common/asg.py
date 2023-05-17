@@ -37,7 +37,6 @@ class Asg(Construct):
             additional_iam_role_policies: 'list[object]' = [],
             allow_associate_address: bool = False,
             allowed_instance_types: 'list[str]' = [],
-            data_volume_size: int = 0,
             default_instance_type: str = None,
             deployment_rolling_update: bool = False,
             health_check_type: str = 'EC2',
@@ -46,6 +45,7 @@ class Asg(Construct):
             root_volume_size: int = 0,
             secret_arns: 'list[str]' = [],
             singleton: bool = False,
+            use_data_volume: bool = False,
             use_graviton: bool = True,
             use_public_subnets: bool = False,
             user_data_contents: str = None,
@@ -300,7 +300,7 @@ class Asg(Construct):
                     policy_name="AllowAssociateAddress"
                 )
             )
-        if data_volume_size > 0:
+        if use_data_volume:
             policies.append(
                 aws_iam.CfnRole.PolicyProperty(
                     policy_document=aws_iam.PolicyDocument(
@@ -406,7 +406,7 @@ class Asg(Construct):
         self.ec2_instance_profile.override_logical_id(f"{id}InstanceProfile")
 
         # data volume
-        if data_volume_size > 0:
+        if use_data_volume:
             # lambda to find az from subnet
             lambda_code_path = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
@@ -446,6 +446,15 @@ class Asg(Construct):
             )
             self.subnet_to_az_custom_resource.node.default_child.override_logical_id(f"{id}SubnetToAzCustomResource")
 
+            self.data_volume_size_param = CfnParameter(
+                self,
+                "AsgDataVolumeSize",
+                type="Number",
+                default="100",
+                description="Required: Size of EBS data volume in GiBs."
+            )
+            self.data_volume_size_param.override_logical_id(f"{id}DataVolumeSize")
+
             self.data_volume_snapshot_param = CfnParameter(
                 self,
                 "AsgDataVolumeSnapshot",
@@ -473,12 +482,12 @@ class Asg(Construct):
                     )
                 ),
                 encrypted=True,
-                size=data_volume_size
+                size=self.data_volume_size_param.value_as_number
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
 
         user_data = None
-        if data_volume_size > 0:
+        if use_data_volume:
             script_code_path = os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
                 "script_attach_ebs.sh"
