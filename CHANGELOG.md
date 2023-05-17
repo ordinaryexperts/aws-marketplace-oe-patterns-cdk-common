@@ -1,5 +1,8 @@
 # Unreleased
 
+* Move from data_volume_size to use_data_volume
+* Add AsgDataVolumeSizeParam
+
 # 3.11.0
 
 * Adding AmazonMQ for RabbitMQ

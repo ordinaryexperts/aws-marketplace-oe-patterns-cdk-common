@@ -53,7 +53,7 @@ def test_data_asg():
   Asg(
     stack,
     'TestAsg',
-    data_volume_size=10,
+    use_data_volume=True,
     user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
     user_data_variables={ 'MYVAR': 'Ref: MyParam' },
     vpc=vpc
@@ -148,4 +148,4 @@ def test_no_graviton_default():
   template = assertions.Template.from_stack(stack)
   instance_type_param = template.find_parameters('TestAsgInstanceType')['TestAsgInstanceType']
 
-  assert instance_type_param['Default'] == 't2.micro'
+  assert instance_type_param['Default'] == 't3.micro'
