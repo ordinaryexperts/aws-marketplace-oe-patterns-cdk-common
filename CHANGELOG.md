@@ -1,6 +1,9 @@
 # Unreleased
 
-* Fix IAM issue with root folders with assets bucket
+* Fix IAM issue with root folders with AssetsBucket
+* Add `allow_open_cors` option in assets AssetsBucket
+* Add `object_ownership_value` option in AssetsBucket
+* Add `remove_public_access_block` option in AssetsBucket
 
 # 3.12.0
 
