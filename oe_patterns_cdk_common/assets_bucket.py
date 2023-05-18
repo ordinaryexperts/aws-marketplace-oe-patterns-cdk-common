@@ -19,7 +19,9 @@ class AssetsBucket(Construct):
             self,
             scope: Construct,
             id: str,
-            allow_public_access: bool = False,
+            allow_open_cors: bool = False,
+            object_ownership_value: str = None,
+            remove_public_access_block: bool = False,
             **props):
         super().__init__(scope, id, **props)
 
@@ -50,7 +52,7 @@ class AssetsBucket(Construct):
                 ]
             ),
         )
-        if allow_public_access:
+        if allow_open_cors:
             self.assets_bucket.cors_configuration = aws_s3.CfnBucket.CorsConfigurationProperty(
                 cors_rules = [
                     aws_s3.CfnBucket.CorsRuleProperty(
@@ -61,18 +63,20 @@ class AssetsBucket(Construct):
                     )
                 ]
             )
+        if object_ownership_value:
+            self.assets_bucket.ownership_controls=aws_s3.CfnBucket.OwnershipControlsProperty(
+                rules=[
+                    aws_s3.CfnBucket.OwnershipControlsRuleProperty(
+                        object_ownership=object_ownership_value
+                    )
+                ]
+            )
+        if remove_public_access_block:
             self.assets_bucket.public_access_block_configuration=aws_s3.CfnBucket.PublicAccessBlockConfigurationProperty(
                 block_public_acls=False,
                 block_public_policy=False,
                 ignore_public_acls=False,
                 restrict_public_buckets=False
-            )
-            self.assets_bucket.ownership_controls=aws_s3.CfnBucket.OwnershipControlsProperty(
-                rules=[
-                    aws_s3.CfnBucket.OwnershipControlsRuleProperty(
-                        object_ownership="ObjectWriter"
-                    )
-                ]
             )
         self.assets_bucket.override_logical_id(f"{id}")
         self.assets_bucket.cfn_options.condition=self.assets_bucket_name_not_exists_condition

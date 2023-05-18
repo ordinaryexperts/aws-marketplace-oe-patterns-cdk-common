@@ -13,9 +13,9 @@ def test_assets_bucket():
   # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
   template.resource_count_is("AWS::S3::Bucket", 1)
 
-def test_public_assets_bucket():
+def test_assets_bucket_cors():
   stack = Stack()
-  AssetsBucket(stack, "TestAssetsBucket", allow_public_access=True)
+  AssetsBucket(stack, "TestAssetsBucket", allow_open_cors=True)
   template = assertions.Template.from_stack(stack)
 
   # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
