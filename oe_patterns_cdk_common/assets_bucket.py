@@ -19,6 +19,7 @@ class AssetsBucket(Construct):
             self,
             scope: Construct,
             id: str,
+            allow_public_access: bool = False,
             **props):
         super().__init__(scope, id, **props)
 
@@ -49,6 +50,13 @@ class AssetsBucket(Construct):
                 ]
             ),
         )
+        if allow_public_access:
+            self.assets_bucket.public_access_block_configuration=aws_s3.CfnBucket.PublicAccessBlockConfigurationProperty(
+                block_public_acls=False,
+                block_public_policy=False,
+                ignore_public_acls=False,
+                restrict_public_buckets=False
+            )
         self.assets_bucket.override_logical_id(f"{id}")
         self.assets_bucket.cfn_options.condition=self.assets_bucket_name_not_exists_condition
         self.assets_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
