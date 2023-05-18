@@ -82,6 +82,7 @@ class AssetsBucket(Construct):
                     aws_iam.PolicyStatement(
                         effect=aws_iam.Effect.ALLOW,
                         actions=[
+                            "s3:GetBucketLocation",
                             "s3:ListBucket"
                         ],
                         resources=[ self.assets_bucket_arn ]
