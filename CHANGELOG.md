@@ -1,5 +1,7 @@
 # Unreleased
 
+* Fix IAM issue with root folders with assets bucket
+
 # 3.12.0
 
 * Move from data_volume_size to use_data_volume

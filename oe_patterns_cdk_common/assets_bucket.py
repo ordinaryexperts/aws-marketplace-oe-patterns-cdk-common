@@ -64,7 +64,6 @@ class AssetsBucket(Construct):
                         self.assets_bucket_name_param.value_as_string
                     )
                 ),
-                resource_name="*",
                 service="s3"
             ),
             stack=Stack.of(self)
