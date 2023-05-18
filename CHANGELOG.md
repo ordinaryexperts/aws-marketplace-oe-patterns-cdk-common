@@ -1,5 +1,12 @@
 # Unreleased
 
+# 3.13.0
+
+* Fix IAM issue with root folders with AssetsBucket
+* Add `allow_open_cors` option in assets AssetsBucket
+* Add `object_ownership_value` option in AssetsBucket
+* Add `remove_public_access_block` option in AssetsBucket
+
 # 3.12.0
 
 * Move from data_volume_size to use_data_volume
