@@ -51,6 +51,16 @@ class AssetsBucket(Construct):
             ),
         )
         if allow_public_access:
+            self.assets_bucket.cors_configuration = aws_s3.CfnBucket.CorsConfigurationProperty(
+                cors_rules = [
+                    aws_s3.CfnBucket.CorsRuleProperty(
+                        allowed_headers=['*'],
+                        allowed_methods=['GET'],
+                        allowed_origins=['*'],
+                        exposed_headers=[]
+                    )
+                ]
+            )
             self.assets_bucket.public_access_block_configuration=aws_s3.CfnBucket.PublicAccessBlockConfigurationProperty(
                 block_public_acls=False,
                 block_public_policy=False,
