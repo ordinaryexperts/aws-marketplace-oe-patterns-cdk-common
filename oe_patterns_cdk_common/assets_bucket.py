@@ -57,6 +57,13 @@ class AssetsBucket(Construct):
                 ignore_public_acls=False,
                 restrict_public_buckets=False
             )
+            self.assets_bucket.ownership_controls=aws_s3.CfnBucket.OwnershipControlsProperty(
+                rules=[
+                    aws_s3.CfnBucket.OwnershipControlsRuleProperty(
+                        object_ownership="objectOwnership"
+                    )
+                ]
+            )
         self.assets_bucket.override_logical_id(f"{id}")
         self.assets_bucket.cfn_options.condition=self.assets_bucket_name_not_exists_condition
         self.assets_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
