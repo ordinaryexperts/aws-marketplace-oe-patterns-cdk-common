@@ -60,7 +60,7 @@ class AssetsBucket(Construct):
             self.assets_bucket.ownership_controls=aws_s3.CfnBucket.OwnershipControlsProperty(
                 rules=[
                     aws_s3.CfnBucket.OwnershipControlsRuleProperty(
-                        object_ownership="objectOwnership"
+                        object_ownership="ObjectWriter"
                     )
                 ]
             )
