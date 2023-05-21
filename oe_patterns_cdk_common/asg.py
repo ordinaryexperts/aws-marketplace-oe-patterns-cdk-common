@@ -65,7 +65,7 @@ class Asg(Construct):
                 "t4g.large",
                 "t4g.xlarge",
                 "t4g.2xlarge",
-                "t4g.4xlarge"
+                "t4g.4xlarge",
                 "a1.medium",
                 "a1.large",
                 "a1.xlarge",
