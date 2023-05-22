@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.14.0
+
+* Update graviton instance types in asg
+
 # 3.13.0
 
 * Fix IAM issue with root folders with AssetsBucket
