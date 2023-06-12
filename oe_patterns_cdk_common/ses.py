@@ -34,7 +34,7 @@ class Ses(Construct):
             "SesCreateDomainIdentity",
             allowed_values=[ "true", "false" ],
             default="true",
-            description="Whether or not to create a SES Identity from the hosted zone."
+            description="Optional: If 'true', a SES Domain Identity will be created from the hosted zone."
         )
         self.create_domain_identity_param.override_logical_id(f"{id}CreateDomainIdentity")
 

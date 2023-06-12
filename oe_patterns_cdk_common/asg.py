@@ -53,6 +53,7 @@ class Asg(Construct):
             **props):
         super().__init__(scope, id, **props)
         self._singleton = singleton
+        self._use_data_volume = use_data_volume
 
         if use_graviton:
             if not default_instance_type:
@@ -463,7 +464,7 @@ class Asg(Construct):
                 self,
                 "AsgDataVolumeSnapshot",
                 default="",
-                description="Optional: An EBS snapshot to restore as a starting point for the data volume.",
+                description="Optional: An EBS snapshot id to restore as a starting point for the data volume.",
             )
             self.data_volume_snapshot_param.override_logical_id(f"{id}DataVolumeSnapshot")
 
@@ -614,6 +615,11 @@ class Asg(Construct):
                 self.max_size_param.logical_id,
                 self.min_size_param.logical_id
             ]
+        if self._use_data_volume:
+            params += [
+                self.data_volume_size_param.logical_id,
+                self.data_volume_snapshot_param.logical_id
+            ]
         return [
             {
                 "Label": {
@@ -643,6 +649,16 @@ class Asg(Construct):
                 },
                 self.min_size_param.logical_id: {
                     "default": "Auto Scaling Group Minimum Size"
+                }
+            }
+        if self._use_data_volume:
+            params = {
+                **params,
+                self.data_volume_size_param.logical_id: {
+                    "default": "Auto Scaling Group EBS Snapshot Size"
+                },
+                self.data_volume_snapshot_param.logical_id: {
+                    "default": "Auto Scaling Group EBS Snapshot ID"
                 }
             }
         return params
