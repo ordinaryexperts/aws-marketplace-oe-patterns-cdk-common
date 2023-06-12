@@ -1,5 +1,10 @@
 # Unreleased
 
+# 3.14.1
+
+* Update descriptions of various CFN parameters
+* Upgrade to v2.2.0 of OE devenv
+
 # 3.14.0
 
 * Update graviton instance types in asg
