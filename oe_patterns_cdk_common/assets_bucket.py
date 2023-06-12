@@ -29,7 +29,7 @@ class AssetsBucket(Construct):
             self,
             "AssetsBucketName",
             default="",
-            description="The name of the S3 bucket to store uploaded assets. If not specified, a bucket will be created."
+            description="Optional: The name of the S3 bucket to store uploaded assets. If not specified, a bucket will be created."
         )
         self.assets_bucket_name_param.override_logical_id(f"{id}Name")
         self.assets_bucket_name_not_exists_condition = CfnCondition(
