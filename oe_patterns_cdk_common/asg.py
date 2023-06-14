@@ -29,6 +29,25 @@ class Asg(Construct):
 
     TWO_YEARS_IN_DAYS=731
 
+    GRAVITON_INSTANCE_TYPES = [
+        "t4g.nano", "t4g.micro", "t4g.small", "t4g.medium", "t4g.large", "t4g.xlarge", "t4g.2xlarge", "t4g.4xlarge",
+        "a1.medium", "a1.large", "a1.xlarge", "a1.2xlarge", "a1.4xlarge", "a1.metal",
+        "c7g.medium", "c7g.large", "c7g.xlarge", "c7g.2xlarge", "c7g.4xlarge", "c7g.8xlarge", "c7g.12xlarge", "c7g.16xlarge", "c7g.metal",
+        "m7g.medium", "m7g.large", "m7g.xlarge", "m7g.2xlarge", "m7g.4xlarge", "m7g.12xlarge", "m7g.metal",
+        "r7g.medium", "r7g.large", "r7g.xlarge", "r7g.2xlarge", "r7g.4xlarge", "r7g.8xlarge", "r7g.12xlarge", "r7g.16xlarge", "r7g.metal"
+    ]
+
+    STANDARD_INSTANCE_TYPES = [
+        "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "t2.xlarge", "t2.2xlarge",
+        "t3.nano", "t3.micro", "t3.small", "t3.medium", "t3.large", "t3.xlarge", "t3.2xlarge",
+        "c5.large", "c5.xlarge", "c5.2xlarge", "c5.4xlarge", "c5.9xlarge", "c5.12xlarge", "c5.18xlarge", "c5.24xlarge", "c5.metal",
+        "c5d.large", "c5d.xlarge", "c5d.2xlarge", "c5d.4xlarge", "c5d.9xlarge", "c5d.12xlarge", "c5d.18xlarge", "c5d.24xlarge",
+        "m5.large", "m5.xlarge", "m5.2xlarge", "m5.4xlarge", "m5.8xlarge", "m5.12xlarge", "m5.16xlarge", "m5.24xlarge", "m5.metal",
+        "m5d.large", "m5d.xlarge", "m5d.2xlarge", "m5d.4xlarge", "m5d.8xlarge", "m5d.12xlarge", "m5d.16xlarge", "m5d.24xlarge", "m5d.metal",
+        "r5.large", "r5.xlarge", "r5.2xlarge", "r5.4xlarge", "r5.8xlarge", "r5.12xlarge", "r5.16xlarge", "r5.24xlarge", "r5.metal",
+        "r5d.large", "r5d.xlarge", "r5d.2xlarge", "r5d.4xlarge", "r5d.8xlarge", "r5d.12xlarge", "r5d.16xlarge", "r5d.24xlarge", "r5d.metal"
+    ]
+
     def __init__(
             self,
             scope: Construct,
@@ -58,119 +77,11 @@ class Asg(Construct):
         if use_graviton:
             if not default_instance_type:
                 default_instance_type = 't4g.small'
-            default_allowed_instance_types = [
-                "t4g.nano",
-                "t4g.micro",
-                "t4g.small",
-                "t4g.medium",
-                "t4g.large",
-                "t4g.xlarge",
-                "t4g.2xlarge",
-                "t4g.4xlarge",
-                "a1.medium",
-                "a1.large",
-                "a1.xlarge",
-                "a1.2xlarge",
-                "a1.4xlarge",
-                "a1.metal",
-                "c7g.medium",
-                "c7g.large",
-                "c7g.xlarge",
-                "c7g.2xlarge",
-                "c7g.4xlarge",
-                "c7g.8xlarge",
-                "c7g.12xlarge",
-                "c7g.16xlarge",
-                "c7g.metal",
-                "m7g.medium",
-                "m7g.large",
-                "m7g.xlarge",
-                "m7g.2xlarge",
-                "m7g.4xlarge",
-                "m7g.12xlarge",
-                "m7g.metal",
-                "r7g.medium",
-                "r7g.large",
-                "r7g.xlarge",
-                "r7g.2xlarge",
-                "r7g.4xlarge",
-                "r7g.8xlarge",
-                "r7g.12xlarge",
-                "r7g.16xlarge",
-                "r7g.metal"
-            ]
+            default_allowed_instance_types = Asg.GRAVITON_INSTANCE_TYPES
         else:
             if not default_instance_type:
                 default_instance_type = 't3.micro'
-            default_allowed_instance_types = [
-                "t2.nano",
-                "t2.micro",
-                "t2.small",
-                "t2.medium",
-                "t2.large",
-                "t2.xlarge",
-                "t2.2xlarge",
-                "t3.nano",
-                "t3.micro",
-                "t3.small",
-                "t3.medium",
-                "t3.large",
-                "t3.xlarge",
-                "t3.2xlarge",
-                "c5.large",
-                "c5.xlarge",
-                "c5.2xlarge",
-                "c5.4xlarge",
-                "c5.9xlarge",
-                "c5.12xlarge",
-                "c5.18xlarge",
-                "c5.24xlarge",
-                "c5.metal",
-                "c5d.large",
-                "c5d.xlarge",
-                "c5d.2xlarge",
-                "c5d.4xlarge",
-                "c5d.9xlarge",
-                "c5d.12xlarge",
-                "c5d.18xlarge",
-                "c5d.24xlarge",
-                "m5.large",
-                "m5.xlarge",
-                "m5.2xlarge",
-                "m5.4xlarge",
-                "m5.8xlarge",
-                "m5.12xlarge",
-                "m5.16xlarge",
-                "m5.24xlarge",
-                "m5.metal",
-                "m5d.large",
-                "m5d.xlarge",
-                "m5d.2xlarge",
-                "m5d.4xlarge",
-                "m5d.8xlarge",
-                "m5d.12xlarge",
-                "m5d.16xlarge",
-                "m5d.24xlarge",
-                "m5d.metal",
-                "r5.large",
-                "r5.xlarge",
-                "r5.2xlarge",
-                "r5.4xlarge",
-                "r5.8xlarge",
-                "r5.12xlarge",
-                "r5.16xlarge",
-                "r5.24xlarge",
-                "r5.metal",
-                "r5d.large",
-                "r5d.xlarge",
-                "r5d.2xlarge",
-                "r5d.4xlarge",
-                "r5d.8xlarge",
-                "r5d.12xlarge",
-                "r5d.16xlarge",
-                "r5d.24xlarge",
-                "r5d.metal"
-            ]
+            default_allowed_instance_types = Asg.STANDARD_INSTANCE_TYPES
 
         self.instance_type_param = CfnParameter(
             self,
