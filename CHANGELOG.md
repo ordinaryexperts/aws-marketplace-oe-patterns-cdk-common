@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.15.0
+
+* make asg instance types available via python
+
 # 3.14.1
 
 * Update descriptions of various CFN parameters
