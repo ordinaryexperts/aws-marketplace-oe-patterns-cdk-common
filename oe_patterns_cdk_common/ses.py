@@ -132,7 +132,7 @@ class Ses(Construct):
         self.instance_user_access_key = aws_iam.AccessKey(
             self,
             "InstanceUserAccessKey",
-            serial=self.instance_user_access_key_serial.value_as_number,
+            serial=self.instance_user_access_key_serial_param.value_as_number,
             user=self.instance_user
         )
         self.instance_user_access_key.node.default_child.override_logical_id(f"{id}InstanceUserAccessKey")
