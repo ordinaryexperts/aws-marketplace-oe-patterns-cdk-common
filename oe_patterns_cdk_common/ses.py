@@ -29,6 +29,15 @@ class Ses(Construct):
         self.id = id
         self.ttl = "300"
 
+        self.instance_user_access_key_serial_param = CfnParameter(
+            self,
+            "SesInstanceUserAccessKeySerial",
+            type="Number",
+            default="",
+            description="Optional: Incrementing this integer value will trigger a rotation of the Instance User Access Key."
+        )
+        self.instance_user_access_key_serial_param.override_logical_id(f"{id}InstanceUserAccessKeySerial")
+
         self.create_domain_identity_param = CfnParameter(
             self,
             "SesCreateDomainIdentity",
@@ -117,15 +126,16 @@ class Ses(Construct):
             policies=policies,
             user_name=f"{Aws.REGION}-{Aws.STACK_NAME}-instance"
         )
-        self.instance_user.override_logical_id("InstanceUser")
+        self.instance_user.override_logical_id(f"{id}InstanceUser")
 
         # actual creds are required to generate the SMTP password
         self.instance_user_access_key = aws_iam.AccessKey(
             self,
             "InstanceUserAccessKey",
+            serial=self.instance_user_access_key_serial.value_as_number,
             user=self.instance_user
         )
-        self.instance_user_access_key.node.default_child.override_logical_id("InstanceUserAccessKey")
+        self.instance_user_access_key.node.default_child.override_logical_id(f"{id}InstanceUserAccessKey")
         self.instance_user_access_key.node.add_dependency(self.instance_user)
 
         lambda_code_path = os.path.join(
@@ -141,8 +151,8 @@ class Ses(Construct):
             handler="index.handler",
             code=aws_lambda.Code.from_inline(lambda_code)
         )
-        self.generate_smtp_password_lambda.node.default_child.override_logical_id("GenerateSMTPPasswordLambda")
-        self.generate_smtp_password_lambda.role.node.default_child.override_logical_id("GenerateSMTPPasswordLambdaRole")
+        self.generate_smtp_password_lambda.node.default_child.override_logical_id(f"{id}GenerateSMTPPasswordLambda")
+        self.generate_smtp_password_lambda.role.node.default_child.override_logical_id(f"{id}GenerateSMTPPasswordLambdaRole")
 
         self.generate_smtp_password_lambda_secret_policy = aws_iam.Policy(
             self,
@@ -174,7 +184,7 @@ class Ses(Construct):
                 )
             ]
         )
-        self.generate_smtp_password_lambda_secret_policy.node.default_child.override_logical_id("InstanceUserCreateSecretPolicy")
+        self.generate_smtp_password_lambda_secret_policy.node.default_child.override_logical_id(f"{id}InstanceUserCreateSecretPolicy")
         self.generate_smtp_password_lambda.role.attach_inline_policy(self.generate_smtp_password_lambda_secret_policy)
         self.generate_smtp_password_custom_resource = CustomResource(
             self,
@@ -187,7 +197,7 @@ class Ses(Construct):
                 "stack_name": Aws.STACK_NAME
             }
         )
-        self.generate_smtp_password_custom_resource.node.default_child.override_logical_id("GenerateSMTPPasswordCustomResource")
+        self.generate_smtp_password_custom_resource.node.default_child.override_logical_id(f"{id}GenerateSMTPPasswordCustomResource")
 
     def secret_arn(self):
         return Token.as_string(
