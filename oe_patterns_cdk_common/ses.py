@@ -211,7 +211,8 @@ class Ses(Construct):
                     "default": "Simple Email Service Configuration"
                 },
                 "Parameters": [
-                    self.create_domain_identity_param.logical_id
+                    self.create_domain_identity_param.logical_id,
+                    self.instance_user_access_key_serial_param.logical_id
                 ]
             }
         ]
@@ -220,5 +221,8 @@ class Ses(Construct):
         return {
             self.create_domain_identity_param.logical_id: {
                 "default": "Create SES Domain Identity"
+            },
+            self.instance_user_access_key_serial_param.logical_id: {
+                "default": "Instance User Access Key Serial"
             }
         }
