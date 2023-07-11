@@ -33,7 +33,7 @@ class Ses(Construct):
             self,
             "SesInstanceUserAccessKeySerial",
             type="Number",
-            default="",
+            default="1",
             description="Optional: Incrementing this integer value will trigger a rotation of the Instance User Access Key."
         )
         self.instance_user_access_key_serial_param.override_logical_id(f"{id}InstanceUserAccessKeySerial")
