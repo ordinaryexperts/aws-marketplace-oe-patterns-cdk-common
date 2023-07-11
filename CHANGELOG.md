@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.16.0
+
+* add SesInstanceUserAccessKeySerial to allow rotation of InstanceUserAccessKey
+
 # 3.15.0
 
 * make asg instance types available via python
