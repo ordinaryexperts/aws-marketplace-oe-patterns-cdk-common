@@ -118,7 +118,7 @@ class AssetsBucket(Construct):
                     )
                 ]
             ),
-            policy_name="AllowAssetsBucket"
+            policy_name=f"{id}AllowBucket"
         )
 
 
