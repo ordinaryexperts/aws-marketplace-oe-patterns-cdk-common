@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.17.0
+
 * Adding dependency on VPC internet gateway attachment on ALB when VPC is not given. Fixes #6
 
 # 3.16.0
