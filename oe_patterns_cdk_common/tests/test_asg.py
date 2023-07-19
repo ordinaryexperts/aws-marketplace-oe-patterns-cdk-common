@@ -1,4 +1,3 @@
-import json
 from aws_cdk import (
   assertions,
   aws_iam,
@@ -7,12 +6,7 @@ from aws_cdk import (
 
 from oe_patterns_cdk_common.vpc import Vpc
 from oe_patterns_cdk_common.asg import Asg
-
-def print_resource(template, type):
-  resource = template.find_resources(type)
-  print('******')
-  print(json.dumps(resource, indent=4, sort_keys=True))
-  print('******')
+from . import print_resource
 
 def test_asg():
   stack = Stack()
