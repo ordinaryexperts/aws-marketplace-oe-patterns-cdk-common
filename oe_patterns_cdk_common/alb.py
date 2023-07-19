@@ -3,7 +3,9 @@ from aws_cdk import (
     aws_elasticloadbalancingv2,
     Aws,
     CfnParameter,
-    Tags
+    Fn,
+    Tags,
+    Token
 )
 
 from constructs import Construct
@@ -99,6 +101,17 @@ class Alb(Construct):
             type="application"
         )
         self.alb.override_logical_id(id)
+        Tags.of(self.alb).add(
+            "vpc-igw-attachment",
+            Token.as_string(
+                Fn.condition_if(
+                    vpc.not_given_condition.logical_id,
+                    vpc.igw_attachment.ref,
+                    "provided-by-user"
+                )
+            )
+        )
+        
         self.http_listener = aws_elasticloadbalancingv2.CfnListener(
             self,
             "HttpListener",
