@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.17.1
+
+* Adding password_length argument to secret class
+
 # 3.17.0
 
 * Adding dependency on VPC internet gateway attachment on ALB when VPC is not given. Fixes #6
