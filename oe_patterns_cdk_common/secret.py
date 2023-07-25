@@ -17,6 +17,7 @@ class Secret(Construct):
             self,
             scope: Construct,
             id: str,
+            password_length: int = 32,
             username: str = 'admin',
             **props):
         super().__init__(scope, id, **props)
@@ -51,6 +52,7 @@ class Secret(Construct):
                 exclude_characters="\"@/\\\"'$,[]*?{}~#%<>|^",
                 exclude_punctuation=True,
                 generate_string_key="password",
+                password_length=password_length,
                 secret_string_template=json.dumps({"username":username})
             ),
             name="{}/{}/secret".format(Aws.STACK_NAME, self.id.lower())
