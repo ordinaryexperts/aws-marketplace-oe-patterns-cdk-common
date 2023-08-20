@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.17.2
+
+* Adding CORS permissions to asset bucket IAM policy
+
 # 3.17.1
 
 * Adding password_length argument to secret class
