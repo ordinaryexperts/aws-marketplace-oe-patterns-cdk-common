@@ -105,14 +105,14 @@ class AmazonMQ(Construct):
                     "default": "AmazonMQ Configuration"
                 },
                 "Parameters": [
-                    self.amazonmq_instance_class_param.logical_id
+                    self.instance_class_param.logical_id
                 ]
             }
         ]
 
     def metadata_parameter_labels(self):
         return {
-            self.amazonmq_instance_class_param.logical_id: {
+            self.instance_class_param.logical_id: {
                 "default": "AmazonMQ Instance Type"
             }
         }

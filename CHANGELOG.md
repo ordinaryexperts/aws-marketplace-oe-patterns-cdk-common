@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.17.3
+
+* Fixing metadata for amazonmq stack
+
 # 3.17.2
 
 * Adding CORS permissions to asset bucket IAM policy
