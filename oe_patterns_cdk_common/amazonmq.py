@@ -43,7 +43,7 @@ class AmazonMQ(Construct):
             "BrokerInstanceClass",
             allowed_values=self.allowed_instance_types if self.allowed_instance_types else self.default_allowed_instance_types,
             default=self.default_instance_type,
-            description="Required: The class profile for memory and compute capacity for the database instance."
+            description="Required: The class profile for memory and compute capacity for the broker instance."
         )
         self.instance_class_param.override_logical_id(f"{id}InstanceClass")
 
