@@ -56,7 +56,7 @@ class Asg(Construct):
             additional_iam_role_policies: 'list[object]' = [],
             allow_associate_address: bool = False,
             allowed_instance_types: 'list[str]' = [],
-            create_and_update_timeout_minutes: int = 25,
+            create_and_update_timeout_minutes: int = 15,
             default_instance_type: str = None,
             deployment_rolling_update: bool = False,
             health_check_type: str = 'EC2',
