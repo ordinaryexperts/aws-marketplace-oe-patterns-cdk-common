@@ -143,3 +143,35 @@ def test_no_graviton_default():
   instance_type_param = template.find_parameters('TestAsgInstanceType')['TestAsgInstanceType']
 
   assert instance_type_param['Default'] == 't3.micro'
+
+def test_excluded_instance_families():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    use_graviton=False,
+    excluded_instance_families=['t2','t3'],
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  instance_type_param = template.find_parameters('TestAsgInstanceType')['TestAsgInstanceType']
+
+  assert 'c5.large' in instance_type_param['AllowedValues']
+  assert 't3.large' not in instance_type_param['AllowedValues']
+
+def test_excluded_instance_sizes():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    use_graviton=False,
+    excluded_instance_sizes=['nano','micro'],
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  instance_type_param = template.find_parameters('TestAsgInstanceType')['TestAsgInstanceType']
+
+  assert 't3.large' in instance_type_param['AllowedValues']
+  assert 't3.nano' not in instance_type_param['AllowedValues']

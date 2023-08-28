@@ -59,6 +59,8 @@ class Asg(Construct):
             create_and_update_timeout_minutes: int = 15,
             default_instance_type: str = None,
             deployment_rolling_update: bool = False,
+            excluded_instance_families: 'list[str]' = [],
+            excluded_instance_sizes: 'list[str]' = [],
             health_check_type: str = 'EC2',
             pipeline_bucket_arn: str = None,
             root_volume_device_name: str = "/dev/sda1",
@@ -84,10 +86,16 @@ class Asg(Construct):
                 default_instance_type = 't3.micro'
             default_allowed_instance_types = Asg.STANDARD_INSTANCE_TYPES
 
+        filtered_defaults = []
+        for item in default_allowed_instance_types:
+            if not any(item.startswith(family) for family in excluded_instance_families) and \
+               not any(item.endswith(size) for size in excluded_instance_sizes):
+                filtered_defaults.append(item)
+
         self.instance_type_param = CfnParameter(
             self,
             "AsgInstanceType",
-            allowed_values=allowed_instance_types if allowed_instance_types else default_allowed_instance_types,
+            allowed_values=allowed_instance_types if allowed_instance_types else filtered_defaults,
             default=default_instance_type,
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
