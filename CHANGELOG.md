@@ -2,6 +2,7 @@
 
 # 3.17.3
 
+* adding parameter for create_and_update_timeout_minutes for ASG
 * Fixing metadata for amazonmq stack
 
 # 3.17.2

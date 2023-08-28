@@ -56,6 +56,7 @@ class Asg(Construct):
             additional_iam_role_policies: 'list[object]' = [],
             allow_associate_address: bool = False,
             allowed_instance_types: 'list[str]' = [],
+            create_and_update_timeout_minutes: int = 25,
             default_instance_type: str = None,
             deployment_rolling_update: bool = False,
             health_check_type: str = 'EC2',
@@ -483,7 +484,7 @@ class Asg(Construct):
         self.asg.cfn_options.creation_policy=CfnCreationPolicy(
             resource_signal=CfnResourceSignal(
                 count=1,
-                timeout="PT15M"
+                timeout=f"PT{create_and_update_timeout_minutes}M"
             )
         )
         if singleton:
@@ -491,7 +492,7 @@ class Asg(Construct):
                 auto_scaling_rolling_update=CfnAutoScalingRollingUpdate(
                     max_batch_size=1,
                     min_instances_in_service=0,
-                    pause_time="PT15M",
+                    pause_time=f"PT{create_and_update_timeout_minutes}M",
                     wait_on_resource_signals=True
                 )
             )
