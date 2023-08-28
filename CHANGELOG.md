@@ -2,6 +2,7 @@
 
 # 3.17.3
 
+* adding excluded_instance_families and excluded_instance_sizes to asg
 * adding parameter for create_and_update_timeout_minutes for ASG
 * Fixing metadata for amazonmq stack
 
