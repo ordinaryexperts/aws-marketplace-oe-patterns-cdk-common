@@ -21,15 +21,17 @@ class AssetsBucket(Construct):
             id: str,
             allow_open_cors: bool = False,
             object_ownership_value: str = None,
+            bucket_label: str = "Assets",
             remove_public_access_block: bool = False,
             **props):
         super().__init__(scope, id, **props)
 
+        self.bucket_label = bucket_label
         self.assets_bucket_name_param = CfnParameter(
             self,
-            "AssetsBucketName",
+            f"{self.bucket_label}BucketName",
             default="",
-            description="Optional: The name of the S3 bucket to store uploaded assets. If not specified, a bucket will be created."
+            description=f"Optional: The name of the S3 bucket to store uploaded {self.bucket_label.lower()}. If not specified, a bucket will be created."
         )
         self.assets_bucket_name_param.override_logical_id(f"{id}Name")
         self.assets_bucket_name_not_exists_condition = CfnCondition(
@@ -40,7 +42,7 @@ class AssetsBucket(Construct):
         self.assets_bucket_name_not_exists_condition.override_logical_id(f"{id}NameNotExists")
         self.assets_bucket = aws_s3.CfnBucket(
             self,
-            "AssetsBucket",
+            f"{self.bucket_label}Bucket",
             access_control="Private",
             bucket_encryption=aws_s3.CfnBucket.BucketEncryptionProperty(
                 server_side_encryption_configuration=[
@@ -137,7 +139,7 @@ class AssetsBucket(Construct):
         return [
             {
                 "Label": {
-                    "default": "Assets Bucket Configuration"
+                    "default": f"{self.bucket_label} Bucket Configuration"
                 },
                 "Parameters": [
                     self.assets_bucket_name_param.logical_id
@@ -148,6 +150,6 @@ class AssetsBucket(Construct):
     def metadata_parameter_labels(self):
         return {
             self.assets_bucket_name_param.logical_id: {
-                "default": "Assets Bucket Name"
+                "default": f"{self.bucket_label} Bucket Name"
             }
         }
