@@ -106,7 +106,7 @@ class Alb(Construct):
             Token.as_string(
                 Fn.condition_if(
                     vpc.not_given_condition.logical_id,
-                    vpc.igw_attachment.ref,
+                    Fn.select(0, Fn.split('|', vpc.igw_attachment.ref)),
                     "provided-by-user"
                 )
             )
