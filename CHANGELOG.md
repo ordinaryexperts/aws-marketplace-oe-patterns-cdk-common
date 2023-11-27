@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.17.4
+
+* Fix issue with ALB when creating new VPC introduced in 3.17.0
+
 # 3.17.3
 
 * adding excluded_instance_families and excluded_instance_sizes to asg
