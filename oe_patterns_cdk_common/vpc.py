@@ -29,7 +29,7 @@ class Vpc(Construct):
         self.cidr_param = CfnParameter(
             self,
             "Cidr",
-            allowed_pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$",
+            allowed_pattern=r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$",
             default="10.0.0.0/16",
             description="Optional: VPC IPv4 CIDR block if no VPC provided."
         )
@@ -54,7 +54,7 @@ class Vpc(Construct):
         self.private_subnet1_cidr_param = CfnParameter(
             self,
             "PrivateSubnet1Cidr",
-            allowed_pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$",
+            allowed_pattern=r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$",
             default="10.0.128.0/18",
             description="Optional: VPC IPv4 CIDR block of private subnet 1 if no VPC provided."
         )
@@ -70,7 +70,7 @@ class Vpc(Construct):
         self.private_subnet2_cidr_param = CfnParameter(
             self,
             "PrivateSubnet2Cidr",
-            allowed_pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$",
+            allowed_pattern=r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$",
             default="10.0.192.0/18",
             description="Optional: VPC IPv4 CIDR block of private subnet 2 if no VPC provided."
         )
@@ -86,7 +86,7 @@ class Vpc(Construct):
         self.public_subnet1_cidr_param = CfnParameter(
             self,
             "PublicSubnet1Cidr",
-            allowed_pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$",
+            allowed_pattern=r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$",
             default="10.0.0.0/18",
             description="Optional: VPC IPv4 CIDR block of public subnet 1 if no VPC provided."
         )
@@ -169,6 +169,7 @@ class Vpc(Construct):
         )
         self.public_route_table.cfn_options.condition=self.not_given_condition
         self.public_route_table.override_logical_id(f"{id}PublicRouteTable")
+        self.public_route_table.node.add_dependency(self.igw_attachment)
 
         self.public_default_route = aws_ec2.CfnRoute(
             self,
