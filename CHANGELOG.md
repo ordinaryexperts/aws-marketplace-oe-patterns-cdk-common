@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.17.6
+
+* Remove incorrect t4g.4xlarge instance type
+
 # 3.17.5
 
 * Fix race condition between public routes and IGW attachment when provisioning VPC
