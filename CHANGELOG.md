@@ -1,5 +1,10 @@
 # Unreleased
 
+# 3.17.5
+
+* Fix race condition between public routes and IGW attachment when provisioning VPC
+* Fix deprecation warnings on escape characters
+
 # 3.17.4
 
 * Fix issue with ALB when creating new VPC introduced in 3.17.0
