@@ -1,3 +1,5 @@
+import os
+
 from aws_cdk import (
     Aws,
     aws_ec2,
@@ -14,6 +16,10 @@ class Util:
             name,
 	    Fn.select(2, Fn.split("/", Aws.STACK_ID))
         ])
+
+    @staticmethod
+    def local_path(relative_path):
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
     @staticmethod
     def add_sg_ingress(resource, sg):

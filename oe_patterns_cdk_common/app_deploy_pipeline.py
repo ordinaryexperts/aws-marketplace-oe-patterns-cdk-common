@@ -1,9 +1,11 @@
 from aws_cdk import (
     Aws,
+    aws_cloudformation,
     aws_codebuild,
     aws_codedeploy,
     aws_codepipeline,
     aws_iam,
+    aws_lambda,
     aws_s3,
     Arn,
     ArnComponents,
@@ -12,11 +14,12 @@ from aws_cdk import (
     CfnOutput,
     CfnParameter,
     Fn,
-    Stack,
     Token
 )
 
 from constructs import Construct
+from oe_patterns_cdk_common.asg import Asg
+from oe_patterns_cdk_common.util import Util
 
 class AppDeployPipeline(Construct):
 
@@ -24,6 +27,9 @@ class AppDeployPipeline(Construct):
             self,
             scope: Construct,
             id: str,
+            asg: Asg,
+            demo_source_url: str = None,
+            notification_topic_arn: str = None,
             **props):
         super().__init__(scope, id)
 
@@ -101,6 +107,7 @@ class AppDeployPipeline(Construct):
         pipeline_artifact_bucket_arn = Arn.format(
             components=ArnComponents(
                 account="",
+                partition=Aws.PARTITION,
                 region="",
                 resource=Token.as_string(
                     Fn.condition_if(
@@ -111,8 +118,7 @@ class AppDeployPipeline(Construct):
                 ),
                 resource_name="*",
                 service="s3"
-            ),
-            stack=self
+            )
         )
         source_artifact_bucket = aws_s3.CfnBucket(
             self,
@@ -142,25 +148,27 @@ class AppDeployPipeline(Construct):
                 source_artifact_bucket.ref
             )
         )
-        source_artifact_bucket_arn = Arn.format(
-            components=ArnComponents(
-                account="",
-                region="",
-                resource=source_artifact_bucket_name,
-                service="s3"
-            ),
-            stack=self
-        )
-        source_artifact_object_key_arn = Arn.format(
-            components=ArnComponents(
-                account="",
-                region="",
-                resource=source_artifact_bucket_name,
-                resource_name=source_artifact_object_key_param.value_as_string,
-                service="s3"
-            ),
-            stack=self
-        )
+        # source_artifact_bucket_arn = Arn.format(
+        #     components=ArnComponents(
+        #         account="",
+        #         region="",
+        #         resource=source_artifact_bucket_name,
+        #         service="s3"
+        #     ),
+        #     stack=self
+        # )
+        source_artifact_bucket_arn = "TEST"
+        # source_artifact_object_key_arn = Arn.format(
+        #     components=ArnComponents(
+        #         account="",
+        #         region="",
+        #         resource=source_artifact_bucket_name,
+        #         resource_name=source_artifact_object_key_param.value_as_string,
+        #         service="s3"
+        #     ),
+        #     stack=self
+        # )
+        source_artifact_object_key_arn = "TEST"
         # codebuild
         codebuild_transform_service_role = aws_iam.CfnRole(
             self,
@@ -201,17 +209,19 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
-        codebuild_transform_service_role_arn = Arn.format(
-            components=ArnComponents(
-                account=Aws.ACCOUNT_ID,
-                region="",
-                resource="role",
-                resource_name=codebuild_transform_service_role.ref,
-                service="iam"
-            ),
-            stack=self
-        )
-        with open("files/codebuild_transform_project_buildspec.yml") as f:
+        # codebuild_transform_service_role_arn = Arn.format(
+        #     components=ArnComponents(
+        #         account=Aws.ACCOUNT_ID,
+        #         region="",
+        #         resource="role",
+        #         resource_name=codebuild_transform_service_role.ref,
+        #         service="iam"
+        #     ),
+        #     stack=self
+        # )
+        codebuild_transform_service_role_arn = "TEST"
+        buildspec_path = Util.local_path("app_deploy_pipeline/codebuild_transform_project_buildspec.yml")
+        with open(buildspec_path) as f:
             codebuild_transform_project_buildspec = f.read()
         codebuild_transform_project = aws_codebuild.CfnProject(
             self,
@@ -274,16 +284,17 @@ class AppDeployPipeline(Construct):
             ],
             managed_policy_arns=[ "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole" ]
         )
-        codedeploy_role_arn = Arn.format(
-            components=ArnComponents(
-                account=Aws.ACCOUNT_ID,
-                region="",
-                resource="role",
-                resource_name=codedeploy_role.ref,
-                service="iam"
-            ),
-            stack=self
-        )
+        # codedeploy_role_arn = Arn.format(
+        #     components=ArnComponents(
+        #         account=Aws.ACCOUNT_ID,
+        #         region="",
+        #         resource="role",
+        #         resource_name=codedeploy_role.ref,
+        #         service="iam"
+        #     ),
+        #     stack=self
+        # )
+        codedeploy_role_arn = "TEST"
         codedeploy_deployment_group = aws_codedeploy.CfnDeploymentGroup(
             self,
             "CodeDeployDeploymentGroup",
@@ -299,7 +310,7 @@ class AppDeployPipeline(Construct):
                         "DeploymentRollback"
                     ],
                     trigger_name="DeploymentNotification",
-                    trigger_target_arn=notification_topic.ref
+                    trigger_target_arn=notification_topic_arn
                 )
             ]
         )
@@ -318,16 +329,17 @@ class AppDeployPipeline(Construct):
                 ]
             )
         )
-        codepipeline_role_arn = Arn.format(
-            components=ArnComponents(
-                account=Aws.ACCOUNT_ID,
-                region="",
-                resource="role",
-                resource_name=codepipeline_role.ref,
-                service="iam"
-            ),
-            stack=self
-        )
+        # codepipeline_role_arn = Arn.format(
+        #     components=ArnComponents(
+        #         account=Aws.ACCOUNT_ID,
+        #         region="",
+        #         resource="role",
+        #         resource_name=codepipeline_role.ref,
+        #         service="iam"
+        #     ),
+        #     stack=self
+        # )
+        codepipeline_role_arn = "TEST"
         codepipeline_source_stage_role = aws_iam.CfnRole(
             self,
             "SourceStageRole",
@@ -356,15 +368,16 @@ class AppDeployPipeline(Construct):
                                 effect=aws_iam.Effect.ALLOW,
                                 actions=[ "s3:GetBucketVersioning" ],
                                 resources=[
-                                    Arn.format(
-                                        components=ArnComponents(
-                                            account="",
-                                            region="",
-                                            resource=source_artifact_bucket_name,
-                                            service="s3"
-                                        ),
-                                        stack=self
-                                    )
+                                    # Arn.format(
+                                    #     components=ArnComponents(
+                                    #         account="",
+                                    #         region="",
+                                    #         resource=source_artifact_bucket_name,
+                                    #         service="s3"
+                                    #     ),
+                                    #     stack=self
+                                    # )
+                                    "test"
                                 ]
                             ),
                             aws_iam.PolicyStatement(
@@ -381,16 +394,17 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
-        codepipeline_source_stage_role_arn = Arn.format(
-            components=ArnComponents(
-                account=Aws.ACCOUNT_ID,
-                region="",
-                resource="role",
-                resource_name=codepipeline_source_stage_role.ref,
-                service="iam"
-            ),
-            stack=self
-        )
+        # codepipeline_source_stage_role_arn = Arn.format(
+        #     components=ArnComponents(
+        #         account=Aws.ACCOUNT_ID,
+        #         region="",
+        #         resource="role",
+        #         resource_name=codepipeline_source_stage_role.ref,
+        #         service="iam"
+        #     ),
+        #     stack=self
+        # )
+        codepipeline_source_stage_role_arn = "test"
         codepipeline_transform_stage_role = aws_iam.CfnRole(
             self,
             "TransformStageRole",
@@ -421,16 +435,17 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
-        codepipeline_transform_stage_role_arn = Arn.format(
-            components=ArnComponents(
-                account=Aws.ACCOUNT_ID,
-                region="",
-                resource="role",
-                resource_name=codepipeline_transform_stage_role.ref,
-                service="iam"
-            ),
-            stack=self
-        )
+        # codepipeline_transform_stage_role_arn = Arn.format(
+        #     components=ArnComponents(
+        #         account=Aws.ACCOUNT_ID,
+        #         region="",
+        #         resource="role",
+        #         resource_name=codepipeline_transform_stage_role.ref,
+        #         service="iam"
+        #     ),
+        #     stack=self
+        # )
+        codepipeline_transform_stage_role_arn = "TeST"
         codepipeline_deploy_stage_role = aws_iam.CfnRole(
             self,
             "DeployStageRole",
@@ -495,16 +510,17 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
-        codepipeline_deploy_stage_role_arn = Arn.format(
-            components=ArnComponents(
-                account=Aws.ACCOUNT_ID,
-                region="",
-                resource="role",
-                resource_name=codepipeline_deploy_stage_role.ref,
-                service="iam"
-            ),
-            stack=self
-        )
+        # codepipeline_deploy_stage_role_arn = Arn.format(
+        #     components=ArnComponents(
+        #         account=Aws.ACCOUNT_ID,
+        #         region="",
+        #         resource="role",
+        #         resource_name=codepipeline_deploy_stage_role.ref,
+        #         service="iam"
+        #     ),
+        #     stack=self
+        # )
+        codepipeline_deploy_stage_role_arn = "TEST"
 
         aws_codepipeline.CfnPipeline(
             self,
@@ -600,7 +616,17 @@ class AppDeployPipeline(Construct):
             ]
         )
 
-        # default wordpress
+        iam_notification_publish_policy =aws_iam.PolicyDocument(
+            statements=[
+                aws_iam.PolicyStatement(
+                    effect=aws_iam.Effect.ALLOW,
+                    actions=[ "sns:Publish" ],
+                    resources=[ notification_topic_arn ]
+                )
+            ]
+        )
+
+        # default app
         initialize_demo_lambda_function_role = aws_iam.CfnRole(
             self,
             "InitializeDemoLambdaFunctionRole",
@@ -617,7 +643,7 @@ class AppDeployPipeline(Construct):
                 "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
             ],
             policies=[
-                # OE default wordpress artifact should be public, so no policy needed for s3:GetObject
+                # OE default artifact should be public, so no policy needed for s3:GetObject
                 aws_iam.CfnRole.PolicyProperty(
                     policy_document=aws_iam.PolicyDocument(
                         statements=[
@@ -645,20 +671,21 @@ class AppDeployPipeline(Construct):
             ]
         )
         initialize_demo_lambda_function_role.cfn_options.condition = initialize_demo_condition
-        with open("files/initialize_demo_lambda_function_code.py") as f:
+        demo_lambda_function_code_path = Util.local_path("app_deploy_pipeline/initialize_demo_lambda_function_code.py")
+        with open(demo_lambda_function_code_path) as f:
             initialize_demo_lambda_function_code = f.read()
         initialize_demo_lambda_function = aws_lambda.CfnFunction(
             self,
-            "InitializeDefaultWordPressLambdaFunction",
+            "InitializeDemoLambdaFunction",
             code=aws_lambda.CfnFunction.CodeProperty(
                 zip_file=initialize_demo_lambda_function_code
             ),
             dead_letter_config=aws_lambda.CfnFunction.DeadLetterConfigProperty(
-                target_arn=notification_topic.ref
+                target_arn=notification_topic_arn
             ),
             environment=aws_lambda.CfnFunction.EnvironmentProperty(
                 variables={
-                    "DemoSourceUrl": DEMO_SOURCE_URL,
+                    "DemoSourceUrl": demo_source_url,
                     "SourceArtifactBucket": source_artifact_bucket_name,
                     "SourceArtifactObjectKey": source_artifact_object_key_param.value_as_string,
                     "StackName": Aws.STACK_NAME

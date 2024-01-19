@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - |
+        cat << EOF > after-install.sh;
+        #!/bin/bash
+        echo "$(date): Starting after-install.sh..."
+        echo TODO
+        echo "$(date): Finished after-install.sh."
+        EOF
+        cat << EOF > appspec.yml;
+        version: 0.0
+        os: linux
+        hooks:
+          AfterInstall:
+            - location: after-install.sh
+              runas: root
+        EOF
+      - cat appspec.yml
+      - cat after-install.sh
+    finally:
+      - echo Finished build
+artifacts:
+  files:
+    - "**/*"
