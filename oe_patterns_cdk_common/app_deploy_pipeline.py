@@ -148,27 +148,25 @@ class AppDeployPipeline(Construct):
                 source_artifact_bucket.ref
             )
         )
-        # source_artifact_bucket_arn = Arn.format(
-        #     components=ArnComponents(
-        #         account="",
-        #         region="",
-        #         resource=source_artifact_bucket_name,
-        #         service="s3"
-        #     ),
-        #     stack=self
-        # )
-        source_artifact_bucket_arn = "TEST"
-        # source_artifact_object_key_arn = Arn.format(
-        #     components=ArnComponents(
-        #         account="",
-        #         region="",
-        #         resource=source_artifact_bucket_name,
-        #         resource_name=source_artifact_object_key_param.value_as_string,
-        #         service="s3"
-        #     ),
-        #     stack=self
-        # )
-        source_artifact_object_key_arn = "TEST"
+        source_artifact_bucket_arn = Arn.format(
+            components=ArnComponents(
+                account="",
+                partition=Aws.PARTITION,
+                region="",
+                resource=source_artifact_bucket_name,
+                service="s3"
+            )
+        )
+        source_artifact_object_key_arn = Arn.format(
+            components=ArnComponents(
+                account="",
+                partition=Aws.PARTITION,
+                region="",
+                resource=source_artifact_bucket_name,
+                resource_name=source_artifact_object_key_param.value_as_string,
+                service="s3"
+            )
+        )
         # codebuild
         codebuild_transform_service_role = aws_iam.CfnRole(
             self,
@@ -209,17 +207,16 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
-        # codebuild_transform_service_role_arn = Arn.format(
-        #     components=ArnComponents(
-        #         account=Aws.ACCOUNT_ID,
-        #         region="",
-        #         resource="role",
-        #         resource_name=codebuild_transform_service_role.ref,
-        #         service="iam"
-        #     ),
-        #     stack=self
-        # )
-        codebuild_transform_service_role_arn = "TEST"
+        codebuild_transform_service_role_arn = Arn.format(
+            components=ArnComponents(
+                account=Aws.ACCOUNT_ID,
+                partition=Aws.PARTITION,
+                region="",
+                resource="role",
+                resource_name=codebuild_transform_service_role.ref,
+                service="iam"
+            )
+        )
         buildspec_path = Util.local_path("app_deploy_pipeline/codebuild_transform_project_buildspec.yml")
         with open(buildspec_path) as f:
             codebuild_transform_project_buildspec = f.read()
@@ -284,17 +281,16 @@ class AppDeployPipeline(Construct):
             ],
             managed_policy_arns=[ "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole" ]
         )
-        # codedeploy_role_arn = Arn.format(
-        #     components=ArnComponents(
-        #         account=Aws.ACCOUNT_ID,
-        #         region="",
-        #         resource="role",
-        #         resource_name=codedeploy_role.ref,
-        #         service="iam"
-        #     ),
-        #     stack=self
-        # )
-        codedeploy_role_arn = "TEST"
+        codedeploy_role_arn = Arn.format(
+            components=ArnComponents(
+                account=Aws.ACCOUNT_ID,
+                partition=Aws.PARTITION,
+                region="",
+                resource="role",
+                resource_name=codedeploy_role.ref,
+                service="iam"
+            )
+        )
         codedeploy_deployment_group = aws_codedeploy.CfnDeploymentGroup(
             self,
             "CodeDeployDeploymentGroup",
@@ -329,17 +325,16 @@ class AppDeployPipeline(Construct):
                 ]
             )
         )
-        # codepipeline_role_arn = Arn.format(
-        #     components=ArnComponents(
-        #         account=Aws.ACCOUNT_ID,
-        #         region="",
-        #         resource="role",
-        #         resource_name=codepipeline_role.ref,
-        #         service="iam"
-        #     ),
-        #     stack=self
-        # )
-        codepipeline_role_arn = "TEST"
+        codepipeline_role_arn = Arn.format(
+            components=ArnComponents(
+                account=Aws.ACCOUNT_ID,
+                partition=Aws.PARTITION,
+                region="",
+                resource="role",
+                resource_name=codepipeline_role.ref,
+                service="iam"
+            )
+        )
         codepipeline_source_stage_role = aws_iam.CfnRole(
             self,
             "SourceStageRole",
@@ -368,16 +363,15 @@ class AppDeployPipeline(Construct):
                                 effect=aws_iam.Effect.ALLOW,
                                 actions=[ "s3:GetBucketVersioning" ],
                                 resources=[
-                                    # Arn.format(
-                                    #     components=ArnComponents(
-                                    #         account="",
-                                    #         region="",
-                                    #         resource=source_artifact_bucket_name,
-                                    #         service="s3"
-                                    #     ),
-                                    #     stack=self
-                                    # )
-                                    "test"
+                                    Arn.format(
+                                        components=ArnComponents(
+                                            account="",
+                                            partition=Aws.PARTITION,
+                                            region="",
+                                            resource=source_artifact_bucket_name,
+                                            service="s3"
+                                        )
+                                    )
                                 ]
                             ),
                             aws_iam.PolicyStatement(
@@ -394,17 +388,16 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
-        # codepipeline_source_stage_role_arn = Arn.format(
-        #     components=ArnComponents(
-        #         account=Aws.ACCOUNT_ID,
-        #         region="",
-        #         resource="role",
-        #         resource_name=codepipeline_source_stage_role.ref,
-        #         service="iam"
-        #     ),
-        #     stack=self
-        # )
-        codepipeline_source_stage_role_arn = "test"
+        codepipeline_source_stage_role_arn = Arn.format(
+            components=ArnComponents(
+                account=Aws.ACCOUNT_ID,
+                partition=Aws.PARTITION,
+                region="",
+                resource="role",
+                resource_name=codepipeline_source_stage_role.ref,
+                service="iam"
+            )
+        )
         codepipeline_transform_stage_role = aws_iam.CfnRole(
             self,
             "TransformStageRole",
@@ -435,17 +428,16 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
-        # codepipeline_transform_stage_role_arn = Arn.format(
-        #     components=ArnComponents(
-        #         account=Aws.ACCOUNT_ID,
-        #         region="",
-        #         resource="role",
-        #         resource_name=codepipeline_transform_stage_role.ref,
-        #         service="iam"
-        #     ),
-        #     stack=self
-        # )
-        codepipeline_transform_stage_role_arn = "TeST"
+        codepipeline_transform_stage_role_arn = Arn.format(
+            components=ArnComponents(
+                account=Aws.ACCOUNT_ID,
+                partition=Aws.PARTITION,
+                region="",
+                resource="role",
+                resource_name=codepipeline_transform_stage_role.ref,
+                service="iam"
+            )
+        )
         codepipeline_deploy_stage_role = aws_iam.CfnRole(
             self,
             "DeployStageRole",
@@ -510,18 +502,16 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
-        # codepipeline_deploy_stage_role_arn = Arn.format(
-        #     components=ArnComponents(
-        #         account=Aws.ACCOUNT_ID,
-        #         region="",
-        #         resource="role",
-        #         resource_name=codepipeline_deploy_stage_role.ref,
-        #         service="iam"
-        #     ),
-        #     stack=self
-        # )
-        codepipeline_deploy_stage_role_arn = "TEST"
-
+        codepipeline_deploy_stage_role_arn = Arn.format(
+            components=ArnComponents(
+                account=Aws.ACCOUNT_ID,
+                partition=Aws.PARTITION,
+                region="",
+                resource="role",
+                resource_name=codepipeline_deploy_stage_role.ref,
+                service="iam"
+            )
+        )
         aws_codepipeline.CfnPipeline(
             self,
             "Pipeline",
