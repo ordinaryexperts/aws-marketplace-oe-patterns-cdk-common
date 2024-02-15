@@ -16,7 +16,7 @@ cloudformation_client = boto3.client("cloudformation")
 s3_client = boto3.client("s3")
 
 def lambda_handler(event, context):
-    logger.info("Initialize Default WordPress Lambda starting...")
+    logger.info("Initialize Default Application Lambda starting...")
 
     try:
         if (event["RequestType"] == "Create"):
@@ -31,8 +31,8 @@ def lambda_handler(event, context):
                 # perform the copy only if the object is not found
                 # in this case that means a 404 ClientError from the HeadObject request
                 if e.response["Error"]["Code"] == "404":
-                    copy_source = os.environ["DefaultWordPressSourceUrl"]
-                    local_file = "/tmp/wordpress.zip"
+                    copy_source = os.environ["DefaultSourceUrl"]
+                    local_file = "/tmp/app.zip"
                     logger.info("Copying {} to {}/{}".format(
                         copy_source,
                         os.environ["SourceArtifactBucket"],
@@ -49,7 +49,7 @@ def lambda_handler(event, context):
                         os.environ["SourceArtifactBucket"],
                         os.environ["SourceArtifactObjectKey"]
                     )
-                    logger.info("WordPress codebase copy complete.")
+                    logger.info("Application codebase copy complete.")
 
             if source_already_exists:
                 logger.info("The artifact object already exists. Copy aborted.")
