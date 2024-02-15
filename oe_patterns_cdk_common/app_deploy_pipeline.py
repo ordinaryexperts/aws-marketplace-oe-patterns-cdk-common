@@ -683,7 +683,7 @@ class AppDeployPipeline(Construct):
             ),
             handler="index.lambda_handler",
             role=initialize_demo_lambda_function_role.attr_arn,
-            runtime="python3.7",
+            runtime="python3.11",
             timeout=300
         )
         initialize_demo_lambda_function.cfn_options.condition = initialize_demo_condition
