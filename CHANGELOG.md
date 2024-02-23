@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.17.7
+
+* Remove obsolete DependsOn SesGenerateSMTPPasswordLambdaRole on SesGenerateSMTPPasswordLambda
+
 # 3.17.6
 
 * Remove incorrect t4g.4xlarge instance type
