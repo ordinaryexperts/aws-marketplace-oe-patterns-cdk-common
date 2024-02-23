@@ -152,6 +152,8 @@ class Ses(Construct):
             code=aws_lambda.Code.from_inline(lambda_code)
         )
         self.generate_smtp_password_lambda.node.default_child.override_logical_id(f"{id}GenerateSMTPPasswordLambda")
+        # cdk generating unnecessary DependsOn to lambda role which breaks taskcat...
+        self.generate_smtp_password_lambda.node.default_child.add_override('DependsOn', None)
         self.generate_smtp_password_lambda.role.node.default_child.override_logical_id(f"{id}GenerateSMTPPasswordLambdaRole")
 
         self.generate_smtp_password_lambda_secret_policy = aws_iam.Policy(

@@ -2,6 +2,23 @@
 
 * Adding AppDeployPipeline construct
 
+# 3.17.7
+
+* Remove obsolete DependsOn SesGenerateSMTPPasswordLambdaRole on SesGenerateSMTPPasswordLambda
+
+# 3.17.6
+
+* Remove incorrect t4g.4xlarge instance type
+
+# 3.17.5
+
+* Fix race condition between public routes and IGW attachment when provisioning VPC
+* Fix deprecation warnings on escape characters
+
+# 3.17.4
+
+* Fix issue with ALB when creating new VPC introduced in 3.17.0
+
 # 3.17.3
 
 * adding excluded_instance_families and excluded_instance_sizes to asg
