@@ -14,6 +14,7 @@ from aws_cdk import (
 )
 
 from constructs import Construct
+from oe_patterns_cdk_common.util import Util
 
 class Ses(Construct):
 
@@ -124,7 +125,7 @@ class Ses(Construct):
             "InstanceUser",
             path="/",
             policies=policies,
-            user_name=f"{Aws.REGION}-{Aws.STACK_NAME}-instance"
+            user_name=f"{Aws.REGION}-{Util.append_stack_uuid('instance')}"
         )
         self.instance_user.override_logical_id(f"{id}InstanceUser")
 
