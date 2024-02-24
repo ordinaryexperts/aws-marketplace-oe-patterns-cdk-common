@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.17.8
+
+* Shorten InstanceUser UserName to allow long stack names
+
 # 3.17.7
 
 * Remove obsolete DependsOn SesGenerateSMTPPasswordLambdaRole on SesGenerateSMTPPasswordLambda
