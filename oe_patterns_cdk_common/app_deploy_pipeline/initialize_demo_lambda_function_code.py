@@ -31,7 +31,7 @@ def lambda_handler(event, context):
                 # perform the copy only if the object is not found
                 # in this case that means a 404 ClientError from the HeadObject request
                 if e.response["Error"]["Code"] == "404":
-                    copy_source = os.environ["DefaultSourceUrl"]
+                    copy_source = os.environ["DemoSourceUrl"]
                     local_file = "/tmp/app.zip"
                     logger.info("Copying {} to {}/{}".format(
                         copy_source,
