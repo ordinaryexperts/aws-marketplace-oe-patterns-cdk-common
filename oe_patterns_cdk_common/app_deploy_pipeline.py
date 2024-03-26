@@ -27,7 +27,7 @@ class AppDeployPipeline(Construct):
             self,
             scope: Construct,
             id: str,
-            asg: Asg,
+            asg: Asg = None,
             demo_source_url: str = None,
             notification_topic_arn: str = None,
             **props):
@@ -220,7 +220,7 @@ class AppDeployPipeline(Construct):
         buildspec_path = Util.local_path("app_deploy_pipeline/codebuild_transform_project_buildspec.yml")
         with open(buildspec_path) as f:
             codebuild_transform_project_buildspec = f.read()
-        codebuild_transform_project = aws_codebuild.CfnProject(
+        self.codebuild_transform_project = aws_codebuild.CfnProject(
             self,
             "CodeBuildTransformProject",
             artifacts=aws_codebuild.CfnProject.ArtifactsProperty(
@@ -228,12 +228,7 @@ class AppDeployPipeline(Construct):
             ),
             environment=aws_codebuild.CfnProject.EnvironmentProperty(
                 compute_type="BUILD_GENERAL1_SMALL",
-                environment_variables=[
-                    aws_codebuild.CfnProject.EnvironmentVariableProperty(
-                        name="AUTO_SCALING_GROUP_NAME",
-                        value=asg.asg.ref,
-                    )
-                ],
+                environment_variables=[],
                 image="aws/codebuild/standard:7.0",
                 type="LINUX_CONTAINER"
             ),
@@ -291,11 +286,10 @@ class AppDeployPipeline(Construct):
                 service="iam"
             )
         )
-        codedeploy_deployment_group = aws_codedeploy.CfnDeploymentGroup(
+        self.codedeploy_deployment_group = aws_codedeploy.CfnDeploymentGroup(
             self,
             "CodeDeployDeploymentGroup",
             application_name=codedeploy_application.application_name,
-            auto_scaling_groups=[ asg.asg.ref ],
             deployment_group_name="{}-app".format(Aws.STACK_NAME),
             deployment_config_name=aws_codedeploy.ServerDeploymentConfig.ONE_AT_A_TIME.deployment_config_name,
             service_role_arn=codedeploy_role_arn,
@@ -310,6 +304,8 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
+        if asg:
+            self.codedeploy_deployment_group.auto_scaling_groups = [ asg.asg.ref ]
 
         # codepipeline
         codepipeline_role = aws_iam.CfnRole(
@@ -420,7 +416,7 @@ class AppDeployPipeline(Construct):
                                     "codebuild:BatchGetBuilds",
                                     "codebuild:StartBuild"
                                 ],
-                                resources=[ codebuild_transform_project.attr_arn ],
+                                resources=[ self.codebuild_transform_project.attr_arn ],
                             )
                         ]
                     ),
@@ -473,7 +469,7 @@ class AppDeployPipeline(Construct):
                                     "codedeploy:GetDeploymentGroup"
                                 ],
                                 resources=[
-                                    f"arn:{Aws.PARTITION}:codedeploy:{Aws.REGION}:{Aws.ACCOUNT_ID}:deploymentgroup:{codedeploy_application.application_name}/{codedeploy_deployment_group.deployment_group_name}"
+                                    f"arn:{Aws.PARTITION}:codedeploy:{Aws.REGION}:{Aws.ACCOUNT_ID}:deploymentgroup:{codedeploy_application.application_name}/{self.codedeploy_deployment_group.deployment_group_name}"
                                 ],
                                 sid="codedeploydeploymentgroup"
                             ),
@@ -562,7 +558,7 @@ class AppDeployPipeline(Construct):
                                 version="1"
                             ),
                             configuration={
-                                "ProjectName": codebuild_transform_project.ref
+                                "ProjectName": self.codebuild_transform_project.ref
                             },
                             input_artifacts=[
                                 aws_codepipeline.CfnPipeline.InputArtifactProperty(
@@ -591,7 +587,7 @@ class AppDeployPipeline(Construct):
                             ),
                             configuration={
                                 "ApplicationName": codedeploy_application.ref,
-                                "DeploymentGroupName": codedeploy_deployment_group.ref,
+                                "DeploymentGroupName": self.codedeploy_deployment_group.ref,
                             },
                             input_artifacts=[
                                 aws_codepipeline.CfnPipeline.InputArtifactProperty(
@@ -710,3 +706,14 @@ class AppDeployPipeline(Construct):
             description="The source artifact S3 object key that is monitored for updates to be deployed",
             value=source_artifact_object_key_param.value_as_string
         )
+
+    def add_codebuild_transform_environment_variable(self, name, value):
+        self.codebuild_transform_project.environment.environment_variables.append(
+            aws_codebuild.CfnProject.EnvironmentVariableProperty(
+                name=name,
+                value=value
+            )
+        )
+
+    def add_asg_to_deployment_group(self, asg):
+        self.codedeploy_deployment_group.auto_scaling_groups = [ asg.asg.ref ]

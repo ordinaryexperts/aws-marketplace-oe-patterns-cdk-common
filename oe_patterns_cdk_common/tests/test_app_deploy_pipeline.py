@@ -11,9 +11,18 @@ from oe_patterns_cdk_common.app_deploy_pipeline import AppDeployPipeline
 def test_app_deploy_pipeline():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
+  AppDeployPipeline(stack, "TestAppDeployPipeline", demo_source_url="TESTURL", notification_topic_arn="TESTARN")
+  template = assertions.Template.from_stack(stack)
+
+  # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  template.resource_count_is("AWS::CodePipeline::Pipeline", 1)
+
+def test_app_deploy_pipeline_with_asg():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
   asg = Asg(stack, 'TestAsg', vpc=vpc)
   AppDeployPipeline(stack, "TestAppDeployPipeline", asg=asg, demo_source_url="TESTURL", notification_topic_arn="TESTARN")
   template = assertions.Template.from_stack(stack)
 
-  import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
-  # template.resource_count_is("AWS::S3::Bucket", 1)
+  # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  template.resource_count_is("AWS::CodePipeline::Pipeline", 1)
