@@ -104,7 +104,7 @@ class AppDeployPipeline(Construct):
         pipeline_artifact_bucket.cfn_options.condition=pipeline_artifact_bucket_name_not_exists_condition
         pipeline_artifact_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
         pipeline_artifact_bucket.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
-        pipeline_artifact_bucket_arn = Arn.format(
+        self.pipeline_artifact_bucket_arn = Arn.format(
             components=ArnComponents(
                 account="",
                 partition=Aws.PARTITION,
@@ -199,7 +199,7 @@ class AppDeployPipeline(Construct):
                                     "s3:GetObject",
                                     "s3:PutObject"
                                 ],
-                                resources=[ pipeline_artifact_bucket_arn ]
+                                resources=[ self.pipeline_artifact_bucket_arn ]
                             )
                         ]
                     ),
@@ -267,7 +267,7 @@ class AppDeployPipeline(Construct):
                                     "s3:GetObject",
                                     "s3:PutObject"
                                 ],
-                                resources=[ pipeline_artifact_bucket_arn ]
+                                resources=[ self.pipeline_artifact_bucket_arn ]
                             ),
                         ]
                     ),
@@ -376,7 +376,7 @@ class AppDeployPipeline(Construct):
                                     "s3:GetObject",
                                     "s3:PutObject"
                                 ],
-                                resources=[ pipeline_artifact_bucket_arn ]
+                                resources=[ self.pipeline_artifact_bucket_arn ]
                             )
                         ]
                     ),
@@ -479,7 +479,7 @@ class AppDeployPipeline(Construct):
                                     "s3:GetObject",
                                     "s3:PutObject"
                                 ],
-                                resources=[ pipeline_artifact_bucket_arn ]
+                                resources=[ self.pipeline_artifact_bucket_arn ]
                             ),
                             aws_iam.PolicyStatement(
                                 effect=aws_iam.Effect.ALLOW,
