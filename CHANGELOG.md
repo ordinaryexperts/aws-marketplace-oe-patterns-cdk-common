@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.18.1
+
+* Cleanup of AppDeployPipeline construct
+
 # 3.18.0
 
 * Adding AppDeployPipeline construct
