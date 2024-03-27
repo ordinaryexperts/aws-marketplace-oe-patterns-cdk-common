@@ -27,6 +27,9 @@ class AppDeployPipeline(Construct):
             self,
             scope: Construct,
             id: str,
+            # TODO add list[str]type hints after upgrade of devenv to python 3.10 or higher
+            after_build_commands = None,  # list[str]
+            after_deploy_commands = None, # list[str]
             asg: Asg = None,
             demo_source_url: str = None,
             notification_topic_arn: str = None,
@@ -217,9 +220,49 @@ class AppDeployPipeline(Construct):
                 service="iam"
             )
         )
-        buildspec_path = Util.local_path("app_deploy_pipeline/codebuild_transform_project_buildspec.yml")
-        with open(buildspec_path) as f:
-            codebuild_transform_project_buildspec = f.read()
+        buildspec_beginning = """
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - |
+        cat << EOF > after-install.sh;
+        #!/bin/bash
+        echo "$(date): Starting after-install.sh..."
+        ###
+        # Custom Commands
+        ###
+"""
+        if after_deploy_commands:
+            for command in after_deploy_commands:
+                buildspec_beginning += f"        {command}\n"
+        buildspec_middle = """        echo "$(date): Finished after-install.sh."
+        EOF
+        cat << EOF > appspec.yml;
+        version: 0.0
+        os: linux
+        hooks:
+          AfterInstall:
+            - location: after-install.sh
+              runas: root
+        EOF
+      - cat appspec.yml
+      - cat after-install.sh
+"""
+        if after_build_commands:
+            for command in after_build_commands:
+                buildspec_middle += f"      - {command}\n"
+        buildspec_end = """    finally:
+      - echo Finished build
+artifacts:
+  files:
+    - "**/*"
+"""
+        codebuild_transform_project_buildspec = buildspec_beginning + buildspec_middle + buildspec_end
+        # buildspec_path = Util.local_path("app_deploy_pipeline/codebuild_transform_project_buildspec.yml")
+        # with open(buildspec_path) as f:
+        #     codebuild_transform_project_buildspec = f.read()
         self.codebuild_transform_project = aws_codebuild.CfnProject(
             self,
             "CodeBuildTransformProject",
@@ -239,6 +282,7 @@ class AppDeployPipeline(Construct):
                 type="CODEPIPELINE"
             )
         )
+        self.codebuild_transform_project.override_logical_id(f"{id}CodeBuildTransformProject")
         codedeploy_application = aws_codedeploy.CfnApplication(
             self,
             "CodeDeployApplication",
