@@ -13,7 +13,7 @@ setuptools.setup(
     description="Common CDK code for re-use in other AWS Marketplace patterns.",
     include_package_data=True,
     package_data={
-        'oe_patterns_cdk_common': ['*.sh']
+        'oe_patterns_cdk_common': ['*.sh', 'app_deploy_pipeline/*']
     },
     long_description=long_description,
     long_description_content_type="text/markdown",
