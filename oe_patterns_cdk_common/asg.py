@@ -23,6 +23,7 @@ from aws_cdk import (
 )
 
 from constructs import Construct
+from oe_patterns_cdk_common.util import Util
 from oe_patterns_cdk_common.vpc import Vpc
 
 class Asg(Construct):
@@ -333,10 +334,7 @@ class Asg(Construct):
         # data volume
         if use_data_volume:
             # lambda to find az from subnet
-            lambda_code_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "lambda_subnet_to_az.py"
-            )
+            lambda_code_path = Util.local_path("lambda_subnet_to_az.py")
             with open(lambda_code_path) as f:
                 lambda_code = f.read()
             self.subnet_to_az_lambda = aws_lambda.Function(
@@ -413,10 +411,7 @@ class Asg(Construct):
 
         user_data = None
         if use_data_volume:
-            script_code_path = os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                "script_attach_ebs.sh"
-            )
+            script_code_path = Util.local_path("script_attach_ebs.sh")
             with open(script_code_path) as f:
                 script_code = f.read()
             if user_data_contents is None:
