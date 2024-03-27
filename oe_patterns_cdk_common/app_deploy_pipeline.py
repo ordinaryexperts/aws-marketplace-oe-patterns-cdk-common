@@ -761,18 +761,20 @@ artifacts:
         #
         # OUTPUTS
         #
-        CfnOutput(
+        source_artifact_bucket_name_output = CfnOutput(
             self,
             "SourceArtifactBucketNameOutput",
             description="The source artifact S3 bucket name that is monitored for updates to be deployed",
             value=source_artifact_bucket_name
         )
-        CfnOutput(
+        source_artifact_bucket_name_output.override_logical_id(f"{id}SourceArtifactBucketNameOutput")
+        source_artifact_object_key_output = CfnOutput(
             self,
             "SourceArtifactObjectKeyOutput",
             description="The source artifact S3 object key that is monitored for updates to be deployed",
             value=self.source_artifact_object_key_param.value_as_string
         )
+        source_artifact_object_key_output.override_logical_id(f"{id}SourceArtifactObjectKeyOutput")
 
     def add_codebuild_transform_environment_variable(self, name, value):
         self.codebuild_transform_project.environment.environment_variables.append(
