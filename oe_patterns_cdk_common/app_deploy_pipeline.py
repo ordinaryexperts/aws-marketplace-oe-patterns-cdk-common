@@ -720,6 +720,7 @@ artifacts:
                 )
             ]
         )
+        initialize_demo_lambda_function_role.override_logical_id(f"{id}InitializeDemoLambdaFunctionRole")
         initialize_demo_lambda_function_role.cfn_options.condition = self.initialize_demo_condition
         demo_lambda_function_code_path = Util.local_path("app_deploy_pipeline/initialize_demo_lambda_function_code.py")
         with open(demo_lambda_function_code_path) as f:
@@ -746,12 +747,14 @@ artifacts:
             runtime="python3.12",
             timeout=300
         )
+        initialize_demo_lambda_function.override_logical_id(f"{id}InitializeDemoLambdaFunction")
         initialize_demo_lambda_function.cfn_options.condition = self.initialize_demo_condition
         initialize_demo_custom_resource = aws_cloudformation.CfnCustomResource(
             self,
             "InitializeDemoCustomResource",
             service_token=initialize_demo_lambda_function.attr_arn
         )
+        initialize_demo_custom_resource.override_logical_id(f"{id}InitializeDemoCustomResource")
         initialize_demo_custom_resource.cfn_options.condition = self.initialize_demo_condition
 
 
