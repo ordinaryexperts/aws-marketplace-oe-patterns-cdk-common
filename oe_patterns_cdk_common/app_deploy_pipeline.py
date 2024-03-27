@@ -36,26 +36,26 @@ class AppDeployPipeline(Construct):
             **props):
         super().__init__(scope, id)
 
-        initialize_demo_param = CfnParameter(
+        self.initialize_demo_param = CfnParameter(
             self,
             "InitializeDemo",
             allowed_values=[ "true", "false" ],
             default="true",
             description="Optional: Trigger the first deployment with a copy of a demo sample codebase from Ordinary Experts."
         )
-        pipeline_artifact_bucket_name_param = CfnParameter(
+        self.pipeline_artifact_bucket_name_param = CfnParameter(
             self,
             "PipelineArtifactBucketName",
             default="",
             description="Optional: Specify a bucket name for the CodePipeline pipeline to use. The bucket must be in this same AWS account. This can be handy when re-creating this template many times."
         )
-        source_artifact_bucket_name_param = CfnParameter(
+        self.source_artifact_bucket_name_param = CfnParameter(
             self,
             "SourceArtifactBucketName",
             default="",
             description="Optional: Specify a S3 bucket name which will contain the build artifacts for the application. If not specified, a bucket will be created."
         )
-        source_artifact_object_key_param = CfnParameter(
+        self.source_artifact_object_key_param = CfnParameter(
             self,
             "SourceArtifactObjectKey",
             default="artifact.zip",
@@ -67,27 +67,27 @@ class AppDeployPipeline(Construct):
         initialize_demo_condition = CfnCondition(
             self,
             "InitializeDemoCondition",
-            expression=Fn.condition_equals(initialize_demo_param.value, "true")
+            expression=Fn.condition_equals(self.initialize_demo_param.value, "true")
         )
         pipeline_artifact_bucket_name_not_exists_condition = CfnCondition(
             self,
             "PipelineArtifactBucketNameNotExists",
-            expression=Fn.condition_equals(pipeline_artifact_bucket_name_param.value, "")
+            expression=Fn.condition_equals(self.pipeline_artifact_bucket_name_param.value, "")
         )
         pipeline_artifact_bucket_name_exists_condition = CfnCondition(
             self,
             "PipelineArtifactBucketNameExists",
-            expression=Fn.condition_not(Fn.condition_equals(pipeline_artifact_bucket_name_param.value, ""))
+            expression=Fn.condition_not(Fn.condition_equals(self.pipeline_artifact_bucket_name_param.value, ""))
         )
         source_artifact_bucket_name_exists_condition = CfnCondition(
             self,
             "SourceArtifactBucketNameExists",
-            expression=Fn.condition_not(Fn.condition_equals(source_artifact_bucket_name_param.value, ""))
+            expression=Fn.condition_not(Fn.condition_equals(self.source_artifact_bucket_name_param.value, ""))
         )
         source_artifact_bucket_name_not_exists_condition = CfnCondition(
             self,
             "SourceArtifactBucketNameNotExists",
-            expression=Fn.condition_equals(source_artifact_bucket_name_param.value, "")
+            expression=Fn.condition_equals(self.source_artifact_bucket_name_param.value, "")
         )
         pipeline_artifact_bucket = aws_s3.CfnBucket(
             self,
@@ -115,7 +115,7 @@ class AppDeployPipeline(Construct):
                 resource=Token.as_string(
                     Fn.condition_if(
                         pipeline_artifact_bucket_name_exists_condition.logical_id,
-                        pipeline_artifact_bucket_name_param.value_as_string,
+                        self.pipeline_artifact_bucket_name_param.value_as_string,
                         pipeline_artifact_bucket.ref
                     )
                 ),
@@ -147,7 +147,7 @@ class AppDeployPipeline(Construct):
         source_artifact_bucket_name = Token.as_string(
             Fn.condition_if(
                 source_artifact_bucket_name_exists_condition.logical_id,
-                source_artifact_bucket_name_param.value_as_string,
+                self.source_artifact_bucket_name_param.value_as_string,
                 source_artifact_bucket.ref
             )
         )
@@ -166,7 +166,7 @@ class AppDeployPipeline(Construct):
                 partition=Aws.PARTITION,
                 region="",
                 resource=source_artifact_bucket_name,
-                resource_name=source_artifact_object_key_param.value_as_string,
+                resource_name=self.source_artifact_object_key_param.value_as_string,
                 service="s3"
             )
         )
@@ -559,7 +559,7 @@ artifacts:
                 location=Token.as_string(
                     Fn.condition_if(
                         pipeline_artifact_bucket_name_exists_condition.logical_id,
-                        pipeline_artifact_bucket_name_param.value_as_string,
+                        self.pipeline_artifact_bucket_name_param.value_as_string,
                         pipeline_artifact_bucket.ref
                     )
                 ),
@@ -579,7 +579,7 @@ artifacts:
                             ),
                             configuration={
                                 "S3Bucket": source_artifact_bucket_name,
-                                "S3ObjectKey": source_artifact_object_key_param.value_as_string
+                                "S3ObjectKey": self.source_artifact_object_key_param.value_as_string
                             },
                             output_artifacts=[
                                 aws_codepipeline.CfnPipeline.OutputArtifactProperty(
@@ -717,7 +717,7 @@ artifacts:
                 variables={
                     "DemoSourceUrl": demo_source_url,
                     "SourceArtifactBucket": source_artifact_bucket_name,
-                    "SourceArtifactObjectKey": source_artifact_object_key_param.value_as_string,
+                    "SourceArtifactObjectKey": self.source_artifact_object_key_param.value_as_string,
                     "StackName": Aws.STACK_NAME
                 }
             ),
@@ -748,7 +748,7 @@ artifacts:
             self,
             "SourceArtifactObjectKeyOutput",
             description="The source artifact S3 object key that is monitored for updates to be deployed",
-            value=source_artifact_object_key_param.value_as_string
+            value=self.source_artifact_object_key_param.value_as_string
         )
 
     def add_codebuild_transform_environment_variable(self, name, value):
@@ -761,3 +761,36 @@ artifacts:
 
     def add_asg_to_deployment_group(self, asg):
         self.codedeploy_deployment_group.auto_scaling_groups = [ asg.asg.ref ]
+
+    def metadata_parameter_group(self):
+        params = [
+            self.initialize_demo_param.logical_id,
+            self.pipeline_artifact_bucket_name_param.logical_id,
+            self.source_artifact_bucket_name_param.logical_id,
+            self.source_artifact_object_key_param.logical_id
+        ]
+        return [
+            {
+                "Label": {
+                    "default": "Deploy Pipeline Configuration"
+                },
+                "Parameters": params
+            }
+        ]
+
+    def metadata_parameter_labels(self):
+        params = {
+            self.initialize_demo_param.logical_id: {
+                "default": "Initialize Demo"
+            },
+            self.pipeline_artifact_bucket_name_param.logical_id: {
+                "default": "Pipeline Artifact Bucket Name"
+            },
+            self.source_artifact_bucket_name_param.logical_id: {
+                "default": "Source Artifact Bucket Name"
+            },
+            self.source_artifact_object_key_param.logical_id: {
+                "default": "Source Artifact Object Key"
+            },
+        }
+        return params
