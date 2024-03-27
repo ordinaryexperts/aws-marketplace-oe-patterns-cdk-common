@@ -68,31 +68,36 @@ class AppDeployPipeline(Construct):
         #
         # CONDITIONS
         #
-        initialize_demo_condition = CfnCondition(
+        self.initialize_demo_condition = CfnCondition(
             self,
             "InitializeDemoCondition",
             expression=Fn.condition_equals(self.initialize_demo_param.value, "true")
         )
-        pipeline_artifact_bucket_name_not_exists_condition = CfnCondition(
+        self.initialize_demo_condition.override_logical_id(f"{id}InitializeDemoCondition")
+        self.pipeline_artifact_bucket_name_not_exists_condition = CfnCondition(
             self,
             "PipelineArtifactBucketNameNotExists",
             expression=Fn.condition_equals(self.pipeline_artifact_bucket_name_param.value, "")
         )
-        pipeline_artifact_bucket_name_exists_condition = CfnCondition(
+        self.pipeline_artifact_bucket_name_not_exists_condition.override_logical_id(f"{id}PipelineArtifactBucketNameNotExists")
+        self.pipeline_artifact_bucket_name_exists_condition = CfnCondition(
             self,
             "PipelineArtifactBucketNameExists",
             expression=Fn.condition_not(Fn.condition_equals(self.pipeline_artifact_bucket_name_param.value, ""))
         )
-        source_artifact_bucket_name_exists_condition = CfnCondition(
+        self.pipeline_artifact_bucket_name_exists_condition.override_logical_id(f"{id}PipelineArtifactBucketNameExists")
+        self.source_artifact_bucket_name_exists_condition = CfnCondition(
             self,
             "SourceArtifactBucketNameExists",
             expression=Fn.condition_not(Fn.condition_equals(self.source_artifact_bucket_name_param.value, ""))
         )
-        source_artifact_bucket_name_not_exists_condition = CfnCondition(
+        self.source_artifact_bucket_name_exists_condition.override_logical_id(f"{id}SourceArtifactBucketNameExists")
+        self.source_artifact_bucket_name_not_exists_condition = CfnCondition(
             self,
             "SourceArtifactBucketNameNotExists",
             expression=Fn.condition_equals(self.source_artifact_bucket_name_param.value, "")
         )
+        self.source_artifact_bucket_not_name_exists_condition.override_logical_id(f"{id}SourceArtifactBucketNameNotExists")
         pipeline_artifact_bucket = aws_s3.CfnBucket(
             self,
             "PipelineArtifactBucket",
@@ -108,7 +113,7 @@ class AppDeployPipeline(Construct):
             ),
             public_access_block_configuration=aws_s3.BlockPublicAccess.BLOCK_ALL
         )
-        pipeline_artifact_bucket.cfn_options.condition=pipeline_artifact_bucket_name_not_exists_condition
+        pipeline_artifact_bucket.cfn_options.condition=self.pipeline_artifact_bucket_name_not_exists_condition
         pipeline_artifact_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
         pipeline_artifact_bucket.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
         self.pipeline_artifact_bucket_arn = Arn.format(
@@ -118,7 +123,7 @@ class AppDeployPipeline(Construct):
                 region="",
                 resource=Token.as_string(
                     Fn.condition_if(
-                        pipeline_artifact_bucket_name_exists_condition.logical_id,
+                        self.pipeline_artifact_bucket_name_exists_condition.logical_id,
                         self.pipeline_artifact_bucket_name_param.value_as_string,
                         pipeline_artifact_bucket.ref
                     )
@@ -145,12 +150,12 @@ class AppDeployPipeline(Construct):
                 status="Enabled"
             )
         )
-        source_artifact_bucket.cfn_options.condition = source_artifact_bucket_name_not_exists_condition
+        source_artifact_bucket.cfn_options.condition = self.source_artifact_bucket_name_not_exists_condition
         source_artifact_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
         source_artifact_bucket.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
         source_artifact_bucket_name = Token.as_string(
             Fn.condition_if(
-                source_artifact_bucket_name_exists_condition.logical_id,
+                self.source_artifact_bucket_name_exists_condition.logical_id,
                 self.source_artifact_bucket_name_param.value_as_string,
                 source_artifact_bucket.ref
             )
@@ -562,7 +567,7 @@ artifacts:
             artifact_store=aws_codepipeline.CfnPipeline.ArtifactStoreProperty(
                 location=Token.as_string(
                     Fn.condition_if(
-                        pipeline_artifact_bucket_name_exists_condition.logical_id,
+                        self.pipeline_artifact_bucket_name_exists_condition.logical_id,
                         self.pipeline_artifact_bucket_name_param.value_as_string,
                         pipeline_artifact_bucket.ref
                     )
@@ -704,7 +709,7 @@ artifacts:
                 )
             ]
         )
-        initialize_demo_lambda_function_role.cfn_options.condition = initialize_demo_condition
+        initialize_demo_lambda_function_role.cfn_options.condition = self.initialize_demo_condition
         demo_lambda_function_code_path = Util.local_path("app_deploy_pipeline/initialize_demo_lambda_function_code.py")
         with open(demo_lambda_function_code_path) as f:
             initialize_demo_lambda_function_code = f.read()
@@ -730,13 +735,13 @@ artifacts:
             runtime="python3.12",
             timeout=300
         )
-        initialize_demo_lambda_function.cfn_options.condition = initialize_demo_condition
+        initialize_demo_lambda_function.cfn_options.condition = self.initialize_demo_condition
         initialize_demo_custom_resource = aws_cloudformation.CfnCustomResource(
             self,
             "InitializeDemoCustomResource",
             service_token=initialize_demo_lambda_function.attr_arn
         )
-        initialize_demo_custom_resource.cfn_options.condition = initialize_demo_condition
+        initialize_demo_custom_resource.cfn_options.condition = self.initialize_demo_condition
 
 
         #
