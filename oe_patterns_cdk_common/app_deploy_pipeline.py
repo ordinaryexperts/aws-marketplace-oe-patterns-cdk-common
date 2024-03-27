@@ -113,6 +113,7 @@ class AppDeployPipeline(Construct):
             ),
             public_access_block_configuration=aws_s3.BlockPublicAccess.BLOCK_ALL
         )
+        pipeline_artifact_bucket.override_logical_id(f"{id}PipelineArtifactBucket")
         pipeline_artifact_bucket.cfn_options.condition=self.pipeline_artifact_bucket_name_not_exists_condition
         pipeline_artifact_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
         pipeline_artifact_bucket.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
@@ -150,6 +151,7 @@ class AppDeployPipeline(Construct):
                 status="Enabled"
             )
         )
+        source_artifact_bucket.override_logical_id(f"{id}SourceArtifactBucket")
         source_artifact_bucket.cfn_options.condition = self.source_artifact_bucket_name_not_exists_condition
         source_artifact_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
         source_artifact_bucket.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
@@ -219,6 +221,7 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
+        codebuild_transform_service_role.override_logical_id(f"{id}CodeBuildTransformServiceRole")
         codebuild_transform_service_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -298,6 +301,7 @@ artifacts:
             application_name=Aws.STACK_NAME,
             compute_platform="Server"
         )
+        codedeploy_application.override_logical_id(f"{id}CodeDeployApplication")
         codedeploy_role = aws_iam.CfnRole(
              self,
             "CodeDeployRole",
@@ -329,6 +333,7 @@ artifacts:
             ],
             managed_policy_arns=[ "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole" ]
         )
+        codedeploy_role.override_logical_id(f"{id}CodeDeployRole")
         codedeploy_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -359,6 +364,7 @@ artifacts:
         )
         if asg:
             self.codedeploy_deployment_group.auto_scaling_groups = [ asg.asg.ref ]
+        self.codedeploy_deployment_group.override_logical_id(f"{id}CodeDeployDeploymentGroup")
 
         # codepipeline
         codepipeline_role = aws_iam.CfnRole(
@@ -374,6 +380,7 @@ artifacts:
                 ]
             )
         )
+        codepipeline_role.override_logical_id(f"{id}PipelineRole")
         codepipeline_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -437,6 +444,7 @@ artifacts:
                 )
             ]
         )
+        codepipeline_source_stage_role.override_logical_id(f"{id}SourceStageRole")
         codepipeline_source_stage_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -477,6 +485,7 @@ artifacts:
                 )
             ]
         )
+        codepipeline_transform_stage_role.override_logical_id(f"{id}TransformStageRole")
         codepipeline_transform_stage_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -551,6 +560,7 @@ artifacts:
                 )
             ]
         )
+        codepipeline_deploy_stage_role.override_logical_id(f"{id}DeployStageRole")
         codepipeline_deploy_stage_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -561,7 +571,7 @@ artifacts:
                 service="iam"
             )
         )
-        aws_codepipeline.CfnPipeline(
+        pipeline = aws_codepipeline.CfnPipeline(
             self,
             "Pipeline",
             artifact_store=aws_codepipeline.CfnPipeline.ArtifactStoreProperty(
@@ -654,8 +664,9 @@ artifacts:
                 )
             ]
         )
+        pipeline.override_logical_id(f"{id}Pipeline")
 
-        iam_notification_publish_policy =aws_iam.PolicyDocument(
+        iam_notification_publish_policy = aws_iam.PolicyDocument(
             statements=[
                 aws_iam.PolicyStatement(
                     effect=aws_iam.Effect.ALLOW,
