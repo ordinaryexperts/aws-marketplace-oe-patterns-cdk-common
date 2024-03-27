@@ -97,7 +97,7 @@ class AppDeployPipeline(Construct):
             "SourceArtifactBucketNameNotExists",
             expression=Fn.condition_equals(self.source_artifact_bucket_name_param.value, "")
         )
-        self.source_artifact_bucket_not_name_exists_condition.override_logical_id(f"{id}SourceArtifactBucketNameNotExists")
+        self.source_artifact_bucket_name_not_exists_condition.override_logical_id(f"{id}SourceArtifactBucketNameNotExists")
         pipeline_artifact_bucket = aws_s3.CfnBucket(
             self,
             "PipelineArtifactBucket",
