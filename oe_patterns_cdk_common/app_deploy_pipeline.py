@@ -43,24 +43,28 @@ class AppDeployPipeline(Construct):
             default="true",
             description="Optional: Trigger the first deployment with a copy of a demo sample codebase from Ordinary Experts."
         )
+        self.initialize_demo_param.override_logical_id(f"{id}InitializeDemoParam")
         self.pipeline_artifact_bucket_name_param = CfnParameter(
             self,
             "PipelineArtifactBucketName",
             default="",
             description="Optional: Specify a bucket name for the CodePipeline pipeline to use. The bucket must be in this same AWS account. This can be handy when re-creating this template many times."
         )
+        self.pipeline_artifact_bucket_name_param.override_logical_id(f"{id}PipelineArtifactBucketNameParam")
         self.source_artifact_bucket_name_param = CfnParameter(
             self,
             "SourceArtifactBucketName",
             default="",
             description="Optional: Specify a S3 bucket name which will contain the build artifacts for the application. If not specified, a bucket will be created."
         )
+        self.source_artifact_bucket_name_param.override_logical_id(f"{id}SourceArtifactBucketNameParam")
         self.source_artifact_object_key_param = CfnParameter(
             self,
             "SourceArtifactObjectKey",
             default="artifact.zip",
             description="Required: AWS S3 object key (path) for the build artifact for the application. Updates to this object will trigger a deployment."
         )
+        self.source_artifact_object_key_param.override_logical_id(f"{id}SourceArtifactObjectKeyParam")
         #
         # CONDITIONS
         #
