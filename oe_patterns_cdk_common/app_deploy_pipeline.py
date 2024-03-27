@@ -43,52 +43,61 @@ class AppDeployPipeline(Construct):
             default="true",
             description="Optional: Trigger the first deployment with a copy of a demo sample codebase from Ordinary Experts."
         )
+        self.initialize_demo_param.override_logical_id(f"{id}InitializeDemoParam")
         self.pipeline_artifact_bucket_name_param = CfnParameter(
             self,
             "PipelineArtifactBucketName",
             default="",
             description="Optional: Specify a bucket name for the CodePipeline pipeline to use. The bucket must be in this same AWS account. This can be handy when re-creating this template many times."
         )
+        self.pipeline_artifact_bucket_name_param.override_logical_id(f"{id}PipelineArtifactBucketNameParam")
         self.source_artifact_bucket_name_param = CfnParameter(
             self,
             "SourceArtifactBucketName",
             default="",
             description="Optional: Specify a S3 bucket name which will contain the build artifacts for the application. If not specified, a bucket will be created."
         )
+        self.source_artifact_bucket_name_param.override_logical_id(f"{id}SourceArtifactBucketNameParam")
         self.source_artifact_object_key_param = CfnParameter(
             self,
             "SourceArtifactObjectKey",
             default="artifact.zip",
             description="Required: AWS S3 object key (path) for the build artifact for the application. Updates to this object will trigger a deployment."
         )
+        self.source_artifact_object_key_param.override_logical_id(f"{id}SourceArtifactObjectKeyParam")
         #
         # CONDITIONS
         #
-        initialize_demo_condition = CfnCondition(
+        self.initialize_demo_condition = CfnCondition(
             self,
             "InitializeDemoCondition",
             expression=Fn.condition_equals(self.initialize_demo_param.value, "true")
         )
-        pipeline_artifact_bucket_name_not_exists_condition = CfnCondition(
+        self.initialize_demo_condition.override_logical_id(f"{id}InitializeDemoCondition")
+        self.pipeline_artifact_bucket_name_not_exists_condition = CfnCondition(
             self,
             "PipelineArtifactBucketNameNotExists",
             expression=Fn.condition_equals(self.pipeline_artifact_bucket_name_param.value, "")
         )
-        pipeline_artifact_bucket_name_exists_condition = CfnCondition(
+        self.pipeline_artifact_bucket_name_not_exists_condition.override_logical_id(f"{id}PipelineArtifactBucketNameNotExists")
+        self.pipeline_artifact_bucket_name_exists_condition = CfnCondition(
             self,
             "PipelineArtifactBucketNameExists",
             expression=Fn.condition_not(Fn.condition_equals(self.pipeline_artifact_bucket_name_param.value, ""))
         )
-        source_artifact_bucket_name_exists_condition = CfnCondition(
+        self.pipeline_artifact_bucket_name_exists_condition.override_logical_id(f"{id}PipelineArtifactBucketNameExists")
+        self.source_artifact_bucket_name_exists_condition = CfnCondition(
             self,
             "SourceArtifactBucketNameExists",
             expression=Fn.condition_not(Fn.condition_equals(self.source_artifact_bucket_name_param.value, ""))
         )
-        source_artifact_bucket_name_not_exists_condition = CfnCondition(
+        self.source_artifact_bucket_name_exists_condition.override_logical_id(f"{id}SourceArtifactBucketNameExists")
+        self.source_artifact_bucket_name_not_exists_condition = CfnCondition(
             self,
             "SourceArtifactBucketNameNotExists",
             expression=Fn.condition_equals(self.source_artifact_bucket_name_param.value, "")
         )
+        self.source_artifact_bucket_name_not_exists_condition.override_logical_id(f"{id}SourceArtifactBucketNameNotExists")
         pipeline_artifact_bucket = aws_s3.CfnBucket(
             self,
             "PipelineArtifactBucket",
@@ -104,7 +113,8 @@ class AppDeployPipeline(Construct):
             ),
             public_access_block_configuration=aws_s3.BlockPublicAccess.BLOCK_ALL
         )
-        pipeline_artifact_bucket.cfn_options.condition=pipeline_artifact_bucket_name_not_exists_condition
+        pipeline_artifact_bucket.override_logical_id(f"{id}PipelineArtifactBucket")
+        pipeline_artifact_bucket.cfn_options.condition=self.pipeline_artifact_bucket_name_not_exists_condition
         pipeline_artifact_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
         pipeline_artifact_bucket.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
         self.pipeline_artifact_bucket_arn = Arn.format(
@@ -114,7 +124,7 @@ class AppDeployPipeline(Construct):
                 region="",
                 resource=Token.as_string(
                     Fn.condition_if(
-                        pipeline_artifact_bucket_name_exists_condition.logical_id,
+                        self.pipeline_artifact_bucket_name_exists_condition.logical_id,
                         self.pipeline_artifact_bucket_name_param.value_as_string,
                         pipeline_artifact_bucket.ref
                     )
@@ -141,12 +151,13 @@ class AppDeployPipeline(Construct):
                 status="Enabled"
             )
         )
-        source_artifact_bucket.cfn_options.condition = source_artifact_bucket_name_not_exists_condition
+        source_artifact_bucket.override_logical_id(f"{id}SourceArtifactBucket")
+        source_artifact_bucket.cfn_options.condition = self.source_artifact_bucket_name_not_exists_condition
         source_artifact_bucket.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
         source_artifact_bucket.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
         source_artifact_bucket_name = Token.as_string(
             Fn.condition_if(
-                source_artifact_bucket_name_exists_condition.logical_id,
+                self.source_artifact_bucket_name_exists_condition.logical_id,
                 self.source_artifact_bucket_name_param.value_as_string,
                 source_artifact_bucket.ref
             )
@@ -210,6 +221,7 @@ class AppDeployPipeline(Construct):
                 )
             ]
         )
+        codebuild_transform_service_role.override_logical_id(f"{id}CodeBuildTransformServiceRole")
         codebuild_transform_service_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -289,6 +301,7 @@ artifacts:
             application_name=Aws.STACK_NAME,
             compute_platform="Server"
         )
+        codedeploy_application.override_logical_id(f"{id}CodeDeployApplication")
         codedeploy_role = aws_iam.CfnRole(
              self,
             "CodeDeployRole",
@@ -320,6 +333,7 @@ artifacts:
             ],
             managed_policy_arns=[ "arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole" ]
         )
+        codedeploy_role.override_logical_id(f"{id}CodeDeployRole")
         codedeploy_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -350,6 +364,7 @@ artifacts:
         )
         if asg:
             self.codedeploy_deployment_group.auto_scaling_groups = [ asg.asg.ref ]
+        self.codedeploy_deployment_group.override_logical_id(f"{id}CodeDeployDeploymentGroup")
 
         # codepipeline
         codepipeline_role = aws_iam.CfnRole(
@@ -365,6 +380,7 @@ artifacts:
                 ]
             )
         )
+        codepipeline_role.override_logical_id(f"{id}PipelineRole")
         codepipeline_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -428,6 +444,7 @@ artifacts:
                 )
             ]
         )
+        codepipeline_source_stage_role.override_logical_id(f"{id}SourceStageRole")
         codepipeline_source_stage_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -468,6 +485,7 @@ artifacts:
                 )
             ]
         )
+        codepipeline_transform_stage_role.override_logical_id(f"{id}TransformStageRole")
         codepipeline_transform_stage_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -542,6 +560,7 @@ artifacts:
                 )
             ]
         )
+        codepipeline_deploy_stage_role.override_logical_id(f"{id}DeployStageRole")
         codepipeline_deploy_stage_role_arn = Arn.format(
             components=ArnComponents(
                 account=Aws.ACCOUNT_ID,
@@ -552,13 +571,13 @@ artifacts:
                 service="iam"
             )
         )
-        aws_codepipeline.CfnPipeline(
+        pipeline = aws_codepipeline.CfnPipeline(
             self,
             "Pipeline",
             artifact_store=aws_codepipeline.CfnPipeline.ArtifactStoreProperty(
                 location=Token.as_string(
                     Fn.condition_if(
-                        pipeline_artifact_bucket_name_exists_condition.logical_id,
+                        self.pipeline_artifact_bucket_name_exists_condition.logical_id,
                         self.pipeline_artifact_bucket_name_param.value_as_string,
                         pipeline_artifact_bucket.ref
                     )
@@ -645,8 +664,9 @@ artifacts:
                 )
             ]
         )
+        pipeline.override_logical_id(f"{id}Pipeline")
 
-        iam_notification_publish_policy =aws_iam.PolicyDocument(
+        iam_notification_publish_policy = aws_iam.PolicyDocument(
             statements=[
                 aws_iam.PolicyStatement(
                     effect=aws_iam.Effect.ALLOW,
@@ -700,7 +720,8 @@ artifacts:
                 )
             ]
         )
-        initialize_demo_lambda_function_role.cfn_options.condition = initialize_demo_condition
+        initialize_demo_lambda_function_role.override_logical_id(f"{id}InitializeDemoLambdaFunctionRole")
+        initialize_demo_lambda_function_role.cfn_options.condition = self.initialize_demo_condition
         demo_lambda_function_code_path = Util.local_path("app_deploy_pipeline/initialize_demo_lambda_function_code.py")
         with open(demo_lambda_function_code_path) as f:
             initialize_demo_lambda_function_code = f.read()
@@ -726,30 +747,34 @@ artifacts:
             runtime="python3.12",
             timeout=300
         )
-        initialize_demo_lambda_function.cfn_options.condition = initialize_demo_condition
+        initialize_demo_lambda_function.override_logical_id(f"{id}InitializeDemoLambdaFunction")
+        initialize_demo_lambda_function.cfn_options.condition = self.initialize_demo_condition
         initialize_demo_custom_resource = aws_cloudformation.CfnCustomResource(
             self,
             "InitializeDemoCustomResource",
             service_token=initialize_demo_lambda_function.attr_arn
         )
-        initialize_demo_custom_resource.cfn_options.condition = initialize_demo_condition
+        initialize_demo_custom_resource.override_logical_id(f"{id}InitializeDemoCustomResource")
+        initialize_demo_custom_resource.cfn_options.condition = self.initialize_demo_condition
 
 
         #
         # OUTPUTS
         #
-        CfnOutput(
+        source_artifact_bucket_name_output = CfnOutput(
             self,
             "SourceArtifactBucketNameOutput",
             description="The source artifact S3 bucket name that is monitored for updates to be deployed",
             value=source_artifact_bucket_name
         )
-        CfnOutput(
+        source_artifact_bucket_name_output.override_logical_id(f"{id}SourceArtifactBucketNameOutput")
+        source_artifact_object_key_output = CfnOutput(
             self,
             "SourceArtifactObjectKeyOutput",
             description="The source artifact S3 object key that is monitored for updates to be deployed",
             value=self.source_artifact_object_key_param.value_as_string
         )
+        source_artifact_object_key_output.override_logical_id(f"{id}SourceArtifactObjectKeyOutput")
 
     def add_codebuild_transform_environment_variable(self, name, value):
         self.codebuild_transform_project.environment.environment_variables.append(
