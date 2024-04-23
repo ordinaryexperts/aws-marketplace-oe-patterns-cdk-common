@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.19.0
+
+* Add allow_update_secret parameter for instance secret updating
+
 # 3.18.1
 
 * Cleanup of AppDeployPipeline construct
