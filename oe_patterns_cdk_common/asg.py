@@ -56,6 +56,7 @@ class Asg(Construct):
             vpc: Vpc,
             additional_iam_role_policies: 'list[object]' = [],
             allow_associate_address: bool = False,
+            allow_update_secret: bool = False,
             allowed_instance_types: 'list[str]' = [],
             create_and_update_timeout_minutes: int = 15,
             default_instance_type: str = None,
@@ -224,6 +225,25 @@ class Asg(Construct):
                         ]
                     ),
                     policy_name="AllowAssociateAddress"
+                )
+            )
+        if allow_update_secret:
+            policies.append(
+                aws_iam.CfnRole.PolicyProperty(
+                    policy_document=aws_iam.PolicyDocument(
+                        statements=[
+                            aws_iam.PolicyStatement(
+                                effect=aws_iam.Effect.ALLOW,
+                                actions=[
+                                    "secretsmanager:UpdateSecret"
+                                ],
+                                resources=[
+                                    f"arn:{Aws.PARTITION}:secretsmanager:{Aws.REGION}:{Aws.ACCOUNT_ID}:secret:{Aws.STACK_NAME}/instance/credentials-*"
+                                ]
+                            )
+                        ]
+                    ),
+                    policy_name="AllowUpdateInstanceSecret"
                 )
             )
         if use_data_volume:

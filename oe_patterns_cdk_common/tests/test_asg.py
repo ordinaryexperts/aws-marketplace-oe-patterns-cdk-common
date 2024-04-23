@@ -101,6 +101,22 @@ def test_additional_iam_role_policies_asg():
 
   assert role['TestAsgInstanceRole']['Properties']['Policies'][-1]['PolicyName'] == 'AllowUpdateAllSecrets'
 
+def test_allow_update_secret_asg():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+
+  Asg(
+    stack,
+    'TestAsg',
+    allow_update_secret = True,
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  role = template.find_resources('AWS::IAM::Role')
+
+  assert role['TestAsgInstanceRole']['Properties']['Policies'][-1]['PolicyName'] == 'AllowUpdateInstanceSecret'
+
 def test_root_instance_size():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
