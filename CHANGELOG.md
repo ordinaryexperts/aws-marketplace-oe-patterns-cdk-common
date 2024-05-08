@@ -1,5 +1,8 @@
 # Unreleased
 
+* Upgrade MySQL Aurora Clusters to 8.0.mysql_aurora.3.04.2
+* Upgrade Postgresql Aurora Clusters to 15.4
+
 # 3.19.0
 
 * Add allow_update_secret parameter for instance secret updating

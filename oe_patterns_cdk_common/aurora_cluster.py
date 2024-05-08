@@ -261,8 +261,8 @@ class AuroraMysql(AuroraCluster):
             **props):
 
         self.engine = "aurora-mysql"
-        self.engine_version = "5.7.mysql_aurora.2.11.1"
-        self.parameter_group_name = "default.aurora-mysql5.7"
+        self.engine_version = "8.0.mysql_aurora.3.04.2"
+        self.parameter_group_name = "default.aurora-mysql8.0"
         self.port = 3306
 
         super().__init__(
@@ -286,8 +286,8 @@ class AuroraPostgresql(AuroraCluster):
             **props):
 
         self.engine = "aurora-postgresql"
-        self.engine_version = "13.7"
-        self.parameter_group_name = "default.aurora-postgresql13"
+        self.engine_version = "15.4"
+        self.parameter_group_name = "default.aurora-postgresql15"
         self.port = 5432
 
         super().__init__(
