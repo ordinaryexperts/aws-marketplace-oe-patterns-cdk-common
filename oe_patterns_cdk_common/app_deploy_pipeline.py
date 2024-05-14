@@ -699,7 +699,7 @@ artifacts:
                             )
                         ]
                     ),
-                    policy_name="EventRolePermssions"
+                    policy_name="EventRolePermissions"
                 )
             ]
         )
@@ -722,6 +722,23 @@ artifacts:
             }
         )
         event_rule.node.default_child.override_logical_id(f"{id}EventRule")
+
+        # Use escape hatch to add a target to the rule
+        event_rule.node.default_child.add_override("Properties.Targets", [
+            {
+                "Arn": Fn.join("", [
+                    "arn:aws:codepipeline:",
+                    Aws.REGION,
+                    ":",
+                    Aws.ACCOUNT_ID,
+                    ":",
+                    pipeline.ref
+                ]),
+                "RoleArn": event_role.attr_arn,
+                "Id": "codepipeline-AppPipeline"
+            }
+        ])
+
         iam_notification_publish_policy = aws_iam.PolicyDocument(
             statements=[
                 aws_iam.PolicyStatement(

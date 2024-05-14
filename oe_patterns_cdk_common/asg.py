@@ -1,5 +1,3 @@
-import os
-
 from aws_cdk import (
     Aws,
     aws_autoscaling,
