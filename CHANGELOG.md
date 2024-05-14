@@ -2,6 +2,7 @@
 
 * Upgrade MySQL Aurora Clusters to 8.0.mysql_aurora.3.04.2
 * Upgrade Postgresql Aurora Clusters to 15.4
+* Upgrade AppDeployPipeline construct to use Events instead of Polling
 
 # 3.19.0
 
