@@ -3,6 +3,8 @@
 * Upgrade MySQL Aurora Clusters to 8.0.mysql_aurora.3.04.2
 * Upgrade Postgresql Aurora Clusters to 15.4
 * Upgrade AppDeployPipeline construct to use Events instead of Polling
+* Upgrade asg and ses custom resource lambdas to 3.10
+* Add 5m timeout for asg and ses custom resource lambdas
 
 # 3.19.0
 
