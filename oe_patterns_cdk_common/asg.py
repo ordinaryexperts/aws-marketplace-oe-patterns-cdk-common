@@ -1,5 +1,3 @@
-import os
-
 from aws_cdk import (
     Aws,
     aws_autoscaling,
@@ -17,6 +15,7 @@ from aws_cdk import (
     CfnResourceSignal,
     CfnUpdatePolicy,
     CustomResource,
+    Duration,
     Fn,
     Tags,
     Token
@@ -360,7 +359,8 @@ class Asg(Construct):
             self.subnet_to_az_lambda = aws_lambda.Function(
                 self,
                 "AsgSubnetToAzLambda",
-                runtime=aws_lambda.Runtime.PYTHON_3_8,
+                runtime=aws_lambda.Runtime.PYTHON_3_10,
+                timeout=Duration.seconds(300),
                 handler="index.handler",
                 code=aws_lambda.Code.from_inline(lambda_code)
             )

@@ -9,6 +9,7 @@ from aws_cdk import (
     CfnCondition,
     CfnParameter,
     CustomResource,
+    Duration,
     Fn,
     Token
 )
@@ -148,7 +149,8 @@ class Ses(Construct):
         self.generate_smtp_password_lambda = aws_lambda.Function(
             self,
             "GenerateSMTPPasswordLambda",
-            runtime=aws_lambda.Runtime.PYTHON_3_8,
+            runtime=aws_lambda.Runtime.PYTHON_3_10,
+            timeout=Duration.seconds(300),
             handler="index.handler",
             code=aws_lambda.Code.from_inline(lambda_code)
         )
