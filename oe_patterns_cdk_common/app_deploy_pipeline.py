@@ -4,7 +4,6 @@ from aws_cdk import (
     aws_codebuild,
     aws_codedeploy,
     aws_codepipeline,
-    aws_events,
     aws_iam,
     aws_lambda,
     aws_s3,
@@ -596,8 +595,7 @@ artifacts:
                             ),
                             configuration={
                                 "S3Bucket": source_artifact_bucket_name,
-                                "S3ObjectKey": self.source_artifact_object_key_param.value_as_string,
-                                "PollForSourceChanges": "false"
+                                "S3ObjectKey": self.source_artifact_object_key_param.value_as_string
                             },
                             output_artifacts=[
                                 aws_codepipeline.CfnPipeline.OutputArtifactProperty(
@@ -664,80 +662,6 @@ artifacts:
             ]
         )
         pipeline.override_logical_id(f"{id}Pipeline")
-
-        event_role = aws_iam.CfnRole(
-            self,
-            "EventRole",
-            assume_role_policy_document=aws_iam.PolicyDocument(
-                statements=[
-                    aws_iam.PolicyStatement(
-                        effect=aws_iam.Effect.ALLOW,
-                        actions=[ "sts:AssumeRole" ],
-                        principals=[ aws_iam.ServicePrincipal("events.amazonaws.com") ]
-                    )
-                ]
-            ),
-            policies=[
-                aws_iam.CfnRole.PolicyProperty(
-                    policy_document=aws_iam.PolicyDocument(
-                        statements=[
-                            aws_iam.PolicyStatement(
-                                effect=aws_iam.Effect.ALLOW,
-                                actions=[
-                                    "codepipeline:StartPipelineExecution"
-                                ],
-                                resources=[
-                                    Fn.join("", [
-                                        "arn:aws:codepipeline:",
-                                        Aws.REGION,
-                                        ":",
-                                        Aws.ACCOUNT_ID,
-                                        ":",
-                                        pipeline.ref
-                                    ])
-                                ]
-                            )
-                        ]
-                    ),
-                    policy_name="EventRolePermissions"
-                )
-            ]
-        )
-        event_role.override_logical_id(f"{id}EventRole")
-        event_rule = aws_events.Rule(
-            self,
-            "EventRule",
-            event_pattern={
-                "source": ["aws.s3"],
-                "detail_type": ["AWS API Call via CloudTrail"],
-                "detail": {
-                    "eventSource": ["s3.amazonaws.com"],
-                    "eventName": ["PutObject", "CompleteMultipartUpload"],
-                    "resources": {
-                        "ARN": [
-                            Fn.join("", [source_artifact_bucket_arn, "/", self.source_artifact_object_key_param.value_as_string])
-                        ]
-                    }
-                }
-            }
-        )
-        event_rule.node.default_child.override_logical_id(f"{id}EventRule")
-
-        # Use escape hatch to add a target to the rule
-        event_rule.node.default_child.add_override("Properties.Targets", [
-            {
-                "Arn": Fn.join("", [
-                    "arn:aws:codepipeline:",
-                    Aws.REGION,
-                    ":",
-                    Aws.ACCOUNT_ID,
-                    ":",
-                    pipeline.ref
-                ]),
-                "RoleArn": event_role.attr_arn,
-                "Id": "codepipeline-AppPipeline"
-            }
-        ])
 
         iam_notification_publish_policy = aws_iam.PolicyDocument(
             statements=[
