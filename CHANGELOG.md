@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.20.1
+
+* Revert AppDeployPipeline use of Events - back to polling
+
 # 3.20.0
 
 * Upgrade MySQL Aurora Clusters to 8.0.mysql_aurora.3.04.2
