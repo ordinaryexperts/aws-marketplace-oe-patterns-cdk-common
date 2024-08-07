@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.20.2
+
+* Require IMDSv2 in ASG
+
 # 3.20.1
 
 * Revert AppDeployPipeline use of Events - back to polling

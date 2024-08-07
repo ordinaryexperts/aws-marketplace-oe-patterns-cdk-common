@@ -1,3 +1,5 @@
+import json
+
 from aws_cdk import (
   assertions,
   aws_iam,
@@ -191,3 +193,17 @@ def test_excluded_instance_sizes():
 
   assert 't3.large' in instance_type_param['AllowedValues']
   assert 't3.nano' not in instance_type_param['AllowedValues']
+
+def test_imdsv2():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  launch_template = template.find_resources('AWS::EC2::LaunchTemplate')
+  
+  assert launch_template['TestAsgLaunchTemplate']['Properties']['LaunchTemplateData']['MetadataOptions']['HttpTokens'] == 'required'
