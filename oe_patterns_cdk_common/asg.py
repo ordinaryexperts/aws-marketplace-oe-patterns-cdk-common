@@ -101,6 +101,13 @@ class Asg(Construct):
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
+        self.key_name_param = CfnParameter(
+            self,
+            "AsgKeyName",
+            default="",
+            description="Optional: The EC2 key pair name for the instance."
+        )
+        self.key_name_param.override_logical_id(f"{id}KeyName")
         self.reprovision_string_param = CfnParameter(
             self,
             "AsgReprovisionString",
@@ -478,6 +485,7 @@ class Asg(Construct):
                 iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
                     name=self.ec2_instance_profile.ref
                 ),
+                key_name=self.key_name_param.value_as_string,
                 metadata_options=aws_ec2.CfnLaunchTemplate.MetadataOptionsProperty(
                     http_tokens="required",
                 ),
