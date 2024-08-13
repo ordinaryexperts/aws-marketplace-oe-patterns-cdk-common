@@ -553,6 +553,7 @@ class Asg(Construct):
     def metadata_parameter_group(self):
         params = [
             self.instance_type_param.logical_id,
+            self.key_name_param.logical_id,
             self.reprovision_string_param.logical_id
         ]
         if not self._singleton:
@@ -579,6 +580,9 @@ class Asg(Construct):
         params = {
             self.instance_type_param.logical_id: {
                 "default": "EC2 instance type"
+            },
+            self.key_name_param.logical_id: {
+                "default": "EC2 Key Pair Name"
             },
             self.reprovision_string_param.logical_id: {
                 "default": "Auto Scaling Group Reprovision String"
