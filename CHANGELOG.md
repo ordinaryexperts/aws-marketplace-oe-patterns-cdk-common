@@ -1,5 +1,9 @@
 # Unreleased
 
+# 3.20.3
+
+* Adding KeyName parameter to ASG
+
 # 3.20.2
 
 * Require IMDSv2 in ASG
