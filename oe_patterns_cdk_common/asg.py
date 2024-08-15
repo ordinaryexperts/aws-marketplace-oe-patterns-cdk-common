@@ -108,6 +108,13 @@ class Asg(Construct):
             description="Optional: The EC2 key pair name for the instance."
         )
         self.key_name_param.override_logical_id(f"{id}KeyName")
+        self.key_name_condition = CfnCondition(
+            self,
+            "AsgKeyNameCondition",
+            expression=Fn.condition_not(Fn.condition_equals(self.key_name_param.value, ""))
+        )
+        self.key_name_condition.override_logical_id(f"{id}KeyNameCondition")
+
         self.reprovision_string_param = CfnParameter(
             self,
             "AsgReprovisionString",
@@ -485,7 +492,13 @@ class Asg(Construct):
                 iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
                     name=self.ec2_instance_profile.ref
                 ),
-                key_name=self.key_name_param.value_as_string,
+                key_name=Token.as_string(
+                    Fn.condition_if(
+                        self.key_name_condition.logical_id,
+                        self.key_name_param.value_as_string,
+                        Aws.NO_VALUE
+                    )
+                ),
                 metadata_options=aws_ec2.CfnLaunchTemplate.MetadataOptionsProperty(
                     http_tokens="required",
                 ),
