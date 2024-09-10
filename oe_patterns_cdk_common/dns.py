@@ -1,10 +1,7 @@
 from aws_cdk import (
     aws_route53,
-    CfnCondition,
     CfnOutput,
-    CfnParameter,
-    Fn,
-    Token
+    CfnParameter
 )
 
 from constructs import Construct
@@ -26,8 +23,7 @@ class Dns(Construct):
         self.route_53_hosted_zone_name_param = CfnParameter(
             self,
             "Route53HostedZoneName",
-            default="",
-            description="Optional: Route 53 Hosted Zone name in which a DNS record will be created by this template. Must already exist and be the domain part of the Hostname parameter, without trailing dot. E.G. 'internal.mycompany.com'"
+            description="Required: Route 53 Hosted Zone name in which a DNS record will be created by this template. Must already exist and be the domain part of the Hostname parameter, without trailing dot. E.G. 'internal.mycompany.com'"
         )
         self.route_53_hosted_zone_name_param.override_logical_id(f"{id}Route53HostedZoneName")
         self.hostname_param = CfnParameter(
@@ -35,22 +31,9 @@ class Dns(Construct):
             "Hostname",
             allowed_pattern="^(?!.*/).*$",
             constraint_description="Hostname should not have any forward slashes",
-            default="",
-            description="Optional: The hostname to access the service. E.G. 'app.internal.mycompany.com'"
+            description="Required: The hostname to access the service. E.G. 'app.internal.mycompany.com'. Must be within the Hosted Zone specified."
         )
         self.hostname_param.override_logical_id(f"{id}Hostname")
-        self.route_53_hosted_zone_name_exists_condition = CfnCondition(
-            self,
-            "Route53HostedZoneNameExists",
-            expression=Fn.condition_not(Fn.condition_equals(self.route_53_hosted_zone_name_param.value, ""))
-        )
-        self.route_53_hosted_zone_name_exists_condition.override_logical_id(f"{id}Route53HostedZoneNameExists")
-        self.hostname_exists_condition = CfnCondition(
-            self,
-            "HostnameExists",
-            expression=Fn.condition_not(Fn.condition_equals(self.hostname_param.value, ""))
-        )
-        self.hostname_exists_condition.override_logical_id(f"{id}HostnameExists")
 
     def add_alb(self, alb):
         # route 53
@@ -71,17 +54,11 @@ class Dns(Construct):
             ]
         )
         self.record_set.override_logical_id(f"{self.id}RecordSetGroup")
-        self.record_set.cfn_options.condition = self.route_53_hosted_zone_name_exists_condition
         self.site_url_output = CfnOutput(
             self,
             "SiteUrlOutput",
             description="The URL Endpoint",
-            value=Token.as_string(
-                Fn.condition_if(
-                self.hostname_exists_condition.logical_id,
-                "https://{}".format(self.hostname_param.value_as_string),
-                "https://{}".format(alb.alb.attr_dns_name)
-            ))
+            value="https://{}".format(self.hostname_param.value_as_string)
         )
         self.site_url_output.override_logical_id(f"{self.id}SiteUrlOutput")
 
@@ -109,13 +86,4 @@ class Dns(Construct):
         }
 
     def hostname(self, alb=None):
-        if alb:
-            return Token.as_string(
-                Fn.condition_if(
-                    self.hostname_exists_condition.logical_id,
-                    self.hostname_param.value_as_string,
-                    alb.alb.attr_dns_name
-                )
-            )
-        else:
-            return self.hostname_param.value_as_string
+        return self.hostname_param.value_as_string
