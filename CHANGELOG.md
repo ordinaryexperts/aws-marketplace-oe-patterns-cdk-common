@@ -1,5 +1,7 @@
 # Unreleased
 
+# 4.0.0
+
 * Make DNS parameters required
 
 # 3.20.3
