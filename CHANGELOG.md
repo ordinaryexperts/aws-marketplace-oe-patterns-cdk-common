@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.0.1
+
+* Pass IamRole in UserData variables
+
 # 4.0.0
 
 * Make DNS parameters required
