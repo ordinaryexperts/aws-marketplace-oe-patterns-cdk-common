@@ -72,7 +72,7 @@ class Asg(Construct):
             use_graviton: bool = True,
             use_public_subnets: bool = False,
             user_data_contents: str = None,
-            user_data_variables: dict = None,
+            user_data_variables: dict = {},
             **props):
         super().__init__(scope, id, **props)
         self._singleton = singleton
@@ -456,6 +456,7 @@ class Asg(Construct):
             user_data_variables['AsgId'] = id
 
         reprovision_snippet = "# reprovision string: ${AsgReprovisionString}"
+        user_data_variables['IamRole'] = self.iam_instance_role.ref
         if user_data_contents is None:
             user_data_contents = reprovision_snippet
         else:
