@@ -1,6 +1,6 @@
 # Unreleased
 
-* Adding custom_params arg to ElastiCache to set custom parameters
+* Adding custom_parameters arg to ElastiCache to set custom parameters
 
 # 4.0.1
 
