@@ -15,6 +15,7 @@ class ElasticacheCluster(Construct):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
+            custom_parameters: dict = {},
             default_instance_type: str = 'cache.t4g.micro',
             **props):
         super().__init__(scope, id, **props)
@@ -103,10 +104,20 @@ class ElasticacheCluster(Construct):
         self.elasticache_subnet_group = aws_elasticache.CfnSubnetGroup(
             self,
             "ElastiCacheSubnetGroup",
-            description="ElastiCache subnet group.",
+            description="ElastiCache subnet group",
             subnet_ids=vpc.private_subnet_ids()
         )
         self.elasticache_subnet_group.override_logical_id(f"{id}SubnetGroup")
+
+        self.elasticache_parameter_group = aws_elasticache.CfnParameterGroup(
+            self,
+            "ElastiCacheParameterGroup",
+            cache_parameter_group_family=self.parameter_group_family,
+            description="ElastiCache parameter group",
+            properties=custom_parameters
+        )
+        self.elasticache_parameter_group.override_logical_id(f"{id}ParameterGroup")
+
         if self.engine == "redis":
             az_mode = Aws.NO_VALUE
         else:
@@ -116,6 +127,7 @@ class ElasticacheCluster(Construct):
             "ElastiCacheCluster",
             az_mode=az_mode,
             cache_node_type=self.elasticache_cluster_cache_node_type_param.value_as_string,
+            cache_parameter_group_name=self.elasticache_parameter_group.ref,
             cache_subnet_group_name=self.elasticache_subnet_group.ref,
             engine=self.engine,
             engine_version=self.engine_version,
@@ -154,11 +166,13 @@ class ElasticacheMemcached(ElasticacheCluster):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
+            custom_parameters: dict = {},
             default_instance_type: str = 'cache.t3.micro',
             **props):
 
         self.engine = "memcached"
         self.engine_version = "1.6.6"
+        self.parameter_group_family = "memcached1.6"
         self.port = 11211
 
         super().__init__(
@@ -166,6 +180,7 @@ class ElasticacheMemcached(ElasticacheCluster):
             id,
             vpc=vpc,
             allowed_instance_types=allowed_instance_types,
+            custom_parameters=custom_parameters,
             default_instance_type=default_instance_type,
             **props)
 
@@ -176,11 +191,13 @@ class ElasticacheRedis(ElasticacheCluster):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
+            custom_parameters: dict = {},
             default_instance_type: str = 'cache.t3.micro',
             **props):
 
         self.engine = "redis"
         self.engine_version = "6.2"
+        self.parameter_group_family = "redis6.x"
         self.port = 6379
 
         super().__init__(
@@ -188,5 +205,6 @@ class ElasticacheRedis(ElasticacheCluster):
             id,
             vpc=vpc,
             allowed_instance_types=allowed_instance_types,
+            custom_parameters=custom_parameters,
             default_instance_type=default_instance_type,
             **props)
