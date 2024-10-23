@@ -15,8 +15,8 @@ class ElasticacheCluster(Construct):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
-            default_instance_type: str = 'cache.t4g.micro',
             custom_parameters: dict = {},
+            default_instance_type: str = 'cache.t4g.micro',
             **props):
         super().__init__(scope, id, **props)
 
@@ -166,6 +166,7 @@ class ElasticacheMemcached(ElasticacheCluster):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
+            custom_parameters: dict = {},
             default_instance_type: str = 'cache.t3.micro',
             **props):
 
@@ -179,6 +180,7 @@ class ElasticacheMemcached(ElasticacheCluster):
             id,
             vpc=vpc,
             allowed_instance_types=allowed_instance_types,
+            custom_parameters=custom_parameters,
             default_instance_type=default_instance_type,
             **props)
 
@@ -189,6 +191,7 @@ class ElasticacheRedis(ElasticacheCluster):
             id: str,
             vpc: Vpc,
             allowed_instance_types: 'list[str]' = [],
+            custom_parameters: dict = {},
             default_instance_type: str = 'cache.t3.micro',
             **props):
 
@@ -202,5 +205,6 @@ class ElasticacheRedis(ElasticacheCluster):
             id,
             vpc=vpc,
             allowed_instance_types=allowed_instance_types,
+            custom_parameters=custom_parameters,
             default_instance_type=default_instance_type,
             **props)
