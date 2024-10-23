@@ -1,5 +1,7 @@
 # Unreleased
 
+* Adding custom_params arg to ElastiCache to set custom parameters
+
 # 4.0.1
 
 * Pass IamRole in UserData variables
