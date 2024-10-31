@@ -34,13 +34,19 @@ class Dns(Construct):
             description="Required: The hostname to access the service. E.G. 'app.internal.mycompany.com'. Must be within the Hosted Zone specified."
         )
         self.hostname_param.override_logical_id(f"{id}Hostname")
+
+
+        #
+        # OUTPUTS
+        #
+
         self.site_url_output = CfnOutput(
             self,
             "SiteUrlOutput",
             description="The URL Endpoint",
             value="https://{}".format(self.hostname_param.value_as_string)
         )
-        self.site_url_output.override_logical_id(f"{self.id}SiteUrlOutput")
+        self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
 
     def add_alb(self, alb):
         # route 53
