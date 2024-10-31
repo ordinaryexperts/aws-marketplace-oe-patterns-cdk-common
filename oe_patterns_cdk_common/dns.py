@@ -34,6 +34,13 @@ class Dns(Construct):
             description="Required: The hostname to access the service. E.G. 'app.internal.mycompany.com'. Must be within the Hosted Zone specified."
         )
         self.hostname_param.override_logical_id(f"{id}Hostname")
+        self.site_url_output = CfnOutput(
+            self,
+            "SiteUrlOutput",
+            description="The URL Endpoint",
+            value="https://{}".format(self.hostname_param.value_as_string)
+        )
+        self.site_url_output.override_logical_id(f"{self.id}SiteUrlOutput")
 
     def add_alb(self, alb):
         # route 53
@@ -54,13 +61,6 @@ class Dns(Construct):
             ]
         )
         self.record_set.override_logical_id(f"{self.id}RecordSetGroup")
-        self.site_url_output = CfnOutput(
-            self,
-            "SiteUrlOutput",
-            description="The URL Endpoint",
-            value="https://{}".format(self.hostname_param.value_as_string)
-        )
-        self.site_url_output.override_logical_id(f"{self.id}SiteUrlOutput")
 
     def metadata_parameter_group(self):
         return [

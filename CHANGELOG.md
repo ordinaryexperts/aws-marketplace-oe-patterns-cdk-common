@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.1.1
+
+* Always include SiteUrlOutput in Dns construct
+
 # 4.1.0
 
 * Adding custom_parameters arg to ElastiCache to set custom parameters
