@@ -35,6 +35,19 @@ class Dns(Construct):
         )
         self.hostname_param.override_logical_id(f"{id}Hostname")
 
+
+        #
+        # OUTPUTS
+        #
+
+        self.site_url_output = CfnOutput(
+            self,
+            "SiteUrlOutput",
+            description="The URL Endpoint",
+            value="https://{}".format(self.hostname_param.value_as_string)
+        )
+        self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
+
     def add_alb(self, alb):
         # route 53
         self.record_set = aws_route53.CfnRecordSetGroup(
@@ -54,13 +67,6 @@ class Dns(Construct):
             ]
         )
         self.record_set.override_logical_id(f"{self.id}RecordSetGroup")
-        self.site_url_output = CfnOutput(
-            self,
-            "SiteUrlOutput",
-            description="The URL Endpoint",
-            value="https://{}".format(self.hostname_param.value_as_string)
-        )
-        self.site_url_output.override_logical_id(f"{self.id}SiteUrlOutput")
 
     def metadata_parameter_group(self):
         return [
