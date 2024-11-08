@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.1.2
+
+* Fix IMDSv2 issue with EBS script
+
 # 4.1.1
 
 * Always include SiteUrlOutput in Dns construct

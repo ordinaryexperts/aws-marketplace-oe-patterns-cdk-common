@@ -4,7 +4,8 @@ function error_exit
   cfn-signal --exit-code 1 --stack ${AWS::StackName} --resource ${AsgId} --region ${AWS::Region}
   exit 1
 }
-instance_id=`curl http://169.254.169.254/latest/meta-data/instance-id`
+token=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+instance_id=$(curl -H "X-aws-ec2-metadata-token: $token" -s http://169.254.169.254/latest/meta-data/instance-id)
 max_attach_tries=12
 attach_tries=0
 success=1
