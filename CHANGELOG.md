@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.1.3
+
+* Use OpenSearchServiceEbsVolumeSize during OpenSearch domain creation
+
 # 4.1.2
 
 * Fix IMDSv2 issue with EBS script
