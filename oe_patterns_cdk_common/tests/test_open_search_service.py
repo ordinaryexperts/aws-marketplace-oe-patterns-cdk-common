@@ -14,3 +14,16 @@ def test_open_search_service():
   # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
 
   template.resource_count_is("AWS::OpenSearchService::Domain", 1)
+
+def test_open_search_service_ebs_volume_size():
+  stack = Stack()
+  vpc = Vpc(stack, "TestVpc")
+  OpenSearchService(stack, "TestOpenSearchService", vpc=vpc)
+  template = assertions.Template.from_stack(stack)
+  # import json; print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+
+  domain = template.find_resources('AWS::OpenSearchService::Domain')
+
+  assert domain['TestOpenSearchServiceDomain']['Properties']['EBSOptions']['VolumeSize'] == {
+    'Ref': 'TestOpenSearchServiceEbsVolumeSize'
+  }

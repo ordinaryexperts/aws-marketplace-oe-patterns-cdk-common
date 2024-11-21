@@ -195,7 +195,7 @@ class OpenSearchService(Construct):
             ),
             ebs_options=aws_opensearchservice.CfnDomain.EBSOptionsProperty(
                 ebs_enabled=True,
-                volume_size=10,
+                volume_size=self.open_search_service_ebs_volume_size_param.value_as_number,
                 volume_type="gp3"
             ),
             encryption_at_rest_options=aws_opensearchservice.CfnDomain.EncryptionAtRestOptionsProperty(
