@@ -129,7 +129,7 @@ class RabbitMQ(AmazonMQ):
             **props):
 
         self.engine_type = "RABBITMQ"
-        self.engine_version = "3.10.20"
+        self.engine_version = "3.13"
         self.port = 5671
 
         super().__init__(
