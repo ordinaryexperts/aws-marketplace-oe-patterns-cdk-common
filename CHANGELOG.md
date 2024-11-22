@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.1.4
+
+* Update RabbitMQ engine_version to 3.13
+
 # 4.1.3
 
 * Use OpenSearchServiceEbsVolumeSize during OpenSearch domain creation
