@@ -48,7 +48,7 @@ class Dns(Construct):
         )
         self.site_url_output.override_logical_id(f"{id}SiteUrlOutput")
 
-    def add_alb(self, alb):
+    def add_alb(self, alb, add_wildcard=False):
         # route 53
         self.record_set = aws_route53.CfnRecordSetGroup(
             self,
@@ -67,6 +67,25 @@ class Dns(Construct):
             ]
         )
         self.record_set.override_logical_id(f"{self.id}RecordSetGroup")
+        if add_wildcard:
+            self.subdomain_record_set = aws_route53.CfnRecordSetGroup(
+                self,
+                "SubdomainRecordSetGroup",
+                hosted_zone_name=f"{self.route_53_hosted_zone_name_param.value_as_string}.",
+                comment=self.hostname_param.value_as_string,
+                record_sets=[
+                    aws_route53.CfnRecordSetGroup.RecordSetProperty(
+                        name=f"*.{self.hostname_param.value_as_string}.",
+                        type="A",
+                        alias_target=aws_route53.CfnRecordSetGroup.AliasTargetProperty(
+                            dns_name=alb.alb.attr_dns_name,
+                            hosted_zone_id=alb.alb.attr_canonical_hosted_zone_id
+                        )
+                    )
+                ]
+            )
+            self.subdomain_record_set.override_logical_id(f"{self.id}SubdomainRecordSetGroup")
+
 
     def metadata_parameter_group(self):
         return [
