@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.1.5
+
+* Add add_wildcard param to add_alb in dns.py
+
 # 4.1.4
 
 * Update RabbitMQ engine_version to 3.13
