@@ -1,5 +1,10 @@
 # Unreleased
 
+# 4.1.6
+
+* Add multi-attach support to EBS volume
+* Add DeletionPolicy: Snapshot to EBS volume
+
 # 4.1.5
 
 * Add add_wildcard param to add_alb in dns.py
