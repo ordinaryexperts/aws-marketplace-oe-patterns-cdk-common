@@ -70,7 +70,6 @@ class Asg(Construct):
             singleton: bool = False,
             use_data_volume: bool = False,
             use_graviton: bool = True,
-            use_multi_attach: bool = False,
             use_public_subnets: bool = False,
             user_data_contents: str = None,
             user_data_variables: dict = {},
@@ -433,7 +432,6 @@ class Asg(Construct):
                 "AsgDataVolume",
                 availability_zone=Token.as_string(self.subnet_to_az_custom_resource.get_att('az')),
                 encrypted=True,
-                multi_attach_enabled=True,
                 snapshot_id=Token.as_string(
                     Fn.condition_if(
                         self.data_volume_snapshot_condition.logical_id,
@@ -442,7 +440,7 @@ class Asg(Construct):
                     )
                 ),
                 size=self.data_volume_size_param.value_as_number,
-                volume_type='io2'
+                volume_type='gp3'
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
             self.data_volume.cfn_options.deletion_policy = CfnDeletionPolicy.SNAPSHOT
@@ -520,13 +518,6 @@ class Asg(Construct):
             subnets = vpc.public_subnet_ids() if use_public_subnets else vpc.private_subnet_ids()
 
         # autoscaling
-        if singleton:
-            max_size = "2" if use_multi_attach else "1"
-            min_size = "1"
-        else:
-            max_size = Token.as_string(self.max_size_param.value)
-            min_size = Token.as_string(self.min_size_param.value)
-
         self.asg = aws_autoscaling.CfnAutoScalingGroup(
             self,
             "Asg",
@@ -536,8 +527,8 @@ class Asg(Construct):
             ),
             desired_capacity="1" if singleton else Token.as_string(self.desired_capacity_param.value),
             health_check_type=health_check_type,
-            max_size=max_size,
-            min_size=min_size,
+            max_size="1" if singleton else Token.as_string(self.max_size_param.value),
+            min_size="1" if singleton else Token.as_string(self.min_size_param.value),
             vpc_zone_identifier=subnets
         )
         self.asg.override_logical_id(id)
@@ -548,11 +539,10 @@ class Asg(Construct):
             )
         )
         if singleton:
-            min_instances_in_service = 1 if use_multi_attach else 0
             self.asg.cfn_options.update_policy=CfnUpdatePolicy(
                 auto_scaling_rolling_update=CfnAutoScalingRollingUpdate(
                     max_batch_size=1,
-                    min_instances_in_service=min_instances_in_service,
+                    min_instances_in_service=0,
                     pause_time=f"PT{create_and_update_timeout_minutes}M",
                     wait_on_resource_signals=True
                 )
