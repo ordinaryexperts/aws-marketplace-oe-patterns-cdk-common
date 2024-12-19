@@ -1,5 +1,12 @@
 # Unreleased
 
+# 4.1.6
+
+* Change EBS volume type to gp3
+* Add DeletionPolicy: Snapshot to EBS volume
+* Add UpdateReplacePolicy: Snapshot to EBS volume
+* Encrypt EBS volume
+
 # 4.1.5
 
 * Add add_wildcard param to add_alb in dns.py

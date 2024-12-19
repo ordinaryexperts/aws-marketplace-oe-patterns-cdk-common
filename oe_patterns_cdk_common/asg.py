@@ -431,6 +431,7 @@ class Asg(Construct):
                 self,
                 "AsgDataVolume",
                 availability_zone=Token.as_string(self.subnet_to_az_custom_resource.get_att('az')),
+                encrypted=True,
                 snapshot_id=Token.as_string(
                     Fn.condition_if(
                         self.data_volume_snapshot_condition.logical_id,
@@ -438,10 +439,12 @@ class Asg(Construct):
                         Aws.NO_VALUE
                     )
                 ),
-                encrypted=True,
-                size=self.data_volume_size_param.value_as_number
+                size=self.data_volume_size_param.value_as_number,
+                volume_type='gp3'
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
+            self.data_volume.cfn_options.deletion_policy = CfnDeletionPolicy.SNAPSHOT
+            self.data_volume.cfn_options.update_replace_policy = CfnDeletionPolicy.SNAPSHOT
 
         user_data = None
         if use_data_volume:
