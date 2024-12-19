@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.1.7
+
+* Automatically extend EBS volume when size changes
+
 # 4.1.6
 
 * Change EBS volume type to gp3
