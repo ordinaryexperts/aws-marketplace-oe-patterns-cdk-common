@@ -464,7 +464,7 @@ class Asg(Construct):
             self.asg_data_volume_backup_vault = aws_backup.CfnBackupVault(
                 self,
                 "AsgDataVolumeBackupVault",
-                backup_vault_name=f"{Aws.STACK_NAME}-vault"
+                backup_vault_name=f"{Aws.STACK_NAME}-backup-vault"
             )
             self.asg_data_volume_backup_vault.override_logical_id(f"{id}DataVolumeBackupVault")
 
@@ -472,10 +472,10 @@ class Asg(Construct):
                 self,
                 "AsgDataVolumeBackupPlan",
                 backup_plan=aws_backup.CfnBackupPlan.BackupPlanResourceTypeProperty(
-                    backup_plan_name=f"{Aws.STACK_NAME}-plan",
+                    backup_plan_name=f"{Aws.STACK_NAME}-backup-plan",
                     backup_plan_rule=[
                         aws_backup.CfnBackupPlan.BackupRuleResourceTypeProperty(
-                            rule_name=f"{Aws.STACK_NAME}-rule",
+                            rule_name=f"{Aws.STACK_NAME}-backup-rule",
                             schedule_expression=aws_events.Schedule.cron(hour="3", minute="0").expression_string,
                             target_backup_vault=self.asg_data_volume_backup_vault.ref,
                             lifecycle=aws_backup.CfnBackupPlan.LifecycleResourceTypeProperty(
@@ -494,7 +494,7 @@ class Asg(Construct):
                 backup_plan_id=self.asg_data_volume_backup_plan.ref,
                 backup_selection=aws_backup.CfnBackupSelection.BackupSelectionResourceTypeProperty(
                     iam_role_arn=f"arn:aws:iam::{Aws.ACCOUNT_ID}:role/service-role/AWSBackupDefaultServiceRole",
-                    selection_name=f"{Aws.STACK_NAME}-selection",
+                    selection_name=f"{Aws.STACK_NAME}-backup-selection",
                     resources=[volume_arn]
                 )
             )
