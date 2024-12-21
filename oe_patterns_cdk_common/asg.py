@@ -1,7 +1,9 @@
 from aws_cdk import (
     Aws,
     aws_autoscaling,
+    aws_backup,
     aws_ec2,
+    aws_events,
     aws_iam,
     aws_lambda,
     aws_logs,
@@ -13,6 +15,7 @@ from aws_cdk import (
     CfnDeletionPolicy,
     CfnParameter,
     CfnResourceSignal,
+    CfnTag,
     CfnUpdatePolicy,
     CustomResource,
     Duration,
@@ -440,11 +443,62 @@ class Asg(Construct):
                     )
                 ),
                 size=self.data_volume_size_param.value_as_number,
-                volume_type='gp3'
+                volume_type='gp3',
+                tags=[CfnTag(key='Name', value=f"{Aws.STACK_NAME}-pds")]
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
             self.data_volume.cfn_options.deletion_policy = CfnDeletionPolicy.SNAPSHOT
             self.data_volume.cfn_options.update_replace_policy = CfnDeletionPolicy.SNAPSHOT
+
+            self.asg_data_volume_backup_retention_period_param = CfnParameter(
+                self,
+                "AsgDataVolumeBackupRetentionPeriod",
+                type="Number",
+                min_value=1,
+                max_value=35,
+                default="7",
+                description="Required: The number of nightly EBS snapshots to retain."
+            )
+            self.asg_data_volume_backup_retention_period_param.override_logical_id(f"{id}DataVolumeBackupRetentionPeriod")
+
+            self.asg_data_volume_backup_vault = aws_backup.CfnBackupVault(
+                self,
+                "AsgDataVolumeBackupVault",
+                backup_vault_name=f"{Aws.STACK_NAME}-vault"
+            )
+            self.asg_data_volume_backup_vault.override_logical_id(f"{id}DataVolumeBackupVault")
+
+            self.asg_data_volume_backup_plan = aws_backup.CfnBackupPlan(
+                self,
+                "AsgDataVolumeBackupPlan",
+                backup_plan=aws_backup.CfnBackupPlan.BackupPlanResourceTypeProperty(
+                    backup_plan_name=f"{Aws.STACK_NAME}-plan",
+                    backup_plan_rule=[
+                        aws_backup.CfnBackupPlan.BackupRuleResourceTypeProperty(
+                            rule_name=f"{Aws.STACK_NAME}-rule",
+                            schedule_expression=aws_events.Schedule.cron(hour="3", minute="0").expression_string,
+                            target_backup_vault=self.asg_data_volume_backup_vault.ref,
+                            lifecycle=aws_backup.CfnBackupPlan.LifecycleResourceTypeProperty(
+                                delete_after_days=self.asg_data_volume_backup_retention_period_param.value_as_number
+                            )
+                        )
+                    ]
+                )
+            )
+            self.asg_data_volume_backup_plan.override_logical_id(f"{id}DataVolumeBackupPlan")
+                                      
+            volume_arn = f"arn:aws:ec2:{Aws.REGION}:{Aws.ACCOUNT_ID}:volume/{self.data_volume.ref}"
+            self.asg_data_volume_backup_selection = aws_backup.CfnBackupSelection(
+                self,
+                "AsgDataVolumeBackupSelection",
+                backup_plan_id=self.asg_data_volume_backup_plan.ref,
+                backup_selection=aws_backup.CfnBackupSelection.BackupSelectionResourceTypeProperty(
+                    iam_role_arn=f"arn:aws:iam::{Aws.ACCOUNT_ID}:role/service-role/AWSBackupDefaultServiceRole",
+                    selection_name=f"{Aws.STACK_NAME}-selection",
+                    resources=[volume_arn]
+                )
+            )
+            self.asg_data_volume_backup_selection.override_logical_id(f"{id}DataVolumeBackupSelection")
 
         user_data = None
         if use_data_volume:

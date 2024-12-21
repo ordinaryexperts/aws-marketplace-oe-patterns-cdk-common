@@ -3,6 +3,7 @@
 # 4.1.7
 
 * Automatically extend EBS volume when size changes
+* Add AWS Backup support to EBS volume
 
 # 4.1.6
 
