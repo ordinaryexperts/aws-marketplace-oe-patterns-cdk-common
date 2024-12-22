@@ -4,6 +4,7 @@
 
 * Automatically extend EBS volume when size changes
 * Add AWS Backup support to EBS volume
+* Add CloudWatch alarm support to root and data volumes
 
 # 4.1.6
 

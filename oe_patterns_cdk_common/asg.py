@@ -2,6 +2,7 @@ from aws_cdk import (
     Aws,
     aws_autoscaling,
     aws_backup,
+    aws_cloudwatch,
     aws_ec2,
     aws_events,
     aws_iam,
@@ -66,6 +67,7 @@ class Asg(Construct):
             excluded_instance_families: 'list[str]' = [],
             excluded_instance_sizes: 'list[str]' = [],
             health_check_type: str = 'EC2',
+            notification_topic_arn: str = None,
             pipeline_bucket_arn: str = None,
             root_volume_device_name: str = "/dev/sda1",
             root_volume_size: int = 0,
@@ -620,6 +622,50 @@ class Asg(Construct):
                     )
                 )
         Tags.of(self.asg).add("Name", "{}/Asg".format(Aws.STACK_NAME))
+
+        if notification_topic_arn:
+            actions=[notification_topic_arn]
+        else:
+            actions=None
+        self.root_disk_alarm = aws_cloudwatch.CfnAlarm(
+            self,
+            "AsgRootDiskAlarm",
+            namespace="CWAgent",
+            metric_name="disk_used_percent",
+            dimensions=[
+                {"name": "AutoScalingGroupName", "value": self.asg.ref },
+                {"name": "fstype", "value": "ext4"},
+                {"name": "path", "value": "/"}
+            ],
+            statistic="Average",
+            period=300,
+            evaluation_periods=1,
+            threshold=80,
+            alarm_actions=actions,
+            comparison_operator="GreaterThanThreshold"
+        )
+        self.root_disk_alarm.override_logical_id(f"{id}RootDiskAlarm")
+
+        if use_data_volume:
+            self.data_disk_alarm = aws_cloudwatch.CfnAlarm(
+                self,
+                "AsgDataDiskAlarm",
+                namespace="CWAgent",
+                metric_name="disk_used_percent",
+                dimensions=[
+                    {"name": "AutoScalingGroupName", "value": self.asg.ref },
+                    {"name": "fstype", "value": "xfs"},
+                    {"name": "path", "value": "/data"}
+                ],
+                statistic="Average",
+                period=300,
+                evaluation_periods=1,
+                threshold=80,
+                alarm_actions=actions,
+                comparison_operator="GreaterThanThreshold"
+            )
+            self.data_disk_alarm.override_logical_id(f"{id}DataDiskAlarm")
+
 
     def metadata_parameter_group(self):
         params = [
