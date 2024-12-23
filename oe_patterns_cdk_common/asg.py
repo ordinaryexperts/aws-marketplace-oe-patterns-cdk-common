@@ -672,7 +672,7 @@ class Asg(Construct):
                 statistic="Average",
                 period=300,
                 evaluation_periods=1,
-                threshold=80,
+                threshold=self.disk_usage_alarm_threshold_param.value_as_number,
                 alarm_actions=actions,
                 ok_actions=actions,
                 comparison_operator="GreaterThanThreshold"
