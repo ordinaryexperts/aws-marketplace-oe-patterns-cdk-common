@@ -642,6 +642,7 @@ class Asg(Construct):
             evaluation_periods=1,
             threshold=80,
             alarm_actions=actions,
+            ok_actions=actions,
             comparison_operator="GreaterThanThreshold"
         )
         self.root_disk_alarm.override_logical_id(f"{id}RootDiskAlarm")
@@ -662,6 +663,7 @@ class Asg(Construct):
                 evaluation_periods=1,
                 threshold=80,
                 alarm_actions=actions,
+                ok_actions=actions,
                 comparison_operator="GreaterThanThreshold"
             )
             self.data_disk_alarm.override_logical_id(f"{id}DataDiskAlarm")
