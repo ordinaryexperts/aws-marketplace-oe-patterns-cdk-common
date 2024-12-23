@@ -369,6 +369,17 @@ class Asg(Construct):
         )
         self.ec2_instance_profile.override_logical_id(f"{id}InstanceProfile")
 
+        self.disk_usage_alarm_threshold_param = CfnParameter(
+            self,
+            "AsgDiskUsageAlarmThreshold",
+            default=80,
+            description="Required: The alarm threshold for disk usage percentage.",
+            min_value=0,
+            max_value=100,
+            type="Number"
+        )
+        self.disk_usage_alarm_threshold_param.override_logical_id(f"{id}DiskUsageAlarmThreshold")
+
         # data volume
         if use_data_volume:
             # lambda to find az from subnet
@@ -640,7 +651,7 @@ class Asg(Construct):
             statistic="Average",
             period=300,
             evaluation_periods=1,
-            threshold=80,
+            threshold=self.disk_usage_alarm_threshold_param.value_as_number,
             alarm_actions=actions,
             ok_actions=actions,
             comparison_operator="GreaterThanThreshold"
@@ -705,6 +716,9 @@ class Asg(Construct):
             },
             self.reprovision_string_param.logical_id: {
                 "default": "Auto Scaling Group Reprovision String"
+            },
+            self.disk_usage_alarm_threshold_param.logical_id: {
+                "default": "Percent Disk Used Alarm Threshold"
             }
         }
         if not self._singleton:
