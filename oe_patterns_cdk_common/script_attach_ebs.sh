@@ -35,10 +35,11 @@ if [ -e /dev/nvme1n1 ]; then
   DEVICE=/dev/nvme1n1
 fi
 echo $DEVICE
-file -s $DEVICE | grep -v xfs &> /dev/null
+file -s $DEVICE | grep -iv xfs &> /dev/null
 if [ $? == 0 ]; then
   mkfs -t xfs $DEVICE
 fi
 mkdir -p /data
 mount $DEVICE /data
 echo "$DEVICE /data xfs defaults,nofail 0 2" >> /etc/fstab
+xfs_growfs -d /data

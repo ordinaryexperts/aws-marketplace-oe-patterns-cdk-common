@@ -1,7 +1,10 @@
 from aws_cdk import (
     Aws,
     aws_autoscaling,
+    aws_backup,
+    aws_cloudwatch,
     aws_ec2,
+    aws_events,
     aws_iam,
     aws_lambda,
     aws_logs,
@@ -13,6 +16,7 @@ from aws_cdk import (
     CfnDeletionPolicy,
     CfnParameter,
     CfnResourceSignal,
+    CfnTag,
     CfnUpdatePolicy,
     CustomResource,
     Duration,
@@ -63,6 +67,7 @@ class Asg(Construct):
             excluded_instance_families: 'list[str]' = [],
             excluded_instance_sizes: 'list[str]' = [],
             health_check_type: str = 'EC2',
+            notification_topic_arn: str = None,
             pipeline_bucket_arn: str = None,
             root_volume_device_name: str = "/dev/sda1",
             root_volume_size: int = 0,
@@ -364,6 +369,17 @@ class Asg(Construct):
         )
         self.ec2_instance_profile.override_logical_id(f"{id}InstanceProfile")
 
+        self.disk_usage_alarm_threshold_param = CfnParameter(
+            self,
+            "AsgDiskUsageAlarmThreshold",
+            default=80,
+            description="Required: The alarm threshold for disk usage percentage.",
+            min_value=0,
+            max_value=100,
+            type="Number"
+        )
+        self.disk_usage_alarm_threshold_param.override_logical_id(f"{id}DiskUsageAlarmThreshold")
+
         # data volume
         if use_data_volume:
             # lambda to find az from subnet
@@ -440,11 +456,62 @@ class Asg(Construct):
                     )
                 ),
                 size=self.data_volume_size_param.value_as_number,
-                volume_type='gp3'
+                volume_type='gp3',
+                tags=[CfnTag(key='Name', value=f"{Aws.STACK_NAME}-pds")]
             )
             self.data_volume.override_logical_id(f"{id}DataVolume")
             self.data_volume.cfn_options.deletion_policy = CfnDeletionPolicy.SNAPSHOT
             self.data_volume.cfn_options.update_replace_policy = CfnDeletionPolicy.SNAPSHOT
+
+            self.asg_data_volume_backup_retention_period_param = CfnParameter(
+                self,
+                "AsgDataVolumeBackupRetentionPeriod",
+                type="Number",
+                min_value=1,
+                max_value=35,
+                default="7",
+                description="Required: The number of nightly EBS snapshots to retain."
+            )
+            self.asg_data_volume_backup_retention_period_param.override_logical_id(f"{id}DataVolumeBackupRetentionPeriod")
+
+            self.asg_data_volume_backup_vault = aws_backup.CfnBackupVault(
+                self,
+                "AsgDataVolumeBackupVault",
+                backup_vault_name=f"{Aws.STACK_NAME}-backup-vault"
+            )
+            self.asg_data_volume_backup_vault.override_logical_id(f"{id}DataVolumeBackupVault")
+
+            self.asg_data_volume_backup_plan = aws_backup.CfnBackupPlan(
+                self,
+                "AsgDataVolumeBackupPlan",
+                backup_plan=aws_backup.CfnBackupPlan.BackupPlanResourceTypeProperty(
+                    backup_plan_name=f"{Aws.STACK_NAME}-backup-plan",
+                    backup_plan_rule=[
+                        aws_backup.CfnBackupPlan.BackupRuleResourceTypeProperty(
+                            rule_name=f"{Aws.STACK_NAME}-backup-rule",
+                            schedule_expression=aws_events.Schedule.cron(hour="3", minute="0").expression_string,
+                            target_backup_vault=self.asg_data_volume_backup_vault.ref,
+                            lifecycle=aws_backup.CfnBackupPlan.LifecycleResourceTypeProperty(
+                                delete_after_days=self.asg_data_volume_backup_retention_period_param.value_as_number
+                            )
+                        )
+                    ]
+                )
+            )
+            self.asg_data_volume_backup_plan.override_logical_id(f"{id}DataVolumeBackupPlan")
+                                      
+            volume_arn = f"arn:aws:ec2:{Aws.REGION}:{Aws.ACCOUNT_ID}:volume/{self.data_volume.ref}"
+            self.asg_data_volume_backup_selection = aws_backup.CfnBackupSelection(
+                self,
+                "AsgDataVolumeBackupSelection",
+                backup_plan_id=self.asg_data_volume_backup_plan.ref,
+                backup_selection=aws_backup.CfnBackupSelection.BackupSelectionResourceTypeProperty(
+                    iam_role_arn=f"arn:aws:iam::{Aws.ACCOUNT_ID}:role/service-role/AWSBackupDefaultServiceRole",
+                    selection_name=f"{Aws.STACK_NAME}-backup-selection",
+                    resources=[volume_arn]
+                )
+            )
+            self.asg_data_volume_backup_selection.override_logical_id(f"{id}DataVolumeBackupSelection")
 
         user_data = None
         if use_data_volume:
@@ -567,6 +634,52 @@ class Asg(Construct):
                 )
         Tags.of(self.asg).add("Name", "{}/Asg".format(Aws.STACK_NAME))
 
+        if notification_topic_arn:
+            actions=[notification_topic_arn]
+        else:
+            actions=None
+        self.root_disk_alarm = aws_cloudwatch.CfnAlarm(
+            self,
+            "AsgRootDiskAlarm",
+            namespace="CWAgent",
+            metric_name="disk_used_percent",
+            dimensions=[
+                {"name": "AutoScalingGroupName", "value": self.asg.ref },
+                {"name": "fstype", "value": "ext4"},
+                {"name": "path", "value": "/"}
+            ],
+            statistic="Average",
+            period=300,
+            evaluation_periods=1,
+            threshold=self.disk_usage_alarm_threshold_param.value_as_number,
+            alarm_actions=actions,
+            ok_actions=actions,
+            comparison_operator="GreaterThanThreshold"
+        )
+        self.root_disk_alarm.override_logical_id(f"{id}RootDiskAlarm")
+
+        if use_data_volume:
+            self.data_disk_alarm = aws_cloudwatch.CfnAlarm(
+                self,
+                "AsgDataDiskAlarm",
+                namespace="CWAgent",
+                metric_name="disk_used_percent",
+                dimensions=[
+                    {"name": "AutoScalingGroupName", "value": self.asg.ref },
+                    {"name": "fstype", "value": "xfs"},
+                    {"name": "path", "value": "/data"}
+                ],
+                statistic="Average",
+                period=300,
+                evaluation_periods=1,
+                threshold=self.disk_usage_alarm_threshold_param.value_as_number,
+                alarm_actions=actions,
+                ok_actions=actions,
+                comparison_operator="GreaterThanThreshold"
+            )
+            self.data_disk_alarm.override_logical_id(f"{id}DataDiskAlarm")
+
+
     def metadata_parameter_group(self):
         params = [
             self.instance_type_param.logical_id,
@@ -603,6 +716,9 @@ class Asg(Construct):
             },
             self.reprovision_string_param.logical_id: {
                 "default": "Auto Scaling Group Reprovision String"
+            },
+            self.disk_usage_alarm_threshold_param.logical_id: {
+                "default": "Percent Disk Used Alarm Threshold"
             }
         }
         if not self._singleton:
