@@ -519,7 +519,7 @@ class Asg(Construct):
                         aws_backup.CfnBackupPlan.BackupRuleResourceTypeProperty(
                             rule_name=f"{Aws.STACK_NAME}-backup-rule",
                             schedule_expression=aws_events.Schedule.cron(hour="3", minute="0").expression_string,
-                            target_backup_vault=self.data_volume_backup_vault.ref,
+                            target_backup_vault=self.data_volume_backup_vault_arn(),
                             lifecycle=aws_backup.CfnBackupPlan.LifecycleResourceTypeProperty(
                                 delete_after_days=self.data_volume_backup_retention_period_param.value_as_number
                             )
