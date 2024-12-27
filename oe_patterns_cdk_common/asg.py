@@ -499,7 +499,7 @@ class Asg(Construct):
             self.data_volume_backup_vault = aws_backup.CfnBackupVault(
                 self,
                 "AsgDataVolumeBackupVault",
-                backup_vault_name=Util.append_stack_uuid('vault')
+                backup_vault_name=Util.append_stack_uuid('cfn-stack-id')
             )
             self.data_volume_backup_vault.cfn_options.condition = self.data_volume_backup_vault_arn_not_exists_condition
             self.data_volume_backup_vault.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
@@ -507,7 +507,17 @@ class Asg(Construct):
             self.data_volume_backup_vault.override_logical_id(f"{id}DataVolumeBackupVault")
             if notification_topic_arn:
                 self.data_volume_backup_vault.notifications = aws_backup.CfnBackupVault.NotificationObjectTypeProperty(
-                    backup_vault_events=["COPY_JOB_FAILED"],
+                    backup_vault_events=[
+                        "BACKUP_JOB_STARTED",
+                        "BACKUP_JOB_COMPLETED",
+                        "CONTINUOUS_BACKUP_INTERRUPTED",
+                        "COPY_JOB_STARTED",
+                        "COPY_JOB_SUCCESSFUL",
+                        "COPY_JOB_FAILED",
+                        "RESTORE_JOB_STARTED",
+                        "RESTORE_JOB_COMPLETED",
+                        "RECOVERY_POINT_MODIFIED"
+                    ],
                     sns_topic_arn=notification_topic_arn
                 )
 
