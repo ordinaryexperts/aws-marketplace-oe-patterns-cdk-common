@@ -519,7 +519,7 @@ class Asg(Construct):
                         aws_backup.CfnBackupPlan.BackupRuleResourceTypeProperty(
                             rule_name=f"{Aws.STACK_NAME}-backup-rule",
                             schedule_expression=aws_events.Schedule.cron(hour="3", minute="0").expression_string,
-                            target_backup_vault=self.data_volume_backup_vault_arn(),
+                            target_backup_vault=self.data_volume_backup_vault_name(),
                             lifecycle=aws_backup.CfnBackupPlan.LifecycleResourceTypeProperty(
                                 delete_after_days=self.data_volume_backup_retention_period_param.value_as_number
                             )
@@ -708,12 +708,15 @@ class Asg(Construct):
             )
             self.data_disk_alarm.override_logical_id(f"{id}DataDiskAlarm")
 
-    def data_volume_backup_vault_arn(self):
+    def data_volume_backup_vault_name(self):
         if self._use_data_volume:
             return Token.as_string(
                 Fn.condition_if(
                     self.data_volume_backup_vault_arn_exists_condition.logical_id,
-                    self.data_volume_backup_vault_arn_param.value_as_string,
+                    Fn.select(
+                        6,
+                        Fn.split(":", self.data_volume_backup_vault_arn_param.value_as_string)
+                    ),
                     self.data_volume_backup_vault.ref
                 )
             )
