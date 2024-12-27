@@ -508,15 +508,7 @@ class Asg(Construct):
             if notification_topic_arn:
                 self.data_volume_backup_vault.notifications = aws_backup.CfnBackupVault.NotificationObjectTypeProperty(
                     backup_vault_events=[
-                        "BACKUP_JOB_STARTED",
-                        "BACKUP_JOB_COMPLETED",
-                        "CONTINUOUS_BACKUP_INTERRUPTED",
-                        "COPY_JOB_STARTED",
-                        "COPY_JOB_SUCCESSFUL",
-                        "COPY_JOB_FAILED",
-                        "RESTORE_JOB_STARTED",
-                        "RESTORE_JOB_COMPLETED",
-                        "RECOVERY_POINT_MODIFIED"
+                        "BACKUP_JOB_COMPLETED"
                     ],
                     sns_topic_arn=notification_topic_arn
                 )
