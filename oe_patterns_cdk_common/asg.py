@@ -14,6 +14,7 @@ from aws_cdk import (
     CfnCondition,
     CfnCreationPolicy,
     CfnDeletionPolicy,
+    CfnOutput,
     CfnParameter,
     CfnResourceSignal,
     CfnTag,
@@ -707,6 +708,30 @@ class Asg(Construct):
                 comparison_operator="GreaterThanThreshold"
             )
             self.data_disk_alarm.override_logical_id(f"{id}DataDiskAlarm")
+
+            #
+            # OUTPUTS
+            #
+
+            self.data_volume_backup_vault_arn_output = CfnOutput(
+                self,
+                "AsgDataVolumeBackupVaultArnOutput",
+                description="The data volume AWS Backup Vault ARN",
+                value=self.data_volume_backup_vault_arn()
+            )
+            self.data_volume_backup_vault_arn_output.override_logical_id(f"{id}DataVolumeBackupVaultArnOutput")
+
+    def data_volume_backup_vault_arn(self):
+        if self._use_data_volume:
+            return Token.as_string(
+                Fn.condition_if(
+                    self.data_volume_backup_vault_arn_exists_condition.logical_id,
+                    self.data_volume_backup_vault_arn_param.value_as_string,
+                    self.data_volume_backup_vault.ref
+                )
+            )
+        else:
+            return None
 
     def data_volume_backup_vault_name(self):
         if self._use_data_volume:
