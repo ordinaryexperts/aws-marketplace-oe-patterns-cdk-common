@@ -4,6 +4,7 @@
 
 * Add AsgDataVolumeBackupVaultArn param to allow existing AWS Backup Vault
 * Change AsgDataVolumeBackupVault deletion policy to RETAIN
+* Add notifications for failed AWS Backup jobs
 
 # 4.1.7
 
