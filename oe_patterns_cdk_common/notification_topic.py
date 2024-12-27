@@ -86,6 +86,12 @@ class NotificationTopic(Construct):
                     effect=aws_iam.Effect.ALLOW,
                     actions=[ "sns:Publish" ],
                     resources=[ self.notification_topic_arn() ]
+                ),
+                aws_iam.PolicyStatement(
+                    effect=aws_iam.Effect.ALLOW,
+                    principals=[ aws_iam.ServicePrincipal("backup.amazonaws.com") ],
+                    actions=[ "sns:Publish" ],
+                    resources=[ self.notification_topic_arn() ]
                 )
             ]
         )
