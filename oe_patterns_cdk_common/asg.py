@@ -505,13 +505,6 @@ class Asg(Construct):
             self.data_volume_backup_vault.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
             self.data_volume_backup_vault.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
             self.data_volume_backup_vault.override_logical_id(f"{id}DataVolumeBackupVault")
-            if notification_topic_arn:
-                self.data_volume_backup_vault.notifications = aws_backup.CfnBackupVault.NotificationObjectTypeProperty(
-                    backup_vault_events=[
-                        "BACKUP_JOB_COMPLETED"
-                    ],
-                    sns_topic_arn=notification_topic_arn
-                )
 
             self.data_volume_backup_plan = aws_backup.CfnBackupPlan(
                 self,
