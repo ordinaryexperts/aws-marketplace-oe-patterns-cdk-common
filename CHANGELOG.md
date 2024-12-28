@@ -1,5 +1,10 @@
 # Unreleased
 
+# 4.1.8
+
+* Add AsgDataVolumeBackupVaultArn param to allow existing AWS Backup Vault
+* Change AsgDataVolumeBackupVault deletion policy to RETAIN
+
 # 4.1.7
 
 * Automatically extend EBS volume when size changes

@@ -14,6 +14,7 @@ from aws_cdk import (
     CfnCondition,
     CfnCreationPolicy,
     CfnDeletionPolicy,
+    CfnOutput,
     CfnParameter,
     CfnResourceSignal,
     CfnTag,
@@ -463,7 +464,7 @@ class Asg(Construct):
             self.data_volume.cfn_options.deletion_policy = CfnDeletionPolicy.SNAPSHOT
             self.data_volume.cfn_options.update_replace_policy = CfnDeletionPolicy.SNAPSHOT
 
-            self.asg_data_volume_backup_retention_period_param = CfnParameter(
+            self.data_volume_backup_retention_period_param = CfnParameter(
                 self,
                 "AsgDataVolumeBackupRetentionPeriod",
                 type="Number",
@@ -472,16 +473,40 @@ class Asg(Construct):
                 default="7",
                 description="Required: The number of nightly EBS snapshots to retain."
             )
-            self.asg_data_volume_backup_retention_period_param.override_logical_id(f"{id}DataVolumeBackupRetentionPeriod")
+            self.data_volume_backup_retention_period_param.override_logical_id(f"{id}DataVolumeBackupRetentionPeriod")
 
-            self.asg_data_volume_backup_vault = aws_backup.CfnBackupVault(
+            self.data_volume_backup_vault_arn_param = CfnParameter(
+                self,
+                "AsgDataVolumeBackupVaultArn",
+                default="",
+                description="Optional: An AWS Backup Vault ARN to use for storing EBS backups. If not specified, a vault will be created."
+            )
+            self.data_volume_backup_vault_arn_param.override_logical_id(f"{id}DataVolumeBackupVaultArn")
+
+            self.data_volume_backup_vault_arn_exists_condition = CfnCondition(
+                self,
+                "AsgDataVolumeBackupVaultArnExistsCondition",
+                expression=Fn.condition_not(Fn.condition_equals(self.data_volume_backup_vault_arn_param.value, ""))
+            )
+            self.data_volume_backup_vault_arn_exists_condition.override_logical_id(f"{id}DataVolumeBackupVaultArnExistsCondition")
+            self.data_volume_backup_vault_arn_not_exists_condition = CfnCondition(
+                self,
+                "AsgDataVolumeBackupVaultArnNotExistsCondition",
+                expression=Fn.condition_equals(self.data_volume_backup_vault_arn_param.value, "")
+            )
+            self.data_volume_backup_vault_arn_not_exists_condition.override_logical_id(f"{id}DataVolumeBackupVaultArnNotExistsCondition")
+
+            self.data_volume_backup_vault = aws_backup.CfnBackupVault(
                 self,
                 "AsgDataVolumeBackupVault",
-                backup_vault_name=f"{Aws.STACK_NAME}-backup-vault"
+                backup_vault_name=Util.append_stack_uuid('cfn-stack-id')
             )
-            self.asg_data_volume_backup_vault.override_logical_id(f"{id}DataVolumeBackupVault")
+            self.data_volume_backup_vault.cfn_options.condition = self.data_volume_backup_vault_arn_not_exists_condition
+            self.data_volume_backup_vault.cfn_options.deletion_policy = CfnDeletionPolicy.RETAIN
+            self.data_volume_backup_vault.cfn_options.update_replace_policy = CfnDeletionPolicy.RETAIN
+            self.data_volume_backup_vault.override_logical_id(f"{id}DataVolumeBackupVault")
 
-            self.asg_data_volume_backup_plan = aws_backup.CfnBackupPlan(
+            self.data_volume_backup_plan = aws_backup.CfnBackupPlan(
                 self,
                 "AsgDataVolumeBackupPlan",
                 backup_plan=aws_backup.CfnBackupPlan.BackupPlanResourceTypeProperty(
@@ -490,28 +515,28 @@ class Asg(Construct):
                         aws_backup.CfnBackupPlan.BackupRuleResourceTypeProperty(
                             rule_name=f"{Aws.STACK_NAME}-backup-rule",
                             schedule_expression=aws_events.Schedule.cron(hour="3", minute="0").expression_string,
-                            target_backup_vault=self.asg_data_volume_backup_vault.ref,
+                            target_backup_vault=self.data_volume_backup_vault_name(),
                             lifecycle=aws_backup.CfnBackupPlan.LifecycleResourceTypeProperty(
-                                delete_after_days=self.asg_data_volume_backup_retention_period_param.value_as_number
+                                delete_after_days=self.data_volume_backup_retention_period_param.value_as_number
                             )
                         )
                     ]
                 )
             )
-            self.asg_data_volume_backup_plan.override_logical_id(f"{id}DataVolumeBackupPlan")
+            self.data_volume_backup_plan.override_logical_id(f"{id}DataVolumeBackupPlan")
                                       
             volume_arn = f"arn:aws:ec2:{Aws.REGION}:{Aws.ACCOUNT_ID}:volume/{self.data_volume.ref}"
-            self.asg_data_volume_backup_selection = aws_backup.CfnBackupSelection(
+            self.data_volume_backup_selection = aws_backup.CfnBackupSelection(
                 self,
                 "AsgDataVolumeBackupSelection",
-                backup_plan_id=self.asg_data_volume_backup_plan.ref,
+                backup_plan_id=self.data_volume_backup_plan.ref,
                 backup_selection=aws_backup.CfnBackupSelection.BackupSelectionResourceTypeProperty(
                     iam_role_arn=f"arn:aws:iam::{Aws.ACCOUNT_ID}:role/service-role/AWSBackupDefaultServiceRole",
                     selection_name=f"{Aws.STACK_NAME}-backup-selection",
                     resources=[volume_arn]
                 )
             )
-            self.asg_data_volume_backup_selection.override_logical_id(f"{id}DataVolumeBackupSelection")
+            self.data_volume_backup_selection.override_logical_id(f"{id}DataVolumeBackupSelection")
 
         user_data = None
         if use_data_volume:
@@ -679,6 +704,44 @@ class Asg(Construct):
             )
             self.data_disk_alarm.override_logical_id(f"{id}DataDiskAlarm")
 
+            #
+            # OUTPUTS
+            #
+
+            self.data_volume_backup_vault_arn_output = CfnOutput(
+                self,
+                "AsgDataVolumeBackupVaultArnOutput",
+                description="The data volume AWS Backup Vault ARN",
+                value=self.data_volume_backup_vault_arn()
+            )
+            self.data_volume_backup_vault_arn_output.override_logical_id(f"{id}DataVolumeBackupVaultArnOutput")
+
+    def data_volume_backup_vault_arn(self):
+        if self._use_data_volume:
+            return Token.as_string(
+                Fn.condition_if(
+                    self.data_volume_backup_vault_arn_exists_condition.logical_id,
+                    self.data_volume_backup_vault_arn_param.value_as_string,
+                    self.data_volume_backup_vault.ref
+                )
+            )
+        else:
+            return None
+
+    def data_volume_backup_vault_name(self):
+        if self._use_data_volume:
+            return Token.as_string(
+                Fn.condition_if(
+                    self.data_volume_backup_vault_arn_exists_condition.logical_id,
+                    Fn.select(
+                        6,
+                        Fn.split(":", self.data_volume_backup_vault_arn_param.value_as_string)
+                    ),
+                    self.data_volume_backup_vault.ref
+                )
+            )
+        else:
+            return None
 
     def metadata_parameter_group(self):
         params = [
