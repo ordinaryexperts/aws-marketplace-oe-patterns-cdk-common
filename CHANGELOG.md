@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.1.9
+
+* Fix metadata for new parameters
+
 # 4.1.8
 
 * Add AsgDataVolumeBackupVaultArn param to allow existing AWS Backup Vault
