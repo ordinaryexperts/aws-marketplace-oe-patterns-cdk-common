@@ -112,4 +112,25 @@ class NotificationTopic(Construct):
             )
         )
 
-        
+    def metadata_parameter_group(self):
+        return [
+            {
+                "Label": {
+                    "default": "Notification Topic Configuration"
+                },
+                "Parameters": [
+                    self.notification_topic_email_param.logical_id,
+                    self.notification_topic_arn_param.logical_id
+                ]
+            }
+        ]
+
+    def metadata_parameter_labels(self):
+        return {
+            self.notification_topic_email_param.logical_id: {
+                "default": "Email Address to be subscribed to Notification Topic"
+            },
+            self.notification_topic_arn_param.logical_id: {
+                "default": "Notification Topic ARN"
+            }
+        }
