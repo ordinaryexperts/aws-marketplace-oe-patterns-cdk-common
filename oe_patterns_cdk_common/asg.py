@@ -759,7 +759,9 @@ class Asg(Construct):
         if self._use_data_volume:
             params += [
                 self.data_volume_size_param.logical_id,
-                self.data_volume_snapshot_param.logical_id
+                self.data_volume_snapshot_param.logical_id,
+                self.data_volume_backup_retention_period_param.logical_id,
+                self.data_volume_backup_vault_arn_param.logical_id
             ]
         return [
             {
@@ -801,17 +803,17 @@ class Asg(Construct):
         if self._use_data_volume:
             params = {
                 **params,
-                self.data_volume_backup_vault_arn_param.logical_id: {
-                    "default": "Auto Scaling Group EBS Backup Vault ARN"
-                },
-                self.data_volume_backup_retention_period_param.logical_id: {
-                    "default": "Auto Scaling Group EBS Backup Retention in Days"
-                },
                 self.data_volume_size_param.logical_id: {
                     "default": "Auto Scaling Group EBS Snapshot Size"
                 },
                 self.data_volume_snapshot_param.logical_id: {
                     "default": "Auto Scaling Group EBS Snapshot ID"
+                },
+                self.data_volume_backup_vault_arn_param.logical_id: {
+                    "default": "Auto Scaling Group EBS Backup Vault ARN"
+                },
+                self.data_volume_backup_retention_period_param.logical_id: {
+                    "default": "Auto Scaling Group EBS Backup Retention in Days"
                 }
             }
         return params
