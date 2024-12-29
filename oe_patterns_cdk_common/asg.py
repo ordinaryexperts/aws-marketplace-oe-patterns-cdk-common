@@ -747,7 +747,8 @@ class Asg(Construct):
         params = [
             self.instance_type_param.logical_id,
             self.key_name_param.logical_id,
-            self.reprovision_string_param.logical_id
+            self.reprovision_string_param.logical_id,
+            self.disk_usage_alarm_threshold_param.logical_id
         ]
         if not self._singleton:
             params += [
@@ -800,6 +801,12 @@ class Asg(Construct):
         if self._use_data_volume:
             params = {
                 **params,
+                self.data_volume_backup_vault_arn_param.logical_id: {
+                    "default": "Auto Scaling Group EBS Backup Vault ARN"
+                },
+                self.data_volume_backup_retention_period_param.logical_id: {
+                    "default": "Auto Scaling Group EBS Backup Retention in Days"
+                },
                 self.data_volume_size_param.logical_id: {
                     "default": "Auto Scaling Group EBS Snapshot Size"
                 },
