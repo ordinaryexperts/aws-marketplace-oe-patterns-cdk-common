@@ -11,7 +11,7 @@ from . import print_resource
 def test_alb():
   stack = Stack()
   vpc = Vpc(stack, "TestVpc")
-  asg = Asg(stack, "TestAsg", vpc=vpc)
+  asg = Asg(stack, "TestAsg", ami_id="test", vpc=vpc)
   Alb(stack, "TestAlb", asg=asg, vpc=vpc)
   template = assertions.Template.from_stack(stack)
   template.has_resource_properties(
@@ -27,7 +27,7 @@ def test_alb():
 def test_alb_http_port():
   stack = Stack()
   vpc = Vpc(stack, "TestVpc")
-  asg = Asg(stack, "TestAsg", vpc=vpc)
+  asg = Asg(stack, "TestAsg", ami_id="test", vpc=vpc)
   Alb(stack, "TestAlb", asg=asg, vpc=vpc, target_group_https = False)
   template = assertions.Template.from_stack(stack)
   template.has_resource_properties(
@@ -38,4 +38,3 @@ def test_alb_http_port():
     },
   )
   template.resource_count_is("AWS::ElasticLoadBalancingV2::LoadBalancer", 1)
-  

@@ -16,6 +16,7 @@ def test_asg():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
     user_data_variables={ 'MYVAR': 'Ref: MyParam' },
     vpc=vpc
@@ -32,6 +33,7 @@ def test_singleton_asg():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     singleton=True,
     user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
     user_data_variables={ 'MYVAR': 'Ref: MyParam' },
@@ -49,6 +51,7 @@ def test_data_asg():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     use_data_volume=True,
     user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
     user_data_variables={ 'MYVAR': 'Ref: MyParam' },
@@ -64,6 +67,7 @@ def test_rolling_deploy_asg():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     deployment_rolling_update=True,
     user_data_contents='#!/bin/bash\necho ${MYVAR}\n',
     user_data_variables={ 'MYVAR': 'Ref: MyParam' },
@@ -95,6 +99,7 @@ def test_additional_iam_role_policies_asg():
     stack,
     'TestAsg',
     additional_iam_role_policies=[asg_update_secret_policy],
+    ami_id="test",
     vpc=vpc
   )
   template = assertions.Template.from_stack(stack)
@@ -111,6 +116,7 @@ def test_allow_update_secret_asg():
     stack,
     'TestAsg',
     allow_update_secret = True,
+    ami_id="test",
     vpc=vpc
   )
   template = assertions.Template.from_stack(stack)
@@ -125,6 +131,7 @@ def test_root_instance_size():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     root_volume_size=100,
     vpc=vpc
   )
@@ -140,6 +147,7 @@ def test_graviton_default():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     use_graviton=True, # default
     vpc=vpc
   )
@@ -154,6 +162,7 @@ def test_no_graviton_default():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     use_graviton=False,
     vpc=vpc
   )
@@ -168,6 +177,7 @@ def test_excluded_instance_families():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     use_graviton=False,
     excluded_instance_families=['t2','t3'],
     vpc=vpc
@@ -184,6 +194,7 @@ def test_excluded_instance_sizes():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     use_graviton=False,
     excluded_instance_sizes=['nano','micro'],
     vpc=vpc
@@ -200,6 +211,7 @@ def test_imdsv2():
   Asg(
     stack,
     'TestAsg',
+    ami_id="test",
     vpc=vpc
   )
   template = assertions.Template.from_stack(stack)
