@@ -593,7 +593,7 @@ class Asg(Construct):
             f"{id}LaunchTemplate",
             launch_template_data=aws_ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
                 block_device_mappings=block_device_mappings,
-                image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
+                image_id=self.ami_id_param.value_as_string,
                 instance_type=self.instance_type_param.value_as_string,
                 iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
                     name=self.ec2_instance_profile.ref
