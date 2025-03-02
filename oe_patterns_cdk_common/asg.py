@@ -107,6 +107,15 @@ class Asg(Construct):
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
+
+        self.ami_id_param = CfnParameter(
+            self,
+            "AsgAmiId",
+            default=AMI_ID,
+            description="Required: The AMI id for the application Auto Scaling Group."
+        )
+        self.ami_id_param.override_logical_id(f"{id}AmiId")
+
         self.key_name_param = CfnParameter(
             self,
             "AsgKeyName",
