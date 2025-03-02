@@ -11,7 +11,7 @@ from oe_patterns_cdk_common.asg import Asg
 def test_dns():
   stack = Stack()
   vpc = Vpc(stack, "TestVpc")
-  asg = Asg(stack, "TestAsg", vpc=vpc)
+  asg = Asg(stack, "TestAsg", ami_id="test", vpc=vpc)
   alb = Alb(stack, "TestAlb", asg=asg, vpc=vpc)
   dns = Dns(stack, "TestDns")
   dns.add_alb(alb)
@@ -23,7 +23,7 @@ def test_dns():
 def test_dns_add_wildcard():
   stack = Stack()
   vpc = Vpc(stack, "TestVpc")
-  asg = Asg(stack, "TestAsg", vpc=vpc)
+  asg = Asg(stack, "TestAsg", ami_id="test", vpc=vpc)
   alb = Alb(stack, "TestAlb", asg=asg, vpc=vpc)
   dns = Dns(stack, "TestDns")
   dns.add_alb(alb, add_wildcard=True)
