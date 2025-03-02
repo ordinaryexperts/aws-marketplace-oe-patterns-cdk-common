@@ -19,7 +19,7 @@ def test_app_deploy_pipeline():
 def test_app_deploy_pipeline_with_asg():
   stack = Stack()
   vpc = Vpc(stack, 'TestVpc')
-  asg = Asg(stack, 'TestAsg', vpc=vpc)
+  asg = Asg(stack, 'TestAsg', ami_id="test", vpc=vpc)
   AppDeployPipeline(stack, "TestAppDeployPipeline", asg=asg, demo_source_url="TESTURL", notification_topic_arn="TESTARN")
   template = assertions.Template.from_stack(stack)
 

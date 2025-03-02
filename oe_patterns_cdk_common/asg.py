@@ -57,6 +57,7 @@ class Asg(Construct):
             self,
             scope: Construct,
             id: str,
+            ami_id: str,
             vpc: Vpc,
             additional_iam_role_policies: 'list[object]' = [],
             allow_associate_address: bool = False,
@@ -107,6 +108,15 @@ class Asg(Construct):
             description="Required: The EC2 instance type for the application Auto Scaling Group."
         )
         self.instance_type_param.override_logical_id(f"{id}InstanceType")
+
+        self.ami_id_param = CfnParameter(
+            self,
+            "AsgAmiId",
+            default=ami_id,
+            description="Required: The AMI id for the application Auto Scaling Group."
+        )
+        self.ami_id_param.override_logical_id(f"{id}AmiId")
+
         self.key_name_param = CfnParameter(
             self,
             "AsgKeyName",
@@ -583,7 +593,7 @@ class Asg(Construct):
             f"{id}LaunchTemplate",
             launch_template_data=aws_ec2.CfnLaunchTemplate.LaunchTemplateDataProperty(
                 block_device_mappings=block_device_mappings,
-                image_id=Fn.find_in_map("AWSAMIRegionMap", Aws.REGION, "AMI"),
+                image_id=self.ami_id_param.value_as_string,
                 instance_type=self.instance_type_param.value_as_string,
                 iam_instance_profile=aws_ec2.CfnLaunchTemplate.IamInstanceProfileProperty(
                     name=self.ec2_instance_profile.ref
