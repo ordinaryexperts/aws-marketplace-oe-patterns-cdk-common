@@ -62,6 +62,7 @@ class Asg(Construct):
             allow_associate_address: bool = False,
             allow_update_secret: bool = False,
             allowed_instance_types: 'list[str]' = [],
+            ami_id: str = None,
             create_and_update_timeout_minutes: int = 15,
             default_instance_type: str = None,
             deployment_rolling_update: bool = False,
@@ -111,7 +112,7 @@ class Asg(Construct):
         self.ami_id_param = CfnParameter(
             self,
             "AsgAmiId",
-            default=AMI_ID,
+            default=ami_id,
             description="Required: The AMI id for the application Auto Scaling Group."
         )
         self.ami_id_param.override_logical_id(f"{id}AmiId")
