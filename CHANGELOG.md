@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.2.1
+
+* Add metadata for AsgAmiId parameter
+
 # 4.2.0
 
 * Add AsgAmiId parameter to support self-service marketplace updates
