@@ -755,6 +755,7 @@ class Asg(Construct):
 
     def metadata_parameter_group(self):
         params = [
+            self.ami_id_param.logical_id,
             self.instance_type_param.logical_id,
             self.key_name_param.logical_id,
             self.reprovision_string_param.logical_id,
@@ -784,6 +785,9 @@ class Asg(Construct):
 
     def metadata_parameter_labels(self):
         params = {
+            self.ami_id_param.logical_id: {
+                "default": "AWS Marketplace AMI"
+            },
             self.instance_type_param.logical_id: {
                 "default": "EC2 instance type"
             },
