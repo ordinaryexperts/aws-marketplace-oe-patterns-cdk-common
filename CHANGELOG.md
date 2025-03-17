@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.2.2
+
+* Update max tries for ebs attach to 30 (5 minutes)
+
 # 4.2.1
 
 * Add metadata for AsgAmiId parameter
