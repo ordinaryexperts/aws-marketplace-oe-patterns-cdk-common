@@ -50,16 +50,17 @@ fi
 
 log "Device detected: $DEVICE"
 
-if ! blkid "$DEVICE"; then
+file -s $DEVICE | grep -iv xfs &> /dev/null
+if [ $? == 0 ]; then
   log "No filesystem detected, formatting as XFS"
-  mkfs.xfs "$DEVICE"
+  mkfs -t xfs $DEVICE
 else
   log "Filesystem already exists on $DEVICE"
 fi
 
 log "Mounting $DEVICE to /data"
 mkdir -p /data
-mount "$DEVICE" /data
+mount $DEVICE /data
 echo "$DEVICE /data xfs defaults,nofail 0 2" >> /etc/fstab
 xfs_growfs -d /data
 
