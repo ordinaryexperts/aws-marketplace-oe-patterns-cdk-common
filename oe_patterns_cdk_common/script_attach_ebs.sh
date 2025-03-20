@@ -30,22 +30,23 @@ done
 MAX_WAITS=12  # 12 tries * 10s = 2 minutes
 CURRENT_WAITS=0
 
-log "Waiting for device to be attached"
-while [[ ! -e /dev/xvdf && ! -e /dev/nvme1n1 ]]; do
+log "Waiting for EBS volume to be detected"
+while [[ -z "$(lsblk -n -o NAME,SERIAL | grep $(aws ec2 describe-volumes --region ${AWS::Region} --volume-ids ${EbsId} --query 'Volumes[0].Attachments[0].VolumeId' --output text))" ]]; do
   if [[ $CURRENT_WAITS -ge $MAX_WAITS ]]; then
-    log "Device attachment timed out"
+    log "Device detection timed out"
     error_exit
   fi
-  log "Waiting for /dev/xvdf or /dev/nvme1n1 to appear..."
+  log "Waiting for EBS volume to appear..."
   sleep 10
   ((CURRENT_WAITS++))
 done
 
-DEVICE=""
-if [[ -e /dev/xvdf ]]; then
-  DEVICE="/dev/xvdf"
-elif [[ -e /dev/nvme1n1 ]]; then
-  DEVICE="/dev/nvme1n1"
+# Detect the correct device name dynamically
+DEVICE=$(lsblk -n -o NAME,SERIAL | grep "$(aws ec2 describe-volumes --region ${AWS::Region} --volume-ids ${EbsId} --query 'Volumes[0].Attachments[0].VolumeId' --output text)" | awk '{print "/dev/" $1}')
+
+if [[ -z "$DEVICE" ]]; then
+  log "Error: Unable to determine device name"
+  error_exit
 fi
 
 log "Device detected: $DEVICE"
