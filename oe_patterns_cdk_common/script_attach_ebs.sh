@@ -51,8 +51,7 @@ fi
 
 log "Device detected: $DEVICE"
 
-file -s $DEVICE | grep -iv xfs &> /dev/null
-if [ $? == 0 ]; then
+if ! blkid "$DEVICE"; then
   log "No filesystem detected, formatting as XFS"
   mkfs -t xfs $DEVICE
 else
