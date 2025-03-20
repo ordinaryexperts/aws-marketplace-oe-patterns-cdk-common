@@ -31,7 +31,7 @@ MAX_WAITS=12  # 12 tries * 10s = 2 minutes
 CURRENT_WAITS=0
 
 log "Waiting for EBS volume to be detected"
-while [[ -z "$(lsblk -n -o NAME,SERIAL | grep $(aws ec2 describe-volumes --region ${AWS::Region} --volume-ids ${EbsId} --query 'Volumes[0].Attachments[0].VolumeId' --output text))" ]]; do
+while [[ -z "$(lsblk -n -o NAME,SERIAL | grep $(aws ec2 describe-volumes --region ${AWS::Region} --volume-ids ${EbsId} --query 'Volumes[0].Attachments[0].VolumeId' --output text | sed 's/-//g'))" ]]; do
   if [[ $CURRENT_WAITS -ge $MAX_WAITS ]]; then
     log "Device detection timed out"
     error_exit
@@ -42,7 +42,7 @@ while [[ -z "$(lsblk -n -o NAME,SERIAL | grep $(aws ec2 describe-volumes --regio
 done
 
 # Detect the correct device name dynamically
-DEVICE=$(lsblk -n -o NAME,SERIAL | grep "$(aws ec2 describe-volumes --region ${AWS::Region} --volume-ids ${EbsId} --query 'Volumes[0].Attachments[0].VolumeId' --output text)" | awk '{print "/dev/" $1}')
+DEVICE=$(lsblk -n -o NAME,SERIAL | grep "$(aws ec2 describe-volumes --region ${AWS::Region} --volume-ids ${EbsId} --query 'Volumes[0].Attachments[0].VolumeId' --output text | sed 's/-//g')" | awk '{print "/dev/" $1}')
 
 if [[ -z "$DEVICE" ]]; then
   log "Error: Unable to determine device name"
@@ -51,10 +51,6 @@ fi
 
 log "Device detected: $DEVICE"
 
-file -s $DEVICE
-log "Sleeping for 10 seconds..."
-sleep 10
-file -s $DEVICE
 file -s $DEVICE | grep -iv xfs &> /dev/null
 if [ $? == 0 ]; then
   log "No filesystem detected, formatting as XFS"
