@@ -1,5 +1,10 @@
 # Unreleased
 
+# 4.2.3
+
+* Update max tries for ebs attach to 30 (5 minutes)
+* Clean up script_attach_ebs.sh
+
 # 4.2.2
 
 * Update max tries for ebs attach to 30 (5 minutes)

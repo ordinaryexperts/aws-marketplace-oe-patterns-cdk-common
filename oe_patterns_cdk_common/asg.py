@@ -283,7 +283,8 @@ class Asg(Construct):
                             aws_iam.PolicyStatement(
                                 effect=aws_iam.Effect.ALLOW,
                                 actions=[
-                                    "ec2:AttachVolume"
+                                    "ec2:AttachVolume",
+                                    "ec2:DescribeVolumes"
                                 ],
                                 resources=["*"]
                             )
