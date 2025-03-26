@@ -1,45 +1,67 @@
 #!/bin/bash
-function error_exit
-{
-  cfn-signal --exit-code 1 --stack ${AWS::StackName} --resource ${AsgId} --region ${AWS::Region}
+
+function log {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') $1"
+}
+
+function error_exit {
+  log "Error: Exiting with failure"
+  cfn-signal --exit-code 1 --stack "${AWS::StackName}" --resource "${AsgId}" --region "${AWS::Region}"
   exit 1
 }
-token=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-instance_id=$(curl -H "X-aws-ec2-metadata-token: $token" -s http://169.254.169.254/latest/meta-data/instance-id)
-max_attach_tries=30
-attach_tries=0
-success=1
-while [[ $success != 0 ]]; do
-  if [ $attach_tries -gt $max_attach_tries ]; then
+
+log "Fetching instance metadata"
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" -s)
+INSTANCE_ID=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s http://169.254.169.254/latest/meta-data/instance-id)
+
+MAX_ATTACH_TRIES=180  # 180 tries * 10s = 30 minutes
+ATTACH_TRIES=0
+
+log "Attaching EBS volume (timeout: 30 minutes)"
+while ! aws ec2 attach-volume --region "${AWS::Region}" --volume-id "${EbsId}" --instance-id "$INSTANCE_ID" --device /dev/sdf; do
+  ((ATTACH_TRIES++))
+  if [[ $ATTACH_TRIES -ge $MAX_ATTACH_TRIES ]]; then
+    log "EBS volume attachment failed after $ATTACH_TRIES attempts"
     error_exit
   fi
   sleep 10
-  aws ec2 attach-volume --region ${AWS::Region} --volume-id ${EbsId} --instance-id $instance_id --device /dev/sdf
-  success=$?
-  ((attach_tries++))
 done
-max_waits=12
-current_waits=0
-while [ ! -e /dev/xvdf ] && [ ! -e /dev/nvme1n1 ]; do
-  echo waiting for /dev/xvdf or /dev/nvme1n1 to attach
-  if [ $current_waits -gt $max_waits ]; then
+
+MAX_WAITS=12  # 12 tries * 10s = 2 minutes
+CURRENT_WAITS=0
+
+log "Waiting for EBS volume to be detected"
+while [[ -z "$(lsblk -n -o NAME,SERIAL | grep $(aws ec2 describe-volumes --region ${AWS::Region} --volume-ids ${EbsId} --query 'Volumes[0].Attachments[0].VolumeId' --output text | sed 's/-//g'))" ]]; do
+  if [[ $CURRENT_WAITS -ge $MAX_WAITS ]]; then
+    log "Device detection timed out"
     error_exit
   fi
+  log "Waiting for EBS volume to appear..."
   sleep 10
-  ((current_waits++))
+  ((CURRENT_WAITS++))
 done
-if [ -e /dev/xvdf ]; then
-  DEVICE=/dev/xvdf
+
+# Detect the correct device name dynamically
+DEVICE=$(lsblk -n -o NAME,SERIAL | grep "$(aws ec2 describe-volumes --region ${AWS::Region} --volume-ids ${EbsId} --query 'Volumes[0].Attachments[0].VolumeId' --output text | sed 's/-//g')" | awk '{print "/dev/" $1}')
+
+if [[ -z "$DEVICE" ]]; then
+  log "Error: Unable to determine device name"
+  error_exit
 fi
-if [ -e /dev/nvme1n1 ]; then
-  DEVICE=/dev/nvme1n1
-fi
-echo $DEVICE
-file -s $DEVICE | grep -iv xfs &> /dev/null
-if [ $? == 0 ]; then
+
+log "Device detected: $DEVICE"
+
+if ! blkid "$DEVICE"; then
+  log "No filesystem detected, formatting as XFS"
   mkfs -t xfs $DEVICE
+else
+  log "Filesystem already exists on $DEVICE"
 fi
+
+log "Mounting $DEVICE to /data"
 mkdir -p /data
 mount $DEVICE /data
 echo "$DEVICE /data xfs defaults,nofail 0 2" >> /etc/fstab
 xfs_growfs -d /data
+
+log "EBS Volume setup completed successfully!"
