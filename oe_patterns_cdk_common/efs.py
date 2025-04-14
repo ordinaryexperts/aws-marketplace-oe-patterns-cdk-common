@@ -88,6 +88,7 @@ class Efs(Construct):
             self,
             "AppEfs",
             encrypted=True,
+            throughput_mode="elastic",
             backup_policy=aws_efs.CfnFileSystem.BackupPolicyProperty(
                 status=self.efs_automatic_backups_enabled_param.value_as_string
             ),
