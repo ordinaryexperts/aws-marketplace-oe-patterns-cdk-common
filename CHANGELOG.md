@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.2.4
+
+* Change EFS ThroughputMode to elastic
+
 # 4.2.3
 
 * Update max tries for ebs attach to 30 (5 minutes)
