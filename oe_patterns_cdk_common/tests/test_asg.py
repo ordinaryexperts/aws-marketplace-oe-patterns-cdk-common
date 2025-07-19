@@ -219,3 +219,20 @@ def test_imdsv2():
   launch_template = template.find_resources('AWS::EC2::LaunchTemplate')
   
   assert launch_template['TestAsgLaunchTemplate']['Properties']['LaunchTemplateData']['MetadataOptions']['HttpTokens'] == 'required'
+
+def test_custom_ami_param_name():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    ami_id="test",
+    ami_name="AsgAmiIdv220",
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  asg_ami_name_param = template.find_parameters('AsgAmiIdv220')
+  print(asg_ami_name_param)
+  
+  # assert launch_template['TestAsgLaunchTemplate']['Properties']['LaunchTemplateData']['MetadataOptions']['HttpTokens'] == 'required'
