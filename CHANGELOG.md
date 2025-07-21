@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.2.5
+
+* Add ami_name_param_suffix construct param
+
 # 4.2.4
 
 * Change EFS ThroughputMode to elastic
