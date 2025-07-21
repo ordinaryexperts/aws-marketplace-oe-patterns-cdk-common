@@ -242,7 +242,7 @@ def test_custom_ami_param_name_suffix():
     stack,
     'TestAsg',
     ami_id="test",
-    ami_param_name_suffix="custom_suffix",
+    ami_id_param_name_suffix="custom_suffix",
     vpc=vpc
   )
   template = assertions.Template.from_stack(stack)
