@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.2.6
+
+* Rename param ami_id_param_name_suffix
+
 # 4.2.5
 
 * Add ami_name_param_suffix construct param
