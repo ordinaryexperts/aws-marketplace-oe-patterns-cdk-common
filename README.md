@@ -23,11 +23,12 @@ $ export AMI_ID=[ami_id_from_above]
 3. Update CDK with AMI ID, synth, and test:
 
 ```
-$ vim cdk/[app]/[app]_stack.py # update as directed by the output of ami-ec2-build
+$ vim cdk/[app]/[app]_stack.py # update AMI id and name
 $ make synth-to-file
 $ avl oe-patterns-prod-dylan
 (take dist/template.yaml and test it manually in console of OE Patterns Prod account)
 $ git add cdk
+$ git ci -m "Updated AMI"
 ```
 
 4. Scan AMI in AWS Marketplace Portal

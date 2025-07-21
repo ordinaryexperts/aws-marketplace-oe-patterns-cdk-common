@@ -219,3 +219,34 @@ def test_imdsv2():
   launch_template = template.find_resources('AWS::EC2::LaunchTemplate')
   
   assert launch_template['TestAsgLaunchTemplate']['Properties']['LaunchTemplateData']['MetadataOptions']['HttpTokens'] == 'required'
+
+def test_custom_ami_param_name_no_suffix():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    ami_id="test",
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  asg_ami_name_params = template.find_parameters('TestAsgAmiId')
+
+  assert asg_ami_name_params['TestAsgAmiId']['Type'] == 'String'
+
+def test_custom_ami_param_name_suffix():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    ami_id="test",
+    ami_param_name_suffix="custom_suffix",
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  # print(json.dumps(template.to_json(), indent=4, sort_keys=True))
+  asg_ami_name_params = template.find_parameters('TestAsgAmiIdcustom_suffix')
+
+  assert asg_ami_name_params['TestAsgAmiIdcustom_suffix']['Type'] == 'String'

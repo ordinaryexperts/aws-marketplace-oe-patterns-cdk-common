@@ -21,6 +21,7 @@ setuptools.setup(
     url="https://github.com/ordinaryexperts/aws-marketplace-oe-patterns-cdk-common",
 
     install_requires=[
+        f"typeguard==2.13.3",
         f"aws-cdk-lib>={CDK_VERSION}"
     ],
 
