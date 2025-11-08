@@ -1,5 +1,10 @@
 # Unreleased
 
+# 4.3.0
+
+* Upgrade Aurora Postgresql to 15.13
+* Upgrade Elasticache Redis to 7.0
+
 # 4.2.6
 
 * Rename param ami_id_param_name_suffix
