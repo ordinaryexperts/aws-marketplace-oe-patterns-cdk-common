@@ -196,8 +196,8 @@ class ElasticacheRedis(ElasticacheCluster):
             **props):
 
         self.engine = "redis"
-        self.engine_version = "6.2"
-        self.parameter_group_family = "redis6.x"
+        self.engine_version = "7.0"
+        self.parameter_group_family = "redis7"
         self.port = 6379
 
         super().__init__(

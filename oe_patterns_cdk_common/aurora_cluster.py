@@ -286,7 +286,7 @@ class AuroraPostgresql(AuroraCluster):
             **props):
 
         self.engine = "aurora-postgresql"
-        self.engine_version = "15.4"
+        self.engine_version = "15.13"
         self.parameter_group_name = "default.aurora-postgresql15"
         self.port = 5432
 
