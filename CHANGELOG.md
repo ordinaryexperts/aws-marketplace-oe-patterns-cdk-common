@@ -1,5 +1,7 @@
 # Unreleased
 
+# 4.3.0
+
 * Upgrade Aurora Postgresql to 15.13
 * Upgrade Elasticache Redis to 7.0
 
