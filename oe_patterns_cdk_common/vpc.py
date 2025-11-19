@@ -481,6 +481,13 @@ class Vpc(Construct):
             }
         }
 
+    def cfn_lint_suppressions(self):
+        return [
+            "W1030",  # VPC and subnet ID parameters must be String type to support empty defaults (optional parameters)
+            "E1154",  # Validate VPC subnet id format - false positive for optional String parameters with allowed_pattern
+            "E1155"   # Validate resource ID format - false positive for optional String parameters with allowed_pattern
+        ]
+
     def private_subnet1_id(self):
         return Token.as_string(
             Fn.condition_if(

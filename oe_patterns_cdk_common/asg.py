@@ -834,3 +834,8 @@ class Asg(Construct):
                 }
             }
         return params
+
+    def cfn_lint_suppressions(self):
+        return [
+            "W1019"  # IamRole variable provided by cdk-common for use in user_data, may not be used by all patterns
+        ]
