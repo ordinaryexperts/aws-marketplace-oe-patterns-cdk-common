@@ -564,6 +564,7 @@ class Asg(Construct):
             user_data_variables['AsgId'] = id
 
         reprovision_snippet = "# reprovision string: ${AsgReprovisionString}"
+        user_data_variables['IamRole'] = self.iam_instance_role.ref
         if user_data_contents is None:
             user_data_contents = reprovision_snippet
         else:
