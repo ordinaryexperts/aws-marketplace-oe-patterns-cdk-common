@@ -113,6 +113,7 @@ class Asg(Construct):
         self.ami_id_param = CfnParameter(
             self,
             f"AsgAmiId{ami_id_param_name_suffix}",
+            type="AWS::EC2::Image::Id",
             default=ami_id,
             description="Required: The AMI id for the application Auto Scaling Group."
         )
@@ -563,7 +564,6 @@ class Asg(Construct):
             user_data_variables['AsgId'] = id
 
         reprovision_snippet = "# reprovision string: ${AsgReprovisionString}"
-        user_data_variables['IamRole'] = self.iam_instance_role.ref
         if user_data_contents is None:
             user_data_contents = reprovision_snippet
         else:
