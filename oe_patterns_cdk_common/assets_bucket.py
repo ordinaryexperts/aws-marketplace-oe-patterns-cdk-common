@@ -43,7 +43,6 @@ class AssetsBucket(Construct):
         self.assets_bucket = aws_s3.CfnBucket(
             self,
             f"{self.bucket_label}Bucket",
-            access_control="Private",
             bucket_encryption=aws_s3.CfnBucket.BucketEncryptionProperty(
                 server_side_encryption_configuration=[
                     aws_s3.CfnBucket.ServerSideEncryptionRuleProperty(

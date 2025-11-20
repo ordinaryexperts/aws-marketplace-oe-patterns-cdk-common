@@ -22,6 +22,7 @@ class Vpc(Construct):
         self.id_param = CfnParameter(
             self,
             "Id",
+            allowed_pattern=r"^(vpc-(([0-9A-Fa-f]{8})|([0-9A-Fa-f]{17})))?$",
             default="",
             description="Optional: Specify the VPC ID. If not specified, a VPC will be created."
         )
@@ -47,6 +48,7 @@ class Vpc(Construct):
         self.private_subnet1_id_param = CfnParameter(
             self,
             "PrivateSubnet1Id",
+            allowed_pattern=r"^(subnet-(([0-9A-Fa-f]{8})|([0-9A-Fa-f]{17})))?$",
             default="",
             description="Optional: Specify Subnet ID for private subnet 1."
         )
@@ -63,6 +65,7 @@ class Vpc(Construct):
         self.private_subnet2_id_param = CfnParameter(
             self,
             "PrivateSubnet2Id",
+            allowed_pattern=r"^(subnet-(([0-9A-Fa-f]{8})|([0-9A-Fa-f]{17})))?$",
             default="",
             description="Optional: Specify Subnet ID for private subnet 2."
         )
@@ -79,6 +82,7 @@ class Vpc(Construct):
         self.public_subnet1_id_param = CfnParameter(
             self,
             "PublicSubnetId1",
+            allowed_pattern=r"^(subnet-(([0-9A-Fa-f]{8})|([0-9A-Fa-f]{17})))?$",
             default="",
             description="Optional: Specify Subnet ID for public subnet 1."
         )
@@ -95,6 +99,7 @@ class Vpc(Construct):
         self.public_subnet2_id_param = CfnParameter(
             self,
             "PublicSubnet2Id",
+            allowed_pattern=r"^(subnet-(([0-9A-Fa-f]{8})|([0-9A-Fa-f]{17})))?$",
             default="",
             description="Optional: Specify Subnet ID for public subnet 2."
         )
@@ -475,6 +480,13 @@ class Vpc(Construct):
                 "default": "Public Subnet 2 IPv4 CIDR"
             }
         }
+
+    def cfn_lint_suppressions(self):
+        return [
+            "W1030",  # VPC and subnet ID parameters must be String type to support empty defaults (optional parameters)
+            "E1154",  # Validate VPC subnet id format - false positive for optional String parameters with allowed_pattern
+            "E1155"   # Validate resource ID format - false positive for optional String parameters with allowed_pattern
+        ]
 
     def private_subnet1_id(self):
         return Token.as_string(
