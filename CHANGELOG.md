@@ -1,5 +1,11 @@
 # Unreleased
 
+# 4.4.0
+
+* Fixing some lint issues
+* Upgrading to CDK 2.225.0
+* Upgrading to devenv 2.8.0
+
 # 4.3.0
 
 * Upgrade Aurora Postgresql to 15.13
