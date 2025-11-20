@@ -113,7 +113,7 @@ class Asg(Construct):
         self.ami_id_param = CfnParameter(
             self,
             f"AsgAmiId{ami_id_param_name_suffix}",
-            type="AWS::EC2::Image::Id",
+            type="String",
             default=ami_id,
             description="Required: The AMI id for the application Auto Scaling Group."
         )
@@ -837,5 +837,6 @@ class Asg(Construct):
 
     def cfn_lint_suppressions(self):
         return [
-            "W1019"  # IamRole variable provided by cdk-common for use in user_data, may not be used by all patterns
+            "W1019",  # IamRole variable provided by cdk-common for use in user_data, may not be used by all patterns
+            "W2030"   # AMI parameter uses String type instead of AWS::EC2::Image::Id for flexibility
         ]

@@ -3,7 +3,7 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-CDK_VERSION="2.20.0"
+CDK_VERSION="2.225.0"
 
 setuptools.setup(
     name="oe-patterns-cdk-common",
@@ -30,5 +30,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.9',
 )
