@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.5.0
+
+* Adding CloudWatch Logs start to beginning of user_data
+
 # 4.4.0
 
 * Fixing some lint issues
