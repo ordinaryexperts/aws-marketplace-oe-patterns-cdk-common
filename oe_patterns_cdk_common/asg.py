@@ -552,16 +552,31 @@ class Asg(Construct):
             self.data_volume_backup_selection.override_logical_id(f"{id}DataVolumeBackupSelection")
 
         user_data = None
+
+        # Always start CloudWatch agent first for early logging visibility
+        cloudwatch_script_path = Util.local_path("script_cloudwatch_start.sh")
+        with open(cloudwatch_script_path) as f:
+            cloudwatch_script = f.read()
+
         if use_data_volume:
             script_code_path = Util.local_path("script_attach_ebs.sh")
             with open(script_code_path) as f:
                 script_code = f.read()
             if user_data_contents is None:
-                user_data_contents = script_code
+                user_data_contents = cloudwatch_script + script_code
             else:
-                user_data_contents = script_code + user_data_contents
+                user_data_contents = cloudwatch_script + script_code + user_data_contents
             user_data_variables['EbsId'] = self.data_volume.ref
             user_data_variables['AsgId'] = id
+        else:
+            if user_data_contents is None:
+                user_data_contents = cloudwatch_script
+            else:
+                user_data_contents = cloudwatch_script + user_data_contents
+
+        # Add log group names for CloudWatch agent configuration
+        user_data_variables['AsgAppLogGroup'] = self.app_log_group.ref
+        user_data_variables['AsgSystemLogGroup'] = self.system_log_group.ref
 
         reprovision_snippet = "# reprovision string: ${AsgReprovisionString}"
         user_data_variables['IamRole'] = self.iam_instance_role.ref
