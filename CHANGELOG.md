@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.5.1
+
+* Add `generate_string_key` and `secret_string_template` parameters to Secret construct for custom secret templates
+
 # 4.5.0
 
 * Adding CloudWatch Logs start to beginning of user_data

@@ -19,10 +19,32 @@ class Secret(Construct):
             id: str,
             password_length: int = 32,
             username: str = 'admin',
+            generate_string_key: str = None,
+            secret_string_template: str = None,
             **props):
+        """
+        Create a Secrets Manager secret with auto-generated values.
+
+        Args:
+            scope: CDK construct scope
+            id: Construct ID
+            password_length: Length of generated secret string (default: 32)
+            username: Username for default template (default: 'admin', ignored if secret_string_template provided)
+            generate_string_key: Key name for generated value (default: 'password')
+            secret_string_template: Custom JSON template string (default: {"username": username})
+        """
         super().__init__(scope, id, **props)
 
         self.id = id
+
+        # Use custom template if provided, otherwise use default username/password template
+        if secret_string_template is not None:
+            template = secret_string_template
+        else:
+            template = json.dumps({"username": username})
+
+        # Use custom key if provided, otherwise default to "password"
+        key = generate_string_key if generate_string_key is not None else "password"
 
         self.secret_arn_param = CfnParameter(
             self,
@@ -51,9 +73,9 @@ class Secret(Construct):
             generate_secret_string=aws_secretsmanager.CfnSecret.GenerateSecretStringProperty(
                 exclude_characters="\"@/\\\"'$,[]*?{}~#%<>|^",
                 exclude_punctuation=True,
-                generate_string_key="password",
+                generate_string_key=key,
                 password_length=password_length,
-                secret_string_template=json.dumps({"username":username})
+                secret_string_template=template
             ),
             name="{}/{}/secret".format(Aws.STACK_NAME, self.id.lower())
         )

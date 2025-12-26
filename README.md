@@ -16,7 +16,7 @@ $ git add CHANGELOG.md
 
 ```
 $ export TEMPLATE_VERSION=x.y.z
-$ ave oe-patterns-prod make TEMPLATE_VERSION=$TEMPLATE_VERSION ami-ec2-build
+$ AWS_PROFILE=oe-patterns-prod make TEMPLATE_VERSION=$TEMPLATE_VERSION ami-ec2-build
 $ export AMI_ID=[ami_id_from_above]
 ```
 
