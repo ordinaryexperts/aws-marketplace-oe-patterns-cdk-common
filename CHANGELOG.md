@@ -1,5 +1,9 @@
 # Unreleased
 
+# 4.5.2
+
+* Upgrade Lambda functions from Python 3.10 to Python 3.13 (3.10 reaches end of Lambda support 2026-10-31)
+
 # 4.5.1
 
 * Add `generate_string_key` and `secret_string_template` parameters to Secret construct for custom secret templates
