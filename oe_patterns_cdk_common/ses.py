@@ -149,7 +149,7 @@ class Ses(Construct):
         self.generate_smtp_password_lambda = aws_lambda.Function(
             self,
             "GenerateSMTPPasswordLambda",
-            runtime=aws_lambda.Runtime.PYTHON_3_10,
+            runtime=aws_lambda.Runtime.PYTHON_3_13,
             timeout=Duration.seconds(300),
             handler="index.handler",
             code=aws_lambda.Code.from_inline(lambda_code)
