@@ -70,6 +70,7 @@ class Asg(Construct):
             excluded_instance_families: 'list[str]' = [],
             excluded_instance_sizes: 'list[str]' = [],
             health_check_type: str = 'EC2',
+            imds_hop_limit: int = 1,
             notification_topic_arn: str = None,
             pipeline_bucket_arn: str = None,
             root_volume_device_name: str = "/dev/sda1",
@@ -624,6 +625,8 @@ class Asg(Construct):
                     )
                 ),
                 metadata_options=aws_ec2.CfnLaunchTemplate.MetadataOptionsProperty(
+                    # 1 is the EC2 default; emit None so existing patterns synthesize unchanged
+                    http_put_response_hop_limit=imds_hop_limit if imds_hop_limit != 1 else None,
                     http_tokens="required",
                 ),
                 security_group_ids=[ self.sg.attr_group_id ],

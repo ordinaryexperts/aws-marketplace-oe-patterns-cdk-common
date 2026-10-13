@@ -27,7 +27,7 @@ make python
 make test
 ```
 
-The Docker environment is based on `ordinaryexperts/aws-marketplace-patterns-devenv:2.5.5` and includes AWS CDK 2.20.0 and pytest.
+The Docker environment is based on `ordinaryexperts/aws-marketplace-patterns-devenv:2.8.0` (see `Dockerfile`) with aws-cdk-lib 2.225.0 (see `CDK_VERSION` in `setup.py`) and pytest.
 
 ## Testing
 
@@ -54,6 +54,7 @@ The library provides CDK constructs that follow a consistent pattern:
    - CloudWatch alarms
    - User data customization
    - Instance profile with configurable IAM policies
+   - IMDSv2 hop limit (`imds_hop_limit`) for container workloads that reach the instance role
 
 3. **AppDeployPipeline (`app_deploy_pipeline.py`)**: CodePipeline-based deployment pipeline with:
    - S3 source stage
@@ -75,7 +76,7 @@ The library provides CDK constructs that follow a consistent pattern:
 
 7. **Other Services**:
    - `amazonmq.py`: Amazon MQ broker
-   - `open_search_service.py`: OpenSearch Service domain
+   - `open_search_service.py`: OpenSearch Service domain (engine version, HTTPS enforcement, and IAM-principal-scoped access policy are optional arguments)
    - `ses.py`: Simple Email Service configuration
    - `dns.py`: Route53 DNS records
    - `secret.py`: Secrets Manager secrets
