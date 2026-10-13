@@ -1,5 +1,7 @@
 # Unreleased
 
+# 4.6.0
+
 * Add `imds_hop_limit` option to `Asg` (default 1, unchanged). Set to 2 when containers on the instance must reach the instance role through IMDSv2.
 * Add `engine_version`, `enforce_https`, and `access_principal_arns` options to `OpenSearchService`. Defaults reproduce the previous template (Elasticsearch 7.10, HTTP on port 80, `es:*` to any principal). With `enforce_https=True` the domain enforces HTTPS with the `Policy-Min-TLS-1-2-PFS-2023-10` TLS policy and the construct's `port` becomes 443; with `access_principal_arns` the access policy allows only `es:ESHttp*` to those principals, which is what SigV4-signed clients need.
 * Correct the devenv and CDK versions cited in `CLAUDE.md` (devenv 2.8.0, aws-cdk-lib 2.225.0).
