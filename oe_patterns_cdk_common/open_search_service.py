@@ -20,13 +20,16 @@ class OpenSearchService(Construct):
             scope: Construct,
             id: str,
             vpc: Vpc,
+            access_principal_arns: 'list[str]' = [],
             allowed_instance_types: 'list[str]' = [],
             default_instance_type: str = 't3.small.search',
+            enforce_https: bool = False,
+            engine_version: str = "Elasticsearch_7.10",
             **props):
         super().__init__(scope, id, **props)
 
         self.id = id
-        self.port = 80
+        self.port = 443 if enforce_https else 80
 
         self.default_instance_type = default_instance_type
         self.default_allowed_instance_types = [
@@ -170,18 +173,34 @@ class OpenSearchService(Construct):
             )
         }
 
+        # Scoped principals get the data-plane actions only (SigV4-signed HTTP requests);
+        # configuration actions stay with the account's IAM policies.
+        if access_principal_arns:
+            access_policy_actions = ["es:ESHttp*"]
+            access_policy_principals = [aws_iam.ArnPrincipal(arn) for arn in access_principal_arns]
+        else:
+            access_policy_actions = ["es:*"]
+            access_policy_principals = [aws_iam.AnyPrincipal()]
+
         access_policies=aws_iam.PolicyDocument(
             statements=[
                 aws_iam.PolicyStatement(
                     effect=aws_iam.Effect.ALLOW,
-                    actions=["es:*"],
-                    principals=[aws_iam.AnyPrincipal()],
+                    actions=access_policy_actions,
+                    principals=access_policy_principals,
                     resources=[
                         f"arn:{Aws.PARTITION}:es:{Aws.REGION}:{Aws.ACCOUNT_ID}:domain/*"
                     ]
                 )
             ]
         )
+
+        domain_endpoint_options = None
+        if enforce_https:
+            domain_endpoint_options = aws_opensearchservice.CfnDomain.DomainEndpointOptionsProperty(
+                enforce_https=True,
+                tls_security_policy="Policy-Min-TLS-1-2-PFS-2023-10"
+            )
 
         self.domain = aws_opensearchservice.CfnDomain(
             self,
@@ -193,6 +212,7 @@ class OpenSearchService(Construct):
                 instance_type=self.open_search_service_node_type_param.value_as_string,
                 zone_awareness_enabled=False
             ),
+            domain_endpoint_options=domain_endpoint_options,
             ebs_options=aws_opensearchservice.CfnDomain.EBSOptionsProperty(
                 ebs_enabled=True,
                 volume_size=self.open_search_service_ebs_volume_size_param.value_as_number,
@@ -202,7 +222,7 @@ class OpenSearchService(Construct):
                 enabled=True,
                 kms_key_id=self.key.attr_key_id
             ),
-            engine_version="Elasticsearch_7.10",
+            engine_version=engine_version,
             node_to_node_encryption_options=aws_opensearchservice.CfnDomain.NodeToNodeEncryptionOptionsProperty(
                 enabled=True
             ),

@@ -250,3 +250,34 @@ def test_custom_ami_param_name_suffix():
   asg_ami_name_params = template.find_parameters('TestAsgAmiIdcustom_suffix')
 
   assert asg_ami_name_params['TestAsgAmiIdcustom_suffix']['Type'] == 'String'
+
+def test_imds_hop_limit_default_leaves_template_unchanged():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    ami_id="test",
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  launch_template = template.find_resources('AWS::EC2::LaunchTemplate')
+  metadata_options = launch_template['TestAsgLaunchTemplate']['Properties']['LaunchTemplateData']['MetadataOptions']
+
+  assert metadata_options == {'HttpTokens': 'required'}
+
+def test_imds_hop_limit_explicit():
+  stack = Stack()
+  vpc = Vpc(stack, 'TestVpc')
+  Asg(
+    stack,
+    'TestAsg',
+    ami_id="test",
+    imds_hop_limit=2,
+    vpc=vpc
+  )
+  template = assertions.Template.from_stack(stack)
+  launch_template = template.find_resources('AWS::EC2::LaunchTemplate')
+  metadata_options = launch_template['TestAsgLaunchTemplate']['Properties']['LaunchTemplateData']['MetadataOptions']
+
+  assert metadata_options == {'HttpTokens': 'required', 'HttpPutResponseHopLimit': 2}
